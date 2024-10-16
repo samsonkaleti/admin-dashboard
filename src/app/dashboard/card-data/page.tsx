@@ -101,18 +101,20 @@ export default function CardDataPage() {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full bg-[#f8fafc] border-none shadow-none">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Card Data Management</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl text-[#3b82f6]">
+          Card Data Management
+        </CardTitle>
+        <CardDescription className="text-[#6366f1]">
           Add, edit, or remove card data for students and faculty.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
+        <div className="mb-6">
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
+              <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white">
                 <Plus className="mr-2 h-4 w-4" /> Add New Card
               </Button>
             </DialogTrigger>
@@ -192,26 +194,32 @@ export default function CardDataPage() {
           </Dialog>
         </div>
 
-        <div className="rounded-md border">
+        <div className="rounded-md border border-[#e2e8f0] bg-white overflow-hidden">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-[#f1f5f9]">
               <TableRow>
-                <TableHead className="w-[200px]">Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Card Number</TableHead>
-                <TableHead className="hidden md:table-cell">
+                <TableHead className="w-[200px] text-[#1e293b]">Name</TableHead>
+                <TableHead className="text-[#1e293b]">Type</TableHead>
+                <TableHead className="text-[#1e293b]">Card Number</TableHead>
+                <TableHead className="hidden md:table-cell text-[#1e293b]">
                   Department
                 </TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-right text-[#1e293b]">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {cardData.map((card) => (
-                <TableRow key={card.id}>
-                  <TableCell className="font-medium">{card.name}</TableCell>
-                  <TableCell>{card.type}</TableCell>
-                  <TableCell>{card.cardNumber}</TableCell>
-                  <TableCell className="hidden md:table-cell">
+                <TableRow key={card.id} className="hover:bg-[#f1f5f9]">
+                  <TableCell className="font-medium text-[#1e293b]">
+                    {card.name}
+                  </TableCell>
+                  <TableCell className="text-[#1e293b]">{card.type}</TableCell>
+                  <TableCell className="text-[#1e293b]">
+                    {card.cardNumber}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell text-[#1e293b]">
                     {card.department}
                   </TableCell>
                   <TableCell className="text-right">
@@ -219,6 +227,7 @@ export default function CardDataPage() {
                       <Button
                         variant="outline"
                         size="icon"
+                        className="text-[#3b82f6] hover:text-[#2563eb]"
                         onClick={() => handleEdit(card.id)}
                       >
                         <Pencil className="h-4 w-4" />
@@ -226,6 +235,7 @@ export default function CardDataPage() {
                       <Button
                         variant="outline"
                         size="icon"
+                        className="text-[#ef4444] hover:text-[#dc2626]"
                         onClick={() => handleDelete(card.id)}
                       >
                         <Trash2 className="h-4 w-4" />

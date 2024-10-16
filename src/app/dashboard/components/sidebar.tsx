@@ -1,5 +1,7 @@
-"use client";
+'use client'
 
+
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -57,11 +59,11 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <nav className="w-64 border-r bg-background">
+    <nav className="w-64 border-r bg-gray-50 dark:bg-gray-800 shadow-md">
       <ScrollArea className="h-full py-6">
         <div className="space-y-4 py-4">
           <div className="px-3 py-2">
-            <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+            <h2 className="mb-4 px-4 text-xl font-bold tracking-tight text-gray-800 dark:text-gray-200">
               Admin Dashboard
             </h2>
             <div className="space-y-1">
@@ -70,13 +72,18 @@ export function Sidebar() {
                   key={item.href}
                   variant={pathname === item.href ? "secondary" : "ghost"}
                   className={cn(
-                    "w-full justify-start",
-                    pathname === item.href && "bg-muted"
+                    "w-full justify-start text-left font-medium",
+                    pathname === item.href
+                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100"
+                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                   )}
                   asChild
                 >
-                  <Link href={item.href}>
-                    <item.icon className="mr-2 h-4 w-4" />
+                  <Link
+                    href={item.href}
+                    className="flex items-center py-2 px-4"
+                  >
+                    <item.icon className="mr-3 h-5 w-5" />
                     {item.title}
                   </Link>
                 </Button>
