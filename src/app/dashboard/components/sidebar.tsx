@@ -18,7 +18,7 @@ import {
 const sidebarNavItems = [
   {
     title: "Dashboard",
-    href: "/dashboard",
+    href: "/",
     icon: LayoutDashboard,
   },
   {
@@ -57,7 +57,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden md:block w-64 border-r bg-background">
+    <nav className="w-64 border-r bg-background">
       <ScrollArea className="h-full py-6">
         <div className="space-y-4 py-4">
           <div className="px-3 py-2">
