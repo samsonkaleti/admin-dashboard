@@ -71,12 +71,21 @@ export default function PDFUploadPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // Open the dialog for a new entry and reset the form
+  const handleNew = () => {
+    setNewUpload({ year: "", course: "", subject: "", fileName: "" });
+    setEditingId(null); // Make sure editing mode is off
+    setIsDialogOpen(true);
+  };
+
+  // Add new PDF upload
   const handleAdd = () => {
     setPDFUploads([...pdfUploads, { ...newUpload, id: Date.now() }]);
     setNewUpload({ year: "", course: "", subject: "", fileName: "" });
     setIsDialogOpen(false); // Close dialog after adding
   };
 
+  // Open the dialog for editing and load the selected entry
   const handleEdit = (id: number) => {
     const uploadToEdit = pdfUploads.find((upload) => upload.id === id);
     if (uploadToEdit) {
@@ -91,6 +100,7 @@ export default function PDFUploadPage() {
     }
   };
 
+  // Update existing PDF upload
   const handleUpdate = () => {
     setPDFUploads(
       pdfUploads.map((upload) =>
@@ -109,16 +119,16 @@ export default function PDFUploadPage() {
   return (
     <Card className="w-full">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">PDF Upload by Year</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl text-blue-500">PDF Upload by Year</CardTitle>
+        <CardDescription className="text-blue-400">
           Manage PDF uploads for different academic years, courses, and subjects.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4">
           <Button
-            className="w-full sm:w-auto"
-            onClick={() => setIsDialogOpen(true)} // Open dialog when clicked
+            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600"
+            onClick={handleNew} // Trigger the new form
           >
             <FileUp className="mr-2 h-4 w-4" /> Upload New PDF
           </Button>
@@ -234,14 +244,14 @@ export default function PDFUploadPage() {
                         size="icon"
                         onClick={() => handleEdit(upload.id)}
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-4 w-4 text-blue-500" />
                       </Button>
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleDelete(upload.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                     </div>
                   </TableCell>

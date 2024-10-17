@@ -61,6 +61,7 @@ export default function UserManagementPage() {
       active: true,
     },
   ]);
+
   const [newUser, setNewUser] = useState<Omit<User, "id">>({
     name: "",
     email: "",
@@ -68,10 +69,19 @@ export default function UserManagementPage() {
     active: true,
   });
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false); // Track add or edit mode
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // Control dialog visibility
+
+  const resetForm = () => {
+    setNewUser({ name: "", email: "", role: "uploader", active: true });
+    setEditingId(null);
+    setIsEditMode(false);
+    setIsDialogOpen(false); // Close dialog after reset
+  };
 
   const handleAdd = () => {
     setUsers([...users, { ...newUser, id: Date.now() }]);
-    setNewUser({ name: "", email: "", role: "uploader", active: true });
+    resetForm();
   };
 
   const handleEdit = (id: number) => {
@@ -84,6 +94,8 @@ export default function UserManagementPage() {
         active: userToEdit.active,
       });
       setEditingId(id);
+      setIsEditMode(true); // Enter edit mode
+      setIsDialogOpen(true); // Open dialog for editing
     }
   };
 
@@ -93,8 +105,7 @@ export default function UserManagementPage() {
         user.id === editingId ? { ...user, ...newUser } : user
       )
     );
-    setNewUser({ name: "", email: "", role: "uploader", active: true });
-    setEditingId(null);
+    resetForm();
   };
 
   const handleDelete = (id: number) => {
@@ -112,21 +123,24 @@ export default function UserManagementPage() {
   return (
     <Card className="w-full">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">User Management</CardTitle>
-        <CardDescription>Manage admin and uploader accounts.</CardDescription>
+        <CardTitle className="text-2xl text-blue-500">User Management</CardTitle>
+        <CardDescription className="text-blue-400">Manage admin and uploader accounts.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4">
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
+              <Button
+                className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600"
+                onClick={() => resetForm()} // Reset form when adding a new user
+              >
                 <Plus className="mr-2 h-4 w-4" /> Add New User
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>
-                  {editingId ? "Edit User" : "Add New User"}
+                  {isEditMode ? "Edit User" : "Add New User"}
                 </DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
@@ -190,10 +204,10 @@ export default function UserManagementPage() {
                 </div>
               </div>
               <Button
-                onClick={editingId ? handleUpdate : handleAdd}
+                onClick={isEditMode ? handleUpdate : handleAdd}
                 className="w-full"
               >
-                {editingId ? "Update" : "Add"}
+                {isEditMode ? "Update" : "Add"}
               </Button>
             </DialogContent>
           </Dialog>
@@ -229,14 +243,14 @@ export default function UserManagementPage() {
                         size="icon"
                         onClick={() => handleEdit(user.id)}
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-4 w-4 text-blue-500" />
                       </Button>
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleDelete(user.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                     </div>
                   </TableCell>

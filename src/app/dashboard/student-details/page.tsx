@@ -27,6 +27,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/ui/select";
 
 type Student = {
   id: number;
@@ -58,6 +59,9 @@ export default function StudentDetailsPage() {
   ]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedCollege, setSelectedCollege] = useState<string | null>(null);
+
+  const collegeList = ["College of Engineering", "Business School", "Arts and Sciences", "Medical School"];
 
   const filteredStudents = students.filter(
     (student) =>
@@ -69,25 +73,45 @@ export default function StudentDetailsPage() {
   return (
     <Card className="w-full">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Student Details</CardTitle>
-        <CardDescription>
-          View and manage student information, print documents, and internship
-          applications.
+        <CardTitle className="text-2xl text-blue-500">Student Details</CardTitle>
+        <CardDescription className="text-blue-400">
+          View and manage student information, print documents, and internship applications.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center space-x-2 mb-4">
-          <Input
-            placeholder="Search by name, registration ID, or course"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
-          <Button variant="outline" size="icon">
-            <Search className="h-4 w-4" />
-          </Button>
+        <div className="flex items-center space-x-2 mb-4 justify-between">
+          {/* Dropdown for selecting college */}
+          <div className="w-1/3">
+            <Label htmlFor="college-select">Select College</Label>
+            <Select onValueChange={(value) => setSelectedCollege(value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose a College" />
+              </SelectTrigger>
+              <SelectContent>
+                {collegeList.map((college, index) => (
+                  <SelectItem key={index} value={college}>
+                    {college}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Search box */}
+          <div className="flex items-center space-x-2">
+            <Input
+              placeholder="Search by name, registration ID, or course"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <Button variant="outline" size="icon">
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
+        {/* Student Table */}
         <div className="rounded-md border">
           <Table>
             <TableHeader>
@@ -108,6 +132,7 @@ export default function StudentDetailsPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
+                      {/* Print Documents Button */}
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -127,15 +152,15 @@ export default function StudentDetailsPage() {
                               Documents for {selectedStudent?.name}
                             </h3>
                             <ul className="list-disc pl-4">
-                              {selectedStudent?.printDocuments.map(
-                                (doc, index) => (
-                                  <li key={index}>{doc}</li>
-                                )
-                              )}
+                              {selectedStudent?.printDocuments.map((doc, index) => (
+                                <li key={index}>{doc}</li>
+                              ))}
                             </ul>
                           </div>
                         </DialogContent>
                       </Dialog>
+
+                      {/* Internship Applications Button */}
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -155,11 +180,9 @@ export default function StudentDetailsPage() {
                               Applications for {selectedStudent?.name}
                             </h3>
                             <ul className="list-disc pl-4">
-                              {selectedStudent?.internshipApplications.map(
-                                (app, index) => (
-                                  <li key={index}>{app}</li>
-                                )
-                              )}
+                              {selectedStudent?.internshipApplications.map((app, index) => (
+                                <li key={index}>{app}</li>
+                              ))}
                             </ul>
                           </div>
                         </DialogContent>
