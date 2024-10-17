@@ -1,5 +1,4 @@
-"use client";
-
+'use client'
 import { useState } from "react";
 import { Plus, Pencil, Trash2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,11 +38,13 @@ export default function CollegeDataPage() {
     { id: 2, name: "Dr. Jane Smith", type: "Faculty", department: "Science" },
     { id: 3, name: "Physics", type: "Department", department: "Science" },
   ]);
+
   const [newData, setNewData] = useState<Omit<CollegeData, "id">>({
     name: "",
     type: "",
     department: "",
   });
+
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const handleAdd = () => {
@@ -93,6 +94,12 @@ export default function CollegeDataPage() {
     document.body.removeChild(link);
   };
 
+  const handleDialogOpen = () => {
+    // Clear form and reset editingId when opening the add form
+    setNewData({ name: "", type: "", department: "" });
+    setEditingId(null); // Make sure we're not in edit mode
+  };
+
   return (
     <div className="space-y-6 bg-[#f8fafc] p-6 rounded-lg">
       <div className="flex justify-between items-center">
@@ -109,7 +116,10 @@ export default function CollegeDataPage() {
 
       <Dialog>
         <DialogTrigger asChild>
-          <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white">
+          <Button
+            className="bg-[#3b82f6] hover:bg-[#2563eb] text-white"
+            onClick={handleDialogOpen} // Call the handler to reset the form
+          >
             <Plus className="mr-2 h-4 w-4" /> Add New Data
           </Button>
         </DialogTrigger>
@@ -193,7 +203,7 @@ export default function CollegeDataPage() {
                           size="icon"
                           onClick={() => handleEdit(data.id)}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-4 w-4 text-blue-500" />
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
@@ -250,6 +260,13 @@ export default function CollegeDataPage() {
                         <Button onClick={handleUpdate}>Update</Button>
                       </DialogContent>
                     </Dialog>
+                    <Button
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => handleDelete(data.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>

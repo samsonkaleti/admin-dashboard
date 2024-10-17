@@ -96,8 +96,8 @@ export default function PrintStationPage() {
   return (
     <Card className="w-full">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Print Station Management</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl text-blue-500">Print Station Management</CardTitle>
+        <CardDescription className="text-blue-400">
           Manage print requests, approve orders, and set delivery dates.
         </CardDescription>
       </CardHeader>
@@ -148,14 +148,14 @@ export default function PrintStationPage() {
                             size="icon"
                             onClick={() => handleApprove(order.id)}
                           >
-                            <Check className="h-4 w-4" />
+                            <Check className="h-4 w-4 text-green-500" />
                           </Button>
                           <Button
                             variant="outline"
                             size="icon"
                             onClick={() => handleReject(order.id)}
                           >
-                            <X className="h-4 w-4" />
+                            <X className="h-4 w-4 text-red-500" />
                           </Button>
                         </>
                       )}
@@ -166,7 +166,7 @@ export default function PrintStationPage() {
                             size="icon"
                             onClick={() => setSelectedOrder(order)}
                           >
-                            <Calendar className="h-4 w-4" />
+                            <Calendar className="h-4 w-4 text-blue-400" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">

@@ -124,7 +124,7 @@ export default function InternshipPage() {
     <Card className="w-full bg-white shadow-lg rounded-lg">
       <CardHeader className="space-y-1">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-3xl font-bold text-gray-800">
+          <CardTitle className="text-3xl font-bold text-blue-500">
             Internship/Placement Management
           </CardTitle>
           <Button
@@ -134,7 +134,7 @@ export default function InternshipPage() {
             <Download className="mr-2 h-4 w-4" /> Export Report
           </Button>
         </div>
-        <CardDescription className="text-gray-600">
+        <CardDescription className="text-blue-400">
           Manage internship opportunities and view applicants.
         </CardDescription>
       </CardHeader>
@@ -179,14 +179,14 @@ export default function InternshipPage() {
                         size="icon"
                         onClick={() => handleEdit(internship.id)}
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-4 w-4 text-blue-500" />
                       </Button>
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleDelete(internship.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                       <Dialog>
                         <DialogTrigger asChild>
