@@ -15,6 +15,8 @@ import {
   Printer,
   Users,
   Briefcase,
+  UserCog,
+  Bell,
 } from "lucide-react";
 
 const sidebarNavItems = [
@@ -52,6 +54,16 @@ const sidebarNavItems = [
     title: "Internship/Placement",
     href: "/dashboard/internships",
     icon: Briefcase,
+  },
+  {
+    title: "User Management",
+    href: "/dashboard/user-management",
+    icon: UserCog,
+  },
+  {
+    title: "Notifications",
+    href: "/dashboard/notifications",
+    icon: Bell,
   },
 ];
 
