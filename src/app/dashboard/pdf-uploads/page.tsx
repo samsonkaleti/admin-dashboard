@@ -60,17 +60,21 @@ export default function PDFUploadPage() {
       fileName: "quantum_mechanics_2022.pdf",
     },
   ]);
+  
   const [newUpload, setNewUpload] = useState<Omit<PDFUpload, "id">>({
     year: "",
     course: "",
     subject: "",
     fileName: "",
   });
+  
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleAdd = () => {
     setPDFUploads([...pdfUploads, { ...newUpload, id: Date.now() }]);
     setNewUpload({ year: "", course: "", subject: "", fileName: "" });
+    setIsDialogOpen(false); // Close dialog after adding
   };
 
   const handleEdit = (id: number) => {
@@ -83,6 +87,7 @@ export default function PDFUploadPage() {
         fileName: uploadToEdit.fileName,
       });
       setEditingId(id);
+      setIsDialogOpen(true); // Open dialog when editing
     }
   };
 
@@ -94,6 +99,7 @@ export default function PDFUploadPage() {
     );
     setNewUpload({ year: "", course: "", subject: "", fileName: "" });
     setEditingId(null);
+    setIsDialogOpen(false); // Close dialog after updating
   };
 
   const handleDelete = (id: number) => {
@@ -105,18 +111,19 @@ export default function PDFUploadPage() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">PDF Upload by Year</CardTitle>
         <CardDescription>
-          Manage PDF uploads for different academic years, courses, and
-          subjects.
+          Manage PDF uploads for different academic years, courses, and subjects.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
-                <FileUp className="mr-2 h-4 w-4" /> Upload New PDF
-              </Button>
-            </DialogTrigger>
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => setIsDialogOpen(true)} // Open dialog when clicked
+          >
+            <FileUp className="mr-2 h-4 w-4" /> Upload New PDF
+          </Button>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>
@@ -207,9 +214,7 @@ export default function PDFUploadPage() {
                 <TableHead>Year</TableHead>
                 <TableHead>Course</TableHead>
                 <TableHead>Subject</TableHead>
-                <TableHead className="hidden md:table-cell">
-                  File Name
-                </TableHead>
+                <TableHead className="hidden md:table-cell">File Name</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>

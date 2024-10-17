@@ -139,78 +139,7 @@ export default function InternshipPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white">
-                <Plus className="mr-2 h-4 w-4" /> Add New Internship
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[450px] p-6 rounded-md border border-gray-300">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingId ? "Edit Internship" : "Add New Internship"}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="company" className="text-right">
-                    Company
-                  </Label>
-                  <Input
-                    id="company"
-                    value={newInternship.company}
-                    onChange={(e) =>
-                      setNewInternship({
-                        ...newInternship,
-                        company: e.target.value,
-                      })
-                    }
-                    className="col-span-3 border-gray-300"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="position" className="text-right">
-                    Position
-                  </Label>
-                  <Input
-                    id="position"
-                    value={newInternship.position}
-                    onChange={(e) =>
-                      setNewInternship({
-                        ...newInternship,
-                        position: e.target.value,
-                      })
-                    }
-                    className="col-span-3 border-gray-300"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-right">
-                    Description
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={newInternship.description}
-                    onChange={(e) =>
-                      setNewInternship({
-                        ...newInternship,
-                        description: e.target.value,
-                      })
-                    }
-                    className="col-span-3 border-gray-300"
-                  />
-                </div>
-              </div>
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white"
-                onClick={editingId ? handleUpdate : handleAdd}
-              >
-                {editingId ? "Update" : "Add"}
-              </Button>
-            </DialogContent>
-          </Dialog>
-        </div>
+
 
         <div className="rounded-md border border-gray-300 bg-gray-50">
           <Table>

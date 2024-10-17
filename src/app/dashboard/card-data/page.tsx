@@ -67,10 +67,12 @@ export default function CardDataPage() {
     department: "",
   });
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleAdd = () => {
     setCardData([...cardData, { ...newCard, id: Date.now() }]);
     setNewCard({ name: "", type: "student", cardNumber: "", department: "" });
+    setIsDialogOpen(false);
   };
 
   const handleEdit = (id: number) => {
@@ -83,6 +85,7 @@ export default function CardDataPage() {
         department: cardToEdit.department,
       });
       setEditingId(id);
+      setIsDialogOpen(true);
     }
   };
 
@@ -94,10 +97,17 @@ export default function CardDataPage() {
     );
     setNewCard({ name: "", type: "student", cardNumber: "", department: "" });
     setEditingId(null);
+    setIsDialogOpen(false);
   };
 
   const handleDelete = (id: number) => {
     setCardData(cardData.filter((card) => card.id !== id));
+  };
+
+  const openAddDialog = () => {
+    setEditingId(null);
+    setNewCard({ name: "", type: "student", cardNumber: "", department: "" });
+    setIsDialogOpen(true);
   };
 
   return (
@@ -112,87 +122,89 @@ export default function CardDataPage() {
       </CardHeader>
       <CardContent>
         <div className="mb-6">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white">
-                <Plus className="mr-2 h-4 w-4" /> Add New Card
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingId ? "Edit Card Data" : "Add New Card Data"}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    Name
-                  </Label>
-                  <Input
-                    id="name"
-                    value={newCard.name}
-                    onChange={(e) =>
-                      setNewCard({ ...newCard, name: e.target.value })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="type" className="text-right">
-                    Type
-                  </Label>
-                  <Select
-                    value={newCard.type}
-                    onValueChange={(value: "student" | "faculty") =>
-                      setNewCard({ ...newCard, type: value })
-                    }
-                  >
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="student">Student</SelectItem>
-                      <SelectItem value="faculty">Faculty</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="cardNumber" className="text-right">
-                    Card Number
-                  </Label>
-                  <Input
-                    id="cardNumber"
-                    value={newCard.cardNumber}
-                    onChange={(e) =>
-                      setNewCard({ ...newCard, cardNumber: e.target.value })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="department" className="text-right">
-                    Department
-                  </Label>
-                  <Input
-                    id="department"
-                    value={newCard.department}
-                    onChange={(e) =>
-                      setNewCard({ ...newCard, department: e.target.value })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={editingId ? handleUpdate : handleAdd}
-                className="w-full"
-              >
-                {editingId ? "Update" : "Add"}
-              </Button>
-            </DialogContent>
-          </Dialog>
+          <Button
+            className="bg-[#3b82f6] hover:bg-[#2563eb] text-white"
+            onClick={openAddDialog}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add New Card
+          </Button>
         </div>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>
+                {editingId ? "Edit Card Data" : "Add New Card Data"}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  value={newCard.name}
+                  onChange={(e) =>
+                    setNewCard({ ...newCard, name: e.target.value })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="type" className="text-right">
+                  Type
+                </Label>
+                <Select
+                  value={newCard.type}
+                  onValueChange={(value: "student" | "faculty") =>
+                    setNewCard({ ...newCard, type: value })
+                  }
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="faculty">Faculty</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="cardNumber" className="text-right">
+                  Card Number
+                </Label>
+                <Input
+                  id="cardNumber"
+                  value={newCard.cardNumber}
+                  onChange={(e) =>
+                    setNewCard({ ...newCard, cardNumber: e.target.value })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="department" className="text-right">
+                  Department
+                </Label>
+                <Input
+                  id="department"
+                  value={newCard.department}
+                  onChange={(e) =>
+                    setNewCard({ ...newCard, department: e.target.value })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <Button
+              onClick={editingId ? handleUpdate : handleAdd}
+              className="w-full"
+            >
+              {editingId ? "Update" : "Add"}
+            </Button>
+          </DialogContent>
+        </Dialog>
 
         <div className="rounded-md border border-[#e2e8f0] bg-white overflow-hidden">
           <Table>
