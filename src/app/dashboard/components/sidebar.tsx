@@ -6,7 +6,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area"; 
+import Image from "next/image"; 
+import logo from '../../../utils/logo.png'
 import {
   LayoutDashboard,
   GraduationCap,
@@ -72,12 +74,23 @@ export function Sidebar() {
 
   return (
     <nav className="w-64 border-r bg-gray-50 dark:bg-gray-800 shadow-md">
-      <ScrollArea className="h-full py-6">
-        <div className="space-y-4 py-4">
+      <div className="flex h-14 items-center border-b px-4 py-2">
+        <Link href="/" className="flex items-center space-x-2">
+          <Image
+            src={logo}
+            alt="Campusify Logo"
+            width={150}
+            height={23}
+            className="h-auto w-auto"
+          />
+        </Link>
+      </div>
+      <ScrollArea className="h-full ">
+        <div className="space-y-6 py-4">
           <div className="px-3 py-2">
-            <h2 className="mb-4 px-4 text-xl font-bold tracking-tight text-gray-800 dark:text-gray-200">
+            {/* <h2 className="mb-4 px-4 text-xl font-bold tracking-tight text-gray-800 dark:text-gray-200">
               Admin Dashboard
-            </h2>
+            </h2> */}
             <div className="space-y-1">
               {sidebarNavItems.map((item) => (
                 <Button

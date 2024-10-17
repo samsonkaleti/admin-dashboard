@@ -17,7 +17,7 @@ import { Bell, LogOut, Settings, User } from "lucide-react";
 
 export function UserNav() {
   return (
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-6 ">
       <Button
         variant="ghost"
         size="icon"
@@ -31,11 +31,11 @@ export function UserNav() {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="relative h-10 w-10 rounded-full ring-2 ring-gray-200 dark:ring-gray-600 hover:ring-gray-300 dark:hover:ring-gray-500"
+            className="relative h-8 w-8 rounded-full ring-2 ring-gray-200 dark:ring-gray-600 hover:ring-gray-300 dark:hover:ring-gray-500"
           >
-            <Avatar className="h-10 w-10">
+            <Avatar className="h-7 w-7">
               <AvatarImage src="/avatars/01.png" alt="@johndoe" />
-              <AvatarFallback className="bg-blue-500 text-white">
+              <AvatarFallback className="bg-blue-500 text-white text-sm">
                 JD
               </AvatarFallback>
             </Avatar>
