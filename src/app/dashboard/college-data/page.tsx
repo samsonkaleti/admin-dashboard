@@ -1,6 +1,6 @@
-'use client'
+"use client";
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Download } from "lucide-react";
+import { Plus, Edit, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,85 +19,185 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { v4 as uuidv4 } from "uuid";
+import { saveAs } from "file-saver";
+
+type Program = {
+  name: string;
+  specializations: string[];
+  years: number[];
+  regulations: {
+    type: string;
+    regulation: string;
+    validYears: number[];
+  }[];
+};
+
+type CollegeDetails = {
+  address: string;
+  contactNumber: string;
+  email: string;
+};
 
 type CollegeData = {
-  id: number;
-  name: string;
-  type: string;
-  department: string;
+  id: string;
+  collegeName: string;
+  regulatoryBody: string;
+  domain: string;
+  details: CollegeDetails[];
+  programs: Program[];
 };
+
+const programOptions = [
+  {
+    name: "B.Tech",
+    specializations: ["CSE", "ECE", "EEE"],
+    years: [1, 2, 3, 4],
+    regulations: [
+      {
+        type: "JNTUK",
+        regulation: "R20",
+        validYears: [2020, 2021, 2022, 2023],
+      },
+      {
+        type: "Autonomous",
+        regulation: "Autonomous Reg 2023",
+        validYears: [2023, 2024],
+      },
+    ],
+  },
+  {
+    name: "M.Tech",
+    specializations: ["CSE", "VLSI", "Power Systems"],
+    years: [1, 2],
+    regulations: [
+      {
+        type: "JNTUK",
+        regulation: "R19",
+        validYears: [2019, 2020, 2021, 2022],
+      },
+    ],
+  },
+];
 
 export default function CollegeDataPage() {
   const [collegeData, setCollegeData] = useState<CollegeData[]>([
     {
-      id: 1,
-      name: "Computer Science",
-      type: "Course",
-      department: "Engineering",
+      id: uuidv4(),
+      collegeName: "Greenfield University",
+      regulatoryBody: "UGC",
+      domain: "greenfield.edu",
+      details: [
+        {
+          address: "123 University Street, Springfield",
+          contactNumber: "123-456-7890",
+          email: "info@greenfield.edu",
+        },
+      ],
+      programs: [],
     },
-    { id: 2, name: "Dr. Jane Smith", type: "Faculty", department: "Science" },
-    { id: 3, name: "Physics", type: "Department", department: "Science" },
+    // ... other colleges
   ]);
 
-  const [newData, setNewData] = useState<Omit<CollegeData, "id">>({
-    name: "",
-    type: "",
-    department: "",
+  const [newData, setNewData] = useState<CollegeData>({
+    id: "",
+    collegeName: "",
+    regulatoryBody: "",
+    domain: "",
+    details: [{ address: "", contactNumber: "", email: "" }],
+    programs: [],
   });
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState("");
 
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const handleAddOrUpdate = async () => {
+    const updatedPrograms = selectedProgram
+      ? [
+          {
+            name: selectedProgram,
+            specializations: programOptions.find(
+              (program) => program.name === selectedProgram
+            )?.specializations || [],
+            years: programOptions.find(
+              (program) => program.name === selectedProgram
+            )?.years || [],
+            regulations: programOptions.find(
+              (program) => program.name === selectedProgram
+            )?.regulations || [],
+          },
+        ]
+      : [];
 
-  const handleAdd = () => {
-    setCollegeData([...collegeData, { ...newData, id: Date.now() }]);
-    setNewData({ name: "", type: "", department: "" });
-  };
+    const collegeDataToSave = {
+      ...newData,
+      programs: updatedPrograms,
+    };
 
-  const handleEdit = (id: number) => {
-    const dataToEdit = collegeData.find((data) => data.id === id);
-    if (dataToEdit) {
-      setNewData({
-        name: dataToEdit.name,
-        type: dataToEdit.type,
-        department: dataToEdit.department,
+    if (editIndex !== null) {
+      const updatedData = [...collegeData];
+      updatedData[editIndex] = collegeDataToSave;
+      setCollegeData(updatedData);
+    } else {
+      const response = await fetch("/api/college", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(collegeDataToSave),
       });
-      setEditingId(id);
+      if (response.ok) {
+        const addedData = await response.json();
+        setCollegeData([...collegeData, addedData]);
+      }
     }
+    setEditIndex(null); // Reset edit mode after saving
+    setDialogOpen(false); // Close dialog
   };
 
-  const handleUpdate = () => {
-    setCollegeData(
-      collegeData.map((data) =>
-        data.id === editingId ? { ...data, ...newData } : data
-      )
-    );
-    setNewData({ name: "", type: "", department: "" });
-    setEditingId(null);
+  const handleEdit = (index: number) => {
+    setNewData(collegeData[index]);
+    setSelectedProgram(collegeData[index].programs[0]?.name || ""); // Set selected program for edit
+    setEditIndex(index); // Set edit mode
+    setDialogOpen(true); // Open dialog
   };
 
-  const handleDelete = (id: number) => {
-    setCollegeData(collegeData.filter((data) => data.id !== id));
-  };
-
-  const handleExport = () => {
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      "ID,Name,Type,Department\n" +
-      collegeData
-        .map((row) => `${row.id},${row.name},${row.type},${row.department}`)
-        .join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "college_data.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDelete = (index: number) => {
+    const updatedData = collegeData.filter((_, i) => i !== index);
+    setCollegeData(updatedData);
   };
 
   const handleDialogOpen = () => {
-    // Clear form and reset editingId when opening the add form
-    setNewData({ name: "", type: "", department: "" });
-    setEditingId(null); // Make sure we're not in edit mode
+    setNewData({
+      id: "",
+      collegeName: "",
+      regulatoryBody: "",
+      domain: "",
+      details: [{ address: "", contactNumber: "", email: "" }],
+      programs: [],
+    });
+    setSelectedProgram(""); // Reset program selection
+    setEditIndex(null); // Reset edit mode when adding new
+    setDialogOpen(true); // Open dialog
+  };
+
+  const exportToCSV = () => {
+    const csvData = collegeData.map(
+      ({ collegeName, regulatoryBody, domain }) => ({
+        collegeName,
+        regulatoryBody,
+        domain,
+      })
+    );
+
+    const csvHeader = "College Name,Regulatory Body,Domain\n";
+    const csvRows = csvData
+      .map((row) => `${row.collegeName},${row.regulatoryBody},${row.domain}`)
+      .join("\n");
+    const csvContent = csvHeader + csvRows;
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    saveAs(blob, "college_data.csv"); // Use file-saver to download the CSV
   };
 
   return (
@@ -107,18 +207,18 @@ export default function CollegeDataPage() {
           College Data Management
         </h1>
         <Button
-          onClick={handleExport}
-          className="bg-[#6366f1] hover:bg-[#4f46e5] text-white"
+          className="bg-[#3b82f6] hover:bg-[#2563eb] text-white"
+          onClick={exportToCSV}
         >
-          <Download className="mr-2 h-4 w-4" /> Export CSV
+          Export CSV
         </Button>
       </div>
 
-      <Dialog>
+      <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <Button
             className="bg-[#3b82f6] hover:bg-[#2563eb] text-white"
-            onClick={handleDialogOpen} // Call the handler to reset the form
+            onClick={handleDialogOpen}
           >
             <Plus className="mr-2 h-4 w-4" /> Add New Data
           </Button>
@@ -126,154 +226,255 @@ export default function CollegeDataPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingId ? "Edit College Data" : "Add New College Data"}
+              {editIndex !== null ? "Edit College Data" : "Add New College Data"}
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {/* College Name */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
+              <Label htmlFor="collegeName" className="text-right">
+                College Name
               </Label>
               <Input
-                id="name"
-                value={newData.name}
+                id="collegeName"
+                value={newData.collegeName}
                 onChange={(e) =>
-                  setNewData({ ...newData, name: e.target.value })
+                  setNewData({ ...newData, collegeName: e.target.value })
                 }
                 className="col-span-3"
               />
             </div>
+            {/* Regulatory Body */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="type" className="text-right">
-                Type
+              <Label htmlFor="regulatoryBody" className="text-right">
+                Regulatory Body
               </Label>
               <Input
-                id="type"
-                value={newData.type}
+                id="regulatoryBody"
+                value={newData.regulatoryBody}
                 onChange={(e) =>
-                  setNewData({ ...newData, type: e.target.value })
+                  setNewData({ ...newData, regulatoryBody: e.target.value })
                 }
                 className="col-span-3"
               />
             </div>
+            {/* Domain */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="department" className="text-right">
-                Department
+              <Label htmlFor="domain" className="text-right">
+                Domain
               </Label>
               <Input
-                id="department"
-                value={newData.department}
+                id="domain"
+                value={newData.domain}
                 onChange={(e) =>
-                  setNewData({ ...newData, department: e.target.value })
+                  setNewData({ ...newData, domain: e.target.value })
                 }
                 className="col-span-3"
               />
             </div>
+            {/* Address */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="address" className="text-right">
+                Address
+              </Label>
+              <Input
+                id="address"
+                value={newData.details[0].address}
+                onChange={(e) =>
+                  setNewData({
+                    ...newData,
+                    details: [
+                      {
+                        ...newData.details[0],
+                        address: e.target.value,
+                      },
+                    ],
+                  })
+                }
+                className="col-span-3"
+              />
+            </div>
+            {/* Contact Number */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="contactNumber" className="text-right">
+                Contact Number
+              </Label>
+              <Input
+                id="contactNumber"
+                value={newData.details[0].contactNumber}
+                onChange={(e) =>
+                  setNewData({
+                    ...newData,
+                    details: [
+                      {
+                        ...newData.details[0],
+                        contactNumber: e.target.value,
+                      },
+                    ],
+                  })
+                }
+                className="col-span-3"
+              />
+            </div>
+            {/* Email */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                value={newData.details[0].email}
+                onChange={(e) =>
+                  setNewData({
+                    ...newData,
+                    details: [
+                      {
+                        ...newData.details[0],
+                        email: e.target.value,
+                      },
+                    ],
+                  })
+                }
+                className="col-span-3"
+              />
+            </div>
+            {/* Program Selector */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="program" className="text-right">
+                Program
+              </Label>
+              <select
+                id="program"
+                value={selectedProgram}
+                onChange={(e) => setSelectedProgram(e.target.value)}
+                className="col-span-3 p-2 border rounded"
+              >
+                <option value="">Select Program</option>
+                {programOptions.map((program) => (
+                  <option key={program.name} value={program.name}>
+                    {program.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Conditionally Render Fields Based on Selected Program */}
+            {selectedProgram && (
+              <>
+                {/* Specializations */}
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="specialization" className="text-right">
+                    Specialization
+                  </Label>
+                  <select
+                    id="specialization"
+                    className="col-span-3 p-2 border rounded"
+                    defaultValue=""
+                  >
+                    <option value="">Select Specialization</option>
+                    {programOptions
+                      .find((program) => program.name === selectedProgram)
+                      ?.specializations.map((spec) => (
+                        <option key={spec} value={spec}>
+                          {spec}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                {/* Years */}
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="year" className="text-right">
+                    Year
+                  </Label>
+                  <select
+                    id="year"
+                    className="col-span-3 p-2 border rounded"
+                    defaultValue=""
+                  >
+                    <option value="">Select Year</option>
+                    {programOptions
+                      .find((program) => program.name === selectedProgram)
+                      ?.years.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                {/* Regulations */}
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="regulation" className="text-right">
+                    Regulation
+                  </Label>
+                  <select
+                    id="regulation"
+                    className="col-span-3 p-2 border rounded"
+                    defaultValue=""
+                  >
+                    <option value="">Select Regulation</option>
+                    {programOptions
+                      .find((program) => program.name === selectedProgram)
+                      ?.regulations.map((reg) => (
+                        <option key={reg.type} value={reg.type}>
+                          {reg.regulation} ({reg.type})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </>
+            )}
           </div>
-          <Button onClick={editingId ? handleUpdate : handleAdd}>
-            {editingId ? "Update" : "Add"}
-          </Button>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button
+              className="bg-[#3b82f6] hover:bg-[#2563eb] text-white"
+              onClick={handleAddOrUpdate}
+            >
+              Save
+            </Button>
+            <Button
+              className="bg-gray-300 hover:bg-gray-400"
+              onClick={() => setDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
-      <div className="rounded-md border border-[#e2e8f0] bg-white overflow-hidden">
-        <Table>
-          <TableHeader className="bg-[#f1f5f9]">
-            <TableRow>
-              <TableHead className="text-[#1e293b]">Name</TableHead>
-              <TableHead className="text-[#1e293b]">Type</TableHead>
-              <TableHead className="text-[#1e293b]">Department</TableHead>
-              <TableHead className="text-[#1e293b]">Actions</TableHead>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>College Name</TableHead>
+            <TableHead>Regulatory Body</TableHead>
+            <TableHead>Domain</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {collegeData.map((college, index) => (
+            <TableRow key={college.id}>
+              <TableCell>{college.collegeName}</TableCell>
+              <TableCell>{college.regulatoryBody}</TableCell>
+              <TableCell>{college.domain}</TableCell>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleEdit(index)}
+                >
+                  <Edit className="mr-2 h-4 w-4 text-blue-500" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleDelete(index)}
+                >
+                  <Trash className="h-4 w-4 text-red-500" />
+                </Button>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {collegeData.map((data) => (
-              <TableRow key={data.id} className="hover:bg-[#f1f5f9]">
-                <TableCell className="text-[#1e293b]">{data.name}</TableCell>
-                <TableCell className="text-[#1e293b]">{data.type}</TableCell>
-                <TableCell className="text-[#1e293b]">
-                  {data.department}
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleEdit(data.id)}
-                        >
-                          <Pencil className="h-4 w-4 text-blue-500" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Edit College Data</DialogTitle>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="edit-name" className="text-right">
-                              Name
-                            </Label>
-                            <Input
-                              id="edit-name"
-                              value={newData.name}
-                              onChange={(e) =>
-                                setNewData({ ...newData, name: e.target.value })
-                              }
-                              className="col-span-3"
-                            />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="edit-type" className="text-right">
-                              Type
-                            </Label>
-                            <Input
-                              id="edit-type"
-                              value={newData.type}
-                              onChange={(e) =>
-                                setNewData({ ...newData, type: e.target.value })
-                              }
-                              className="col-span-3"
-                            />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label
-                              htmlFor="edit-department"
-                              className="text-right"
-                            >
-                              Department
-                            </Label>
-                            <Input
-                              id="edit-department"
-                              value={newData.department}
-                              onChange={(e) =>
-                                setNewData({
-                                  ...newData,
-                                  department: e.target.value,
-                                })
-                              }
-                              className="col-span-3"
-                            />
-                          </div>
-                        </div>
-                        <Button onClick={handleUpdate}>Update</Button>
-                      </DialogContent>
-                    </Dialog>
-                    <Button
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => handleDelete(data.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
