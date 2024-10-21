@@ -86,7 +86,7 @@ export default function NotificationsPage() {
             <p className="mt-2 text-lg font-medium text-gray-800">
               No notifications
             </p>
-            <p className="text-sm text-gray-600">You're all caught up!</p>
+            <p className="text-sm text-gray-600">You&aposre all caught up!</p>
           </div>
         ) : (
           <div className="space-y-4">

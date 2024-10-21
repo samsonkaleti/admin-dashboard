@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 
 type Program = {
   name: string;
@@ -27,12 +27,12 @@ type CollegeData = {
 
 const collegeData: CollegeData[] = [];
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    const newCollege = req.body;
-    collegeData.push(newCollege);
-    res.status(201).json(newCollege);
-  } else {
-    res.status(405).json({ message: 'Method not allowed' });
-  }
+export async function POST(request: NextRequest) {
+  const newCollege: CollegeData = await request.json();
+  collegeData.push(newCollege);
+  return NextResponse.json(newCollege, { status: 201 });
+}
+
+export async function GET() {
+  return NextResponse.json(collegeData);
 }
