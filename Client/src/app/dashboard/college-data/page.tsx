@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { Plus, Edit, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,39 +20,23 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { v4 as uuidv4 } from "uuid";
 import { saveAs } from "file-saver";
-
-type Program = {
-  name: string;
-  specializations: string[];
-  years: number[];
-  regulations: {
-    type: string;
-    regulation: string;
-    validYears: number[];
-  }[];
-};
-
-type CollegeDetails = {
-  address: string;
-  contactNumber: string;
-  email: string;
-};
-
-type CollegeData = {
-  id: string;
-  collegeName: string;
-  regulatoryBody: string;
-  domain: string;
-  details: CollegeDetails[];
-  programs: Program[];
-};
+import { useCreateCollege } from "@/app/hooks/colleges/useCreateCollege";
+import { useDeleteCollege } from "@/app/hooks/colleges/useDeleteCollege";
+import { useGetColleges } from "@/app/hooks/colleges/useGetColleges";
+import { useUpdateCollege } from "@/app/hooks/colleges/useUpdateCollege";
+import {
+  CollegeData,
+  Regulation,
+  Program,
+  CollegeDetails,
+  CollegeExportData,
+} from "@/app/@types/college";
 
 const programOptions = [
   {
     name: "B.Tech",
-    specializations: ["CSE", "ECE", "EEE"],
+    specializations: ["CSE", "ECE", "EEE", "CSM", "Civil", "Mechanical"],
     years: [1, 2, 3, 4],
     regulations: [
       {
@@ -81,109 +66,91 @@ const programOptions = [
 ];
 
 export default function CollegeDataPage() {
-  const [collegeData, setCollegeData] = useState<CollegeData[]>([
-    {
-      id: uuidv4(),
-      collegeName: "Greenfield University",
-      regulatoryBody: "UGC",
-      domain: "greenfield.edu",
-      details: [
-        {
-          address: "123 University Street, Springfield",
-          contactNumber: "123-456-7890",
-          email: "info@greenfield.edu",
-        },
-      ],
-      programs: [],
-    },
-    // ... other colleges
-  ]);
-
   const [newData, setNewData] = useState<CollegeData>({
-    id: "",
     collegeName: "",
     regulatoryBody: "",
     domain: "",
     details: [{ address: "", contactNumber: "", email: "" }],
     programs: [],
   });
-  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState("");
+  const [selectedSpecializations, setSelectedSpecializations] = useState<
+    string[]
+  >([]);
+  const [selectedYears, setSelectedYears] = useState<number[]>([]);
+  const [selectedRegulations, setSelectedRegulations] = useState<Regulation[]>(
+    []
+  );
+
+  const {
+    data: collegeData,
+    isLoading,
+    error,
+  } = useGetColleges();
+  const createCollegeMutation = useCreateCollege();
+  const updateCollegeMutation = useUpdateCollege();
+  const deleteCollegeMutation = useDeleteCollege();
 
   const handleAddOrUpdate = async () => {
-    const updatedPrograms = selectedProgram
-      ? [
-          {
-            name: selectedProgram,
-            specializations: programOptions.find(
-              (program) => program.name === selectedProgram
-            )?.specializations || [],
-            years: programOptions.find(
-              (program) => program.name === selectedProgram
-            )?.years || [],
-            regulations: programOptions.find(
-              (program) => program.name === selectedProgram
-            )?.regulations || [],
-          },
-        ]
-      : [];
+    const updatedPrograms: Program[] = [
+      {
+        name: selectedProgram,
+        specializations: selectedSpecializations,
+        years: selectedYears,
+        regulations: selectedRegulations,
+      },
+    ];
 
     const collegeDataToSave = {
       ...newData,
       programs: updatedPrograms,
     };
 
-    if (editIndex !== null) {
-      const updatedData = [...collegeData];
-      updatedData[editIndex] = collegeDataToSave;
-      setCollegeData(updatedData);
+    if (editId) {
+      updateCollegeMutation.mutate({ id: editId, ...collegeDataToSave });
     } else {
-      const response = await fetch("/api/college", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(collegeDataToSave),
-      });
-      if (response.ok) {
-        const addedData = await response.json();
-        setCollegeData([...collegeData, addedData]);
-      }
+      createCollegeMutation.mutate(collegeDataToSave);
     }
-    setEditIndex(null); // Reset edit mode after saving
-    setDialogOpen(false); // Close dialog
+
+    setEditId(null);
+    setDialogOpen(false);
   };
 
-  const handleEdit = (index: number) => {
-    setNewData(collegeData[index]);
-    setSelectedProgram(collegeData[index].programs[0]?.name || ""); // Set selected program for edit
-    setEditIndex(index); // Set edit mode
-    setDialogOpen(true); // Open dialog
+  const handleEdit = (college: CollegeData) => {
+    setNewData(college);
+    setSelectedProgram(college.programs[0]?.name || "");
+    setSelectedSpecializations(college.programs[0]?.specializations || []);
+    setSelectedYears(college.programs[0]?.years || []);
+    setSelectedRegulations(college.programs[0]?.regulations || []);
+    setEditId(college._id || null);
+    setDialogOpen(true);
   };
 
-  const handleDelete = (index: number) => {
-    const updatedData = collegeData.filter((_, i) => i !== index);
-    setCollegeData(updatedData);
+  const handleDelete = async (id: string) => {
+    deleteCollegeMutation.mutate(id);
   };
 
   const handleDialogOpen = () => {
     setNewData({
-      id: "",
       collegeName: "",
       regulatoryBody: "",
       domain: "",
       details: [{ address: "", contactNumber: "", email: "" }],
       programs: [],
     });
-    setSelectedProgram(""); // Reset program selection
-    setEditIndex(null); // Reset edit mode when adding new
-    setDialogOpen(true); // Open dialog
+    setSelectedProgram("");
+    setSelectedSpecializations([]);
+    setSelectedYears([]);
+    setSelectedRegulations([]);
+    setEditId(null);
+    setDialogOpen(true);
   };
 
   const exportToCSV = () => {
-    const csvData = collegeData.map(
-      ({ collegeName, regulatoryBody, domain }) => ({
+    const csvData = collegeData?.map(
+      ({ collegeName, regulatoryBody, domain }: CollegeExportData) => ({
         collegeName,
         regulatoryBody,
         domain,
@@ -192,13 +159,28 @@ export default function CollegeDataPage() {
 
     const csvHeader = "College Name,Regulatory Body,Domain\n";
     const csvRows = csvData
-      .map((row) => `${row.collegeName},${row.regulatoryBody},${row.domain}`)
+      ?.map(
+        (row: CollegeExportData) =>
+          `${row.collegeName},${row.regulatoryBody},${row.domain}`
+      )
       .join("\n");
-    const csvContent = csvHeader + csvRows;
+    const csvContent = csvHeader + (csvRows || "");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    saveAs(blob, "college_data.csv"); // Use file-saver to download the CSV
+    saveAs(blob, "college_data.csv");
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div>
+        Error: {error instanceof Error ? error.message : "An error occurred"}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 bg-[#f8fafc] p-6 rounded-lg">
@@ -223,14 +205,13 @@ export default function CollegeDataPage() {
             <Plus className="mr-2 h-4 w-4" /> Add New Data
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>
-              {editIndex !== null ? "Edit College Data" : "Add New College Data"}
+              {editId ? "Edit College Data" : "Add New College Data"}
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {/* College Name */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="collegeName" className="text-right">
                 College Name
@@ -244,7 +225,6 @@ export default function CollegeDataPage() {
                 className="col-span-3"
               />
             </div>
-            {/* Regulatory Body */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="regulatoryBody" className="text-right">
                 Regulatory Body
@@ -258,7 +238,6 @@ export default function CollegeDataPage() {
                 className="col-span-3"
               />
             </div>
-            {/* Domain */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="domain" className="text-right">
                 Domain
@@ -272,7 +251,6 @@ export default function CollegeDataPage() {
                 className="col-span-3"
               />
             </div>
-            {/* Address */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="address" className="text-right">
                 Address
@@ -294,7 +272,6 @@ export default function CollegeDataPage() {
                 className="col-span-3"
               />
             </div>
-            {/* Contact Number */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="contactNumber" className="text-right">
                 Contact Number
@@ -316,7 +293,6 @@ export default function CollegeDataPage() {
                 className="col-span-3"
               />
             </div>
-            {/* Email */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="email" className="text-right">
                 Email
@@ -338,7 +314,6 @@ export default function CollegeDataPage() {
                 className="col-span-3"
               />
             </div>
-            {/* Program Selector */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="program" className="text-right">
                 Program
@@ -358,68 +333,114 @@ export default function CollegeDataPage() {
               </select>
             </div>
 
-            {/* Conditionally Render Fields Based on Selected Program */}
             {selectedProgram && (
               <>
-                {/* Specializations */}
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="specialization" className="text-right">
-                    Specialization
+                  <Label htmlFor="specializations" className="text-right">
+                    Specializations
                   </Label>
-                  <select
-                    id="specialization"
-                    className="col-span-3 p-2 border rounded"
-                    defaultValue=""
-                  >
-                    <option value="">Select Specialization</option>
+                  <div className="col-span-3 flex flex-wrap gap-2">
                     {programOptions
                       .find((program) => program.name === selectedProgram)
                       ?.specializations.map((spec) => (
-                        <option key={spec} value={spec}>
-                          {spec}
-                        </option>
+                        <label
+                          key={spec}
+                          className="flex items-center space-x-2"
+                        >
+                          <input
+                            type="checkbox"
+                            value={spec}
+                            checked={selectedSpecializations.includes(spec)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedSpecializations([
+                                  ...selectedSpecializations,
+                                  spec,
+                                ]);
+                              } else {
+                                setSelectedSpecializations(
+                                  selectedSpecializations.filter(
+                                    (s) => s !== spec
+                                  )
+                                );
+                              }
+                            }}
+                          />
+                          <span>{spec}</span>
+                        </label>
                       ))}
-                  </select>
+                  </div>
                 </div>
-                {/* Years */}
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="year" className="text-right">
-                    Year
+                  <Label htmlFor="years" className="text-right">
+                    Years
                   </Label>
-                  <select
-                    id="year"
-                    className="col-span-3 p-2 border rounded"
-                    defaultValue=""
-                  >
-                    <option value="">Select Year</option>
+                  <div className="col-span-3 flex flex-wrap gap-2">
                     {programOptions
                       .find((program) => program.name === selectedProgram)
                       ?.years.map((year) => (
-                        <option key={year} value={year}>
-                          {year}
-                        </option>
+                        <label
+                          key={year}
+                          className="flex items-center space-x-2"
+                        >
+                          <input
+                            type="checkbox"
+                            value={year}
+                            checked={selectedYears.includes(year)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedYears([...selectedYears, year]);
+                              } else {
+                                setSelectedYears(
+                                  selectedYears.filter((y) => y !== year)
+                                );
+                              }
+                            }}
+                          />
+                          <span>{year}</span>
+                        </label>
                       ))}
-                  </select>
+                  </div>
                 </div>
-                {/* Regulations */}
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="regulation" className="text-right">
-                    Regulation
+                  <Label htmlFor="regulations" className="text-right">
+                    Regulations
                   </Label>
-                  <select
-                    id="regulation"
-                    className="col-span-3 p-2 border rounded"
-                    defaultValue=""
-                  >
-                    <option value="">Select Regulation</option>
+                  <div className="col-span-3 flex flex-wrap gap-2">
                     {programOptions
                       .find((program) => program.name === selectedProgram)
                       ?.regulations.map((reg) => (
-                        <option key={reg.type} value={reg.type}>
-                          {reg.regulation} ({reg.type})
-                        </option>
+                        <label
+                          key={reg.type}
+                          className="flex items-center space-x-2"
+                        >
+                          <input
+                            type="checkbox"
+                            value={reg.type}
+                            checked={selectedRegulations.some(
+                              (r) => r.type === reg.type
+                            )}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedRegulations([
+                                  ...selectedRegulations,
+                                  reg,
+                                ]);
+                              } else {
+                                setSelectedRegulations(
+                                  selectedRegulations.filter(
+                                    (r) => r.type !== reg.type
+                                  )
+                                );
+                              }
+                            }}
+                          />
+                          <span>
+                            {reg.regulation} ({reg.type})
+                          </span>
+                        </label>
                       ))}
-                  </select>
+                  </div>
                 </div>
               </>
             )}
@@ -447,26 +468,28 @@ export default function CollegeDataPage() {
           <TableRow>
             <TableHead>College Name</TableHead>
             <TableHead>Regulatory Body</TableHead>
+
             <TableHead>Domain</TableHead>
+            <TableHead>Programs</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {collegeData.map((college, index) => (
-            <TableRow key={college.id}>
+          {collegeData?.map((college: CollegeData) => (
+            <TableRow key={college._id}>
               <TableCell>{college.collegeName}</TableCell>
               <TableCell>{college.regulatoryBody}</TableCell>
               <TableCell>{college.domain}</TableCell>
               <TableCell>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleEdit(index)}
-                >
+                {college.programs.map((p) => p.name).join(", ")}
+              </TableCell>
+              <TableCell>
+                <Button variant="ghost" onClick={() => handleEdit(college)}>
                   <Edit className="mr-2 h-4 w-4 text-blue-500" />
                 </Button>
                 <Button
                   variant="ghost"
-                  onClick={() => handleDelete(index)}
+                  onClick={() => handleDelete(college._id!)}
                 >
                   <Trash className="h-4 w-4 text-red-500" />
                 </Button>
