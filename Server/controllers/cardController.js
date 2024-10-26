@@ -1,20 +1,39 @@
 const Card = require('../models/Card'); // Adjust the path as necessary
 
+
 // Create a new card
 exports.createCard = async (req, res) => {
-  const { studentId, facultyId, cardDetails } = req.body;
+  const {
+    title,
+    description,
+    imageUrl,
+    allowAll,
+    specificCollege,
+    excludeCollege,
+    order,
+  } = req.body;
 
   try {
     const newCard = await Card.create({
-      studentId,
-      facultyId,
-      cardDetails,
+      title,
+      description,
+      imageUrl,
+      allowAll,
+      specificCollege,
+      excludeCollege,
+      order,
     });
-    return res.status(201).json({ message: 'Card added successfully', card: newCard });
+    return res
+      .status(201)
+      .json({ message: "Card added successfully", card: newCard });
   } catch (error) {
-    return res.status(500).json({ message: 'Error adding card', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error adding card", error: error.message });
   }
 };
+
+
 
 // Update card by ID
 exports.updateCardById = async (req, res) => {

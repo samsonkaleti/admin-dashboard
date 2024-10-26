@@ -1,24 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -27,6 +16,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -34,230 +32,188 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-type CardData = {
-  id: number;
-  name: string;
-  type: "student" | "faculty";
-  cardNumber: string;
-  department: string;
-};
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  imageUrl: z.string().url("Invalid URL"),
+  allowAll: z.boolean(),
+  specificCollege: z.string().nullable(),
+  excludeCollege: z.string().nullable(),
+  order: z.number().int().positive("Order must be a positive integer"),
+});
 
-export default function CardDataPage() {
-  const [cardData, setCardData] = useState<CardData[]>([
-    {
-      id: 1,
-      name: "John Doe",
-      type: "student",
-      cardNumber: "S12345",
-      department: "Computer Science",
+type FormValues = z.infer<typeof formSchema>;
+
+export default function TechUniversityForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "Welcome to Tech University",
+      description:
+        "Discover the latest updates and courses offered at Tech University.",
+      imageUrl: "https://example.com/images/welcome-tech-university.jpg",
+      allowAll: true,
+      specificCollege: null,
+      excludeCollege: null,
+      order: 1,
     },
-    {
-      id: 2,
-      name: "Jane Smith",
-      type: "faculty",
-      cardNumber: "F67890",
-      department: "Physics",
-    },
-  ]);
-  const [newCard, setNewCard] = useState<Omit<CardData, "id">>({
-    name: "",
-    type: "student",
-    cardNumber: "",
-    department: "",
   });
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleAdd = () => {
-    setCardData([...cardData, { ...newCard, id: Date.now() }]);
-    setNewCard({ name: "", type: "student", cardNumber: "", department: "" });
-    setIsDialogOpen(false);
-  };
-
-  const handleEdit = (id: number) => {
-    const cardToEdit = cardData.find((card) => card.id === id);
-    if (cardToEdit) {
-      setNewCard({
-        name: cardToEdit.name,
-        type: cardToEdit.type,
-        cardNumber: cardToEdit.cardNumber,
-        department: cardToEdit.department,
-      });
-      setEditingId(id);
-      setIsDialogOpen(true);
-    }
-  };
-
-  const handleUpdate = () => {
-    setCardData(
-      cardData.map((card) =>
-        card.id === editingId ? { ...card, ...newCard } : card
-      )
-    );
-    setNewCard({ name: "", type: "student", cardNumber: "", department: "" });
-    setEditingId(null);
-    setIsDialogOpen(false);
-  };
-
-  const handleDelete = (id: number) => {
-    setCardData(cardData.filter((card) => card.id !== id));
-  };
-
-  const openAddDialog = () => {
-    setEditingId(null);
-    setNewCard({ name: "", type: "student", cardNumber: "", department: "" });
-    setIsDialogOpen(true);
+  const onSubmit = async (data: FormValues) => {
+    setIsSubmitting(true);
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    console.log(data);
+    setIsSubmitting(false);
+    // Here you would typically send the data to your backend
   };
 
   return (
-    <Card className="w-full bg-[#f8fafc] border-none shadow-none">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-[#3b82f6]">
-          Card Data Management
-        </CardTitle>
-        <CardDescription className="text-[#6366f1]">
-          Add, edit, or remove card data for students and faculty.
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle>Tech University Form</CardTitle>
+        <CardDescription>
+          Enter details for the Tech University announcement
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-6">
-          <Button
-            className="bg-[#3b82f6] hover:bg-[#2563eb] text-white"
-            onClick={openAddDialog}
-          >
-            <Plus className="mr-2 h-4 w-4" /> Add New Card
-          </Button>
-        </div>
-
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>
-                {editingId ? "Edit Card Data" : "Add New Card Data"}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  value={newCard.name}
-                  onChange={(e) =>
-                    setNewCard({ ...newCard, name: e.target.value })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="type" className="text-right">
-                  Type
-                </Label>
-                <Select
-                  value={newCard.type}
-                  onValueChange={(value: "student" | "faculty") =>
-                    setNewCard({ ...newCard, type: value })
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="faculty">Faculty</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="cardNumber" className="text-right">
-                  Card Number
-                </Label>
-                <Input
-                  id="cardNumber"
-                  value={newCard.cardNumber}
-                  onChange={(e) =>
-                    setNewCard({ ...newCard, cardNumber: e.target.value })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="department" className="text-right">
-                  Department
-                </Label>
-                <Input
-                  id="department"
-                  value={newCard.department}
-                  onChange={(e) =>
-                    setNewCard({ ...newCard, department: e.target.value })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-            </div>
-            <Button
-              onClick={editingId ? handleUpdate : handleAdd}
-              className="w-full"
-            >
-              {editingId ? "Update" : "Add"}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image URL</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="allowAll"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Allow All</FormLabel>
+                    <FormDescription>
+                      Check this if the announcement is for all colleges
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="specificCollege"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Specific College</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a college" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="engineering">Engineering</SelectItem>
+                      <SelectItem value="science">Science</SelectItem>
+                      <SelectItem value="arts">Arts</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="excludeCollege"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Exclude College</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a college to exclude" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="engineering">Engineering</SelectItem>
+                      <SelectItem value="science">Science</SelectItem>
+                      <SelectItem value="arts">Arts</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="order"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Order</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseInt(e.target.value, 10))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
-          </DialogContent>
-        </Dialog>
-
-        <div className="rounded-md border border-[#e2e8f0] bg-white overflow-hidden">
-          <Table>
-            <TableHeader className="bg-[#f1f5f9]">
-              <TableRow>
-                <TableHead className="w-[200px] text-[#1e293b]">Name</TableHead>
-                <TableHead className="text-[#1e293b]">Type</TableHead>
-                <TableHead className="text-[#1e293b]">Card Number</TableHead>
-                <TableHead className="hidden md:table-cell text-[#1e293b]">
-                  Department
-                </TableHead>
-                <TableHead className="text-right text-[#1e293b]">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {cardData.map((card) => (
-                <TableRow key={card.id} className="hover:bg-[#f1f5f9]">
-                  <TableCell className="font-medium text-[#1e293b]">
-                    {card.name}
-                  </TableCell>
-                  <TableCell className="text-[#1e293b]">{card.type}</TableCell>
-                  <TableCell className="text-[#1e293b]">
-                    {card.cardNumber}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-[#1e293b]">
-                    {card.department}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="text-[#3b82f6] hover:text-[#2563eb]"
-                        onClick={() => handleEdit(card.id)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="text-[#ef4444] hover:text-[#dc2626]"
-                        onClick={() => handleDelete(card.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
