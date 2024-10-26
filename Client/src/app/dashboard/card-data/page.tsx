@@ -1,10 +1,35 @@
 "use client";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Pencil, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-import { useState } from "react";
+type Announcement = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  allowAll: boolean;
+  specificCollege: string | null;
+  excludeCollege: string | null;
+  order: number;
+};
+
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,6 +56,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -44,12 +71,20 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function TechUniversityForm() {
+type TechUniversityFormProps = {
+  initialData?: Announcement | null;
+  onSubmit: (data: FormValues) => void;
+};
+
+const TechUniversityForm = ({
+  initialData,
+  onSubmit,
+}: TechUniversityFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       title: "Welcome to Tech University",
       description:
         "Discover the latest updates and courses offered at Tech University.",
@@ -61,13 +96,10 @@ export default function TechUniversityForm() {
     },
   });
 
-  const onSubmit = async (data: FormValues) => {
+  const handleSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log(data);
+    await onSubmit(data);
     setIsSubmitting(false);
-    // Here you would typically send the data to your backend
   };
 
   return (
@@ -216,5 +248,116 @@ export default function TechUniversityForm() {
         </Form>
       </CardContent>
     </Card>
+  );
+};
+
+const mockAnnouncements: Announcement[] = [
+  {
+    id: "1",
+    title: "Welcome to Tech University",
+    description:
+      "Discover the latest updates and courses offered at Tech University.",
+    imageUrl: "https://example.com/images/welcome-tech-university.jpg",
+    allowAll: true,
+    specificCollege: null,
+    excludeCollege: null,
+    order: 1,
+  },
+  {
+    id: "2",
+    title: "New Computer Science Course",
+    description: "Enroll in our new AI and Machine Learning course.",
+    imageUrl: "https://example.com/images/cs-course.jpg",
+    allowAll: false,
+    specificCollege: "engineering",
+    excludeCollege: null,
+    order: 2,
+  },
+];
+
+export function TechUniversityTable() {
+  const [announcements, setAnnouncements] =
+    useState<Announcement[]>(mockAnnouncements);
+  const [editingAnnouncement, setEditingAnnouncement] =
+    useState<Announcement | null>(null);
+
+  const handleEdit = (announcement: Announcement) => {
+    setEditingAnnouncement(announcement);
+  };
+
+  const handleDelete = (id: string) => {
+    setAnnouncements(announcements.filter((a) => a.id !== id));
+  };
+
+  const handleSave = (updatedAnnouncement: Announcement) => {
+    setAnnouncements(
+      announcements.map((a) =>
+        a.id === updatedAnnouncement.id ? updatedAnnouncement : a
+      )
+    );
+    setEditingAnnouncement(null);
+  };
+
+  return (
+    <div className="container mx-auto py-10">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>Allow All</TableHead>
+            <TableHead>Specific College</TableHead>
+            <TableHead>Exclude College</TableHead>
+            <TableHead>Order</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {announcements.map((announcement) => (
+            <TableRow key={announcement.id}>
+              <TableCell>{announcement.title}</TableCell>
+              <TableCell>{announcement.description}</TableCell>
+              <TableCell>{announcement.allowAll ? "Yes" : "No"}</TableCell>
+              <TableCell>{announcement.specificCollege || "N/A"}</TableCell>
+              <TableCell>{announcement.excludeCollege || "N/A"}</TableCell>
+              <TableCell>{announcement.order}</TableCell>
+              <TableCell>
+                <div className="flex space-x-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleEdit(announcement)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Edit Announcement</DialogTitle>
+                      </DialogHeader>
+                      <TechUniversityForm
+                        initialData={editingAnnouncement}
+                        onSubmit={(data: FormValues) =>
+                          handleSave({ ...data, id: announcement.id })
+                        }
+                      />
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleDelete(announcement.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
