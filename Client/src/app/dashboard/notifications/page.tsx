@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { useState } from "react";
 import { Bell, Trash2, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,61 +55,70 @@ export default function NotificationsPage() {
   const getNotificationIcon = (type: Notification["type"]) => {
     switch (type) {
       case "success":
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />;
       case "warning":
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+        return (
+          <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+        );
       default:
-        return <Bell className="h-5 w-5 text-primary" />;
+        return <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />;
     }
   };
 
   return (
-    <Card className="w-full bg-white shadow-md">
-      <CardHeader className="space-y-1 bg-gray-50 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl text-gray-800">
+    <Card className="w-full">
+      <CardHeader className="space-y-1">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
             Notifications
+            <Badge
+              variant="secondary"
+              className="ml-2 bg-primary/10 text-primary text-xs md:text-sm"
+            >
+              {notifications.length} New
+            </Badge>
           </CardTitle>
-          <Badge variant="secondary" className="bg-primary/10 text-primary">
-            {notifications.length} New
-          </Badge>
         </div>
-        <CardDescription className="text-gray-600">
-          View and manage your notifications.
+        <CardDescription className="text-sm md:text-base text-gray-400">
+          View and manage your system notifications.
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6">
+      <CardContent>
         {notifications.length === 0 ? (
           <div className="text-center py-8">
-            <Bell className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-2 text-lg font-medium text-gray-800">
+            <Bell className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-400" />
+            <p className="mt-2 text-base sm:text-lg font-medium text-gray-800">
               No notifications
             </p>
-            <p className="text-sm text-gray-600">You&aposre all caught up!</p>
+            <p className="text-xs sm:text-sm text-gray-400">
+              You&apos;re all caught up!
+            </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className="flex items-start justify-between p-4 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors"
+                className="flex items-start justify-between p-3 sm:p-4 rounded-lg border hover:bg-gray-50/50 transition-colors"
               >
-                <div className="flex items-start space-x-4">
+                <div className="flex items-start space-x-3 sm:space-x-4">
                   {getNotificationIcon(notification.type)}
                   <div>
-                    <p className="font-medium text-gray-800">
+                    <p className="text-sm sm:text-base font-medium">
                       {notification.message}
                     </p>
-                    <p className="text-sm text-gray-600">{notification.date}</p>
+                    <p className="text-xs sm:text-sm text-gray-400">
+                      {notification.date}
+                    </p>
                   </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(notification.id)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="h-8 w-8"
                 >
-                  <Trash2 className="h-4 w-4 text-red-500" />
+                  <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </div>
             ))}

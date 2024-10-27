@@ -200,8 +200,8 @@ return (
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
-              variant="outline"
-              className="w-full sm:w-auto"
+              variant="secondary"
+              className="w-full sm:w-aut"
               onClick={exportToCSV}
             >
               Export CSV

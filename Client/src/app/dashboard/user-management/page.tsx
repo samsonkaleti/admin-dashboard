@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -69,14 +68,14 @@ export default function UserManagementPage() {
     active: true,
   });
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [isEditMode, setIsEditMode] = useState(false); // Track add or edit mode
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // Control dialog visibility
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const resetForm = () => {
     setNewUser({ name: "", email: "", role: "uploader", active: true });
     setEditingId(null);
     setIsEditMode(false);
-    setIsDialogOpen(false); // Close dialog after reset
+    setIsDialogOpen(false);
   };
 
   const handleAdd = () => {
@@ -94,8 +93,8 @@ export default function UserManagementPage() {
         active: userToEdit.active,
       });
       setEditingId(id);
-      setIsEditMode(true); // Enter edit mode
-      setIsDialogOpen(true); // Open dialog for editing
+      setIsEditMode(true);
+      setIsDialogOpen(true);
     }
   };
 
@@ -123,29 +122,28 @@ export default function UserManagementPage() {
   return (
     <Card className="w-full">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-blue-500">User Management</CardTitle>
-        <CardDescription className="text-blue-400">Manage admin and uploader accounts.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
+            User Management
+          </CardTitle>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button
-                className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600"
-                onClick={() => resetForm()} // Reset form when adding a new user
-              >
+              <Button className="w-full sm:w-auto" onClick={resetForm}>
                 <Plus className="mr-2 h-4 w-4" /> Add New User
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>
+                <DialogTitle className="text-lg text-secondary">
                   {isEditMode ? "Edit User" : "Add New User"}
                 </DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="name"
+                    className="text-sm font-medium "
+                  >
                     Name
                   </Label>
                   <Input
@@ -154,11 +152,13 @@ export default function UserManagementPage() {
                     onChange={(e) =>
                       setNewUser({ ...newUser, name: e.target.value })
                     }
-                    className="col-span-3"
                   />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right">
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="email"
+                    className="text-sm font-medium "
+                  >
                     Email
                   </Label>
                   <Input
@@ -168,11 +168,13 @@ export default function UserManagementPage() {
                     onChange={(e) =>
                       setNewUser({ ...newUser, email: e.target.value })
                     }
-                    className="col-span-3"
                   />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="role" className="text-right">
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="role"
+                    className="text-sm font-medium"
+                  >
                     Role
                   </Label>
                   <Select
@@ -181,7 +183,7 @@ export default function UserManagementPage() {
                       setNewUser({ ...newUser, role: value })
                     }
                   >
-                    <SelectTrigger className="col-span-3">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -190,10 +192,7 @@ export default function UserManagementPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="active" className="text-right">
-                    Active
-                  </Label>
+                <div className="flex items-center space-x-2">
                   <Switch
                     id="active"
                     checked={newUser.active}
@@ -201,25 +200,35 @@ export default function UserManagementPage() {
                       setNewUser({ ...newUser, active: checked })
                     }
                   />
+                  <Label
+                    htmlFor="active"
+                    className="text-sm font-medium "
+                  >
+                    Active Status
+                  </Label>
                 </div>
               </div>
               <Button
                 onClick={isEditMode ? handleUpdate : handleAdd}
                 className="w-full"
               >
-                {isEditMode ? "Update" : "Add"}
+                {isEditMode ? "Update User" : "Add User"}
               </Button>
             </DialogContent>
           </Dialog>
         </div>
-
-        <div className="rounded-md border">
+        <CardDescription className="text-sm md:text-base text-gray-400">
+          Manage admin and uploader accounts with role-based access control.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead className="hidden sm:table-cell">Email</TableHead>
+                <TableHead className="hidden md:table-cell">Role</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -227,30 +236,45 @@ export default function UserManagementPage() {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
+                  <TableCell className="font-medium">
+                    <div>{user.name}</div>
+                    <div className="text-sm text-muted-foreground sm:hidden">
+                      {user.email}
+                    </div>
+                    <div className="text-sm text-muted-foreground md:hidden sm:block">
+                      {user.role}
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {user.email}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {user.role}
+                  </TableCell>
                   <TableCell>
                     <Switch
                       checked={user.active}
                       onCheckedChange={() => handleToggleActive(user.id)}
+                      className="h-5 w-9"
                     />
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
+                    <div className="flex justify-end gap-2">
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleEdit(user.id)}
+                        className="h-8 w-8"
                       >
-                        <Pencil className="h-4 w-4 text-blue-500" />
+                        <Pencil className="h-4 w-4 text-secondary" />
                       </Button>
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleDelete(user.id)}
+                        className="h-8 w-8"
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
                   </TableCell>

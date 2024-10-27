@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Pencil, Trash2, Download, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -25,6 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 type Internship = {
   id: number;
@@ -55,8 +57,7 @@ export default function InternshipPage() {
     Omit<Internship, "id" | "applicants">
   >({ company: "", position: "", description: "" });
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [selectedInternship, setSelectedInternship] =
-    useState<Internship | null>(null);
+  const [selectedInternship, setSelectedInternship] = useState<Internship | null>(null);
 
   const handleAdd = () => {
     setInternships([
@@ -67,9 +68,7 @@ export default function InternshipPage() {
   };
 
   const handleEdit = (id: number) => {
-    const internshipToEdit = internships.find(
-      (internship) => internship.id === id
-    );
+    const internshipToEdit = internships.find((internship) => internship.id === id);
     if (internshipToEdit) {
       setNewInternship({
         company: internshipToEdit.company,
@@ -118,72 +117,73 @@ export default function InternshipPage() {
   };
 
   return (
-    <Card className="w-full bg-white shadow-lg rounded-lg">
+    <Card className="w-full">
       <CardHeader className="space-y-1">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-3xl font-bold text-blue-500">
-            Internship/Placement Management
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
+            Internship Management
           </CardTitle>
           <Button
-            className="bg-blue-600 hover:bg-blue-500 text-white"
             onClick={handleExport}
+            className="w-full sm:w-auto"
           >
             <Download className="mr-2 h-4 w-4" /> Export Report
           </Button>
         </div>
-        <CardDescription className="text-blue-400">
-          Manage internship opportunities and view applicants.
+        <CardDescription className="text-sm md:text-base text-gray-400">
+          Manage internship opportunities and track applicant progress.
         </CardDescription>
       </CardHeader>
+
       <CardContent>
+        {/* Add/Edit Form Section */}
+        
 
-
-        <div className="rounded-md border border-gray-300 bg-gray-50">
+        {/* Table Section */}
+        <div className="rounded-md border overflow-x-auto">
           <Table>
-            <TableHeader className="bg-gray-100">
+            <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px] text-gray-700">
-                  Company
-                </TableHead>
-                <TableHead className="text-gray-700">Position</TableHead>
-                <TableHead className="hidden md:table-cell text-gray-700">
-                  Description
-                </TableHead>
-                <TableHead className="text-gray-700">Applicants</TableHead>
-                <TableHead className="text-right text-gray-700">
-                  Actions
-                </TableHead>
+                <TableHead>Company</TableHead>
+                <TableHead className="hidden sm:table-cell">Position</TableHead>
+                <TableHead className="hidden md:table-cell">Description</TableHead>
+                <TableHead>Applicants</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {internships.map((internship, index) => (
-                <TableRow
-                  key={internship.id}
-                  className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                >
-                  <TableCell className="font-medium text-gray-800">
-                    {internship.company}
+              {internships.map((internship) => (
+                <TableRow key={internship.id}>
+                  <TableCell className="font-medium">
+                    <div>{internship.company}</div>
+                    <div className="text-sm text-muted-foreground sm:hidden">
+                      {internship.position}
+                    </div>
                   </TableCell>
-                  <TableCell>{internship.position}</TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {internship.position}
+                  </TableCell>
                   <TableCell className="hidden md:table-cell">
                     {internship.description}
                   </TableCell>
                   <TableCell>{internship.applicants.length}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
+                    <div className="flex justify-end gap-2">
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleEdit(internship.id)}
+                        className="h-8 w-8"
                       >
-                        <Pencil className="h-4 w-4 text-blue-500" />
+                        <Pencil className="h-4 w-4 text-secondary" />
                       </Button>
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleDelete(internship.id)}
+                        className="h-8 w-8"
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                       <Dialog>
                         <DialogTrigger asChild>
@@ -191,26 +191,31 @@ export default function InternshipPage() {
                             variant="outline"
                             size="icon"
                             onClick={() => setSelectedInternship(internship)}
+                            className="h-8 w-8"
                           >
-                            <Users className="h-4 w-4" />
+                            <Users className="h-4 w-4 text-primary" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px] p-6">
+                        <DialogContent className="sm:max-w-[425px]">
                           <DialogHeader>
-                            <DialogTitle>
+                            <DialogTitle className="text-lg">
                               Applicants for {selectedInternship?.position}
                             </DialogTitle>
                           </DialogHeader>
                           <div className="py-4">
-                            <h3 className="font-semibold mb-2">Applicants:</h3>
-                            <ul className="list-disc pl-5 space-y-1">
-                              {selectedInternship?.applicants.map(
-                                (applicant, index) => (
-                                  <li key={index} className="text-gray-800">
-                                    {applicant}
-                                  </li>
-                                )
-                              )}
+                            <h3 className="font-medium text-base mb-3">
+                              Current Applicants
+                            </h3>
+                            <ul className="space-y-2">
+                              {selectedInternship?.applicants.map((applicant, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-center gap-2"
+                                >
+                                  <Users className="h-4 w-4 text-muted-foreground" />
+                                  {applicant}
+                                </li>
+                              ))}
                             </ul>
                           </div>
                         </DialogContent>
