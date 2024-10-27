@@ -19,7 +19,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -89,13 +88,15 @@ export default function PrintStationPage() {
   return (
     <Card className="w-full">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-blue-500">Print Station Management</CardTitle>
-        <CardDescription className="text-blue-400">
+        <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
+          Print Station Management
+        </CardTitle>
+        <CardDescription className="text-sm md:text-base text-gray-500">
           Manage print requests, approve orders, and set delivery dates.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -119,7 +120,7 @@ export default function PrintStationPage() {
                     <Badge
                       variant={
                         order.status === "approved"
-                          ? "secondary" 
+                          ? "secondary"
                           : order.status === "rejected"
                           ? "destructive"
                           : "default"
@@ -128,7 +129,6 @@ export default function PrintStationPage() {
                       {order.status}
                     </Badge>
                   </TableCell>
-
                   <TableCell className="hidden md:table-cell">
                     {order.deliveryDate || "Not set"}
                   </TableCell>
@@ -141,7 +141,7 @@ export default function PrintStationPage() {
                             size="icon"
                             onClick={() => handleApprove(order.id)}
                           >
-                            <Check className="h-4 w-4 text-green-500" />
+                            <Check className="h-4 w-4 text-primary" />
                           </Button>
                           <Button
                             variant="outline"

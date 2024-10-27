@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
@@ -59,32 +60,29 @@ export default function PDFUploadPage() {
       fileName: "quantum_mechanics_2022.pdf",
     },
   ]);
-  
+
   const [newUpload, setNewUpload] = useState<Omit<PDFUpload, "id">>({
     year: "",
     course: "",
     subject: "",
     fileName: "",
   });
-  
+
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Open the dialog for a new entry and reset the form
   const handleNew = () => {
     setNewUpload({ year: "", course: "", subject: "", fileName: "" });
-    setEditingId(null); // Make sure editing mode is off
+    setEditingId(null);
     setIsDialogOpen(true);
   };
 
-  // Add new PDF upload
   const handleAdd = () => {
     setPDFUploads([...pdfUploads, { ...newUpload, id: Date.now() }]);
     setNewUpload({ year: "", course: "", subject: "", fileName: "" });
-    setIsDialogOpen(false); // Close dialog after adding
+    setIsDialogOpen(false);
   };
 
-  // Open the dialog for editing and load the selected entry
   const handleEdit = (id: number) => {
     const uploadToEdit = pdfUploads.find((upload) => upload.id === id);
     if (uploadToEdit) {
@@ -95,11 +93,10 @@ export default function PDFUploadPage() {
         fileName: uploadToEdit.fileName,
       });
       setEditingId(id);
-      setIsDialogOpen(true); // Open dialog when editing
+      setIsDialogOpen(true);
     }
   };
 
-  // Update existing PDF upload
   const handleUpdate = () => {
     setPDFUploads(
       pdfUploads.map((upload) =>
@@ -108,7 +105,7 @@ export default function PDFUploadPage() {
     );
     setNewUpload({ year: "", course: "", subject: "", fileName: "" });
     setEditingId(null);
-    setIsDialogOpen(false); // Close dialog after updating
+    setIsDialogOpen(false);
   };
 
   const handleDelete = (id: number) => {
@@ -116,148 +113,184 @@ export default function PDFUploadPage() {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-blue-500">PDF Upload by Year</CardTitle>
-        <CardDescription className="text-blue-400">
-          Manage PDF uploads for different academic years, courses, and subjects.
+    <Card className="w-full max-w-[95vw] mx-auto">
+      <CardHeader className="space-y-2">
+        <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
+          PDF Upload Manager
+        </CardTitle>
+        <CardDescription className="text-sm md:text-base text-muted-foreground">
+          Organize and manage PDF uploads across different academic years,
+          courses, and subjects
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="mb-4">
+      <CardContent className="space-y-6">
+        <div className="flex justify-between items-center flex-wrap gap-4">
           <Button
-            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600"
-            onClick={handleNew} // Trigger the new form
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
+            onClick={handleNew}
           >
-            <FileUp className="mr-2 h-4 w-4" /> Upload New PDF
+            <FileUp className="mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Upload New PDF</span>
+            <span className="sm:hidden">Upload</span>
           </Button>
-
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingId ? "Edit PDF Upload" : "Upload New PDF"}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="year" className="text-right">
-                    Year
-                  </Label>
-                  <Select
-                    value={newUpload.year}
-                    onValueChange={(value) =>
-                      setNewUpload({ ...newUpload, year: value })
-                    }
-                  >
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["2022", "2023", "2024"].map((year) => (
-                        <SelectItem key={year} value={year}>
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="course" className="text-right">
-                    Course
-                  </Label>
-                  <Input
-                    id="course"
-                    value={newUpload.course}
-                    onChange={(e) =>
-                      setNewUpload({ ...newUpload, course: e.target.value })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="subject" className="text-right">
-                    Subject
-                  </Label>
-                  <Input
-                    id="subject"
-                    value={newUpload.subject}
-                    onChange={(e) =>
-                      setNewUpload({ ...newUpload, subject: e.target.value })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="file" className="text-right">
-                    File
-                  </Label>
-                  <Input
-                    id="file"
-                    type="file"
-                    accept=".pdf"
-                    onChange={(e) =>
-                      setNewUpload({
-                        ...newUpload,
-                        fileName: e.target.files?.[0]?.name || "",
-                      })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={editingId ? handleUpdate : handleAdd}
-                className="w-full"
-              >
-                {editingId ? "Update" : "Upload"}
-              </Button>
-            </DialogContent>
-          </Dialog>
         </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Year</TableHead>
-                <TableHead>Course</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead className="hidden md:table-cell">File Name</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pdfUploads.map((upload) => (
-                <TableRow key={upload.id}>
-                  <TableCell>{upload.year}</TableCell>
-                  <TableCell>{upload.course}</TableCell>
-                  <TableCell>{upload.subject}</TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {upload.fileName}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEdit(upload.id)}
-                      >
-                        <Pencil className="h-4 w-4 text-blue-500" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleDelete(upload.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </TableCell>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-primary">
+                {editingId ? "Edit PDF Upload" : "Upload New PDF"}
+              </DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                {editingId
+                  ? "Modify the existing PDF details"
+                  : "Add a new PDF to the collection"}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label
+                  htmlFor="year"
+                  className="text-right text-sm font-medium"
+                >
+                  Year
+                </Label>
+                <Select
+                  value={newUpload.year}
+                  onValueChange={(value) =>
+                    setNewUpload({ ...newUpload, year: value })
+                  }
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["2022", "2023", "2024"].map((year) => (
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label
+                  htmlFor="course"
+                  className="text-right text-sm font-medium"
+                >
+                  Course
+                </Label>
+                <Input
+                  id="course"
+                  value={newUpload.course}
+                  onChange={(e) =>
+                    setNewUpload({ ...newUpload, course: e.target.value })
+                  }
+                  className="col-span-3"
+                  placeholder="Enter course name"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label
+                  htmlFor="subject"
+                  className="text-right text-sm font-medium"
+                >
+                  Subject
+                </Label>
+                <Input
+                  id="subject"
+                  value={newUpload.subject}
+                  onChange={(e) =>
+                    setNewUpload({ ...newUpload, subject: e.target.value })
+                  }
+                  className="col-span-3"
+                  placeholder="Enter subject name"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label
+                  htmlFor="file"
+                  className="text-right text-sm font-medium"
+                >
+                  File
+                </Label>
+                <Input
+                  id="file"
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) =>
+                    setNewUpload({
+                      ...newUpload,
+                      fileName: e.target.files?.[0]?.name || "",
+                    })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <Button
+              onClick={editingId ? handleUpdate : handleAdd}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {editingId ? "Update PDF" : "Upload PDF"}
+            </Button>
+          </DialogContent>
+        </Dialog>
+
+        <div className="rounded-md border border-border">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-semibold">Year</TableHead>
+                  <TableHead className="font-semibold hidden sm:table-cell">
+                    Course
+                  </TableHead>
+                  <TableHead className="font-semibold">Subject</TableHead>
+                  <TableHead className="font-semibold hidden lg:table-cell">
+                    File Name
+                  </TableHead>
+                  <TableHead className="text-right font-semibold">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {pdfUploads.map((upload) => (
+                  <TableRow key={upload.id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium">{upload.year}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {upload.course}
+                    </TableCell>
+                    <TableCell>{upload.subject}</TableCell>
+                    <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
+                      {upload.fileName}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleEdit(upload.id)}
+                          className="h-8 w-8 hover:bg-primary/10"
+                        >
+                          <Pencil className="h-4 w-4 text-primary" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDelete(upload.id)}
+                          className="h-8 w-8 hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </CardContent>
     </Card>

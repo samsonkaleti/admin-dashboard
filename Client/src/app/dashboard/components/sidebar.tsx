@@ -1,14 +1,11 @@
-'use client'
-
+"use client";
 
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area"; 
-import Image from "next/image"; 
-import logo from '../../../utils/logo.png'
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   LayoutDashboard,
   GraduationCap,
@@ -73,50 +70,36 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <nav className="w-64 border-r bg-gray-50 dark:bg-gray-800 shadow-md">
-      <div className="flex h-14 items-center border-b px-4 py-2">
-        <Link href="/" className="flex items-center space-x-2">
-          <Image
-            src={logo}
-            alt="Campusify Logo"
-            width={150}
-            height={23}
-            className="h-auto w-auto"
-          />
-        </Link>
-      </div>
-      <ScrollArea className="h-full ">
-        <div className="space-y-6 py-4">
-          <div className="px-3 py-2">
-            {/* <h2 className="mb-4 px-4 text-xl font-bold tracking-tight text-gray-800 dark:text-gray-200">
-              Admin Dashboard
-            </h2> */}
-            <div className="space-y-1">
-              {sidebarNavItems.map((item) => (
+    <ScrollArea className="h-screen">
+      {" "}
+      {/* Full height scroll area */}
+      <div className="space-y-4 py-8">
+        <div className="px-3 py-2">
+          <div className="space-y-1">
+            {sidebarNavItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
                 <Button
                   key={item.href}
-                  variant={pathname === item.href ? "secondary" : "ghost"}
+                  variant={isActive ? "secondary" : "ghost"}
                   className={cn(
-                    "w-full justify-start text-left font-medium",
-                    pathname === item.href
-                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100"
-                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                    "w-full justify-start",
+                    isActive
+                      ? "bg-secondary hover:bg-secondary/80"
+                      : "hover:bg-secondary/10"
                   )}
                   asChild
                 >
-                  <Link
-                    href={item.href}
-                    className="flex items-center py-2 px-4"
-                  >
-                    <item.icon className="mr-3 h-5 w-5" />
-                    {item.title}
+                  <Link href={item.href} className="flex items-center">
+                    <item.icon className="mr-2 h-4 w-4" />
+                    <span className="text-sm font-medium">{item.title}</span>
                   </Link>
                 </Button>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
-      </ScrollArea>
-    </nav>
+      </div>
+    </ScrollArea>
   );
 }

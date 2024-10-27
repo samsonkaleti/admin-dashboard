@@ -47,14 +47,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useCards, useCreateAnnouncement, useDeleteAnnouncement, useUpdateAnnouncement } from "@/app/hooks/cardData/useCardData";
-const   API_BASE_URL = 'http://localhost:5001/api';
-// Types
+import {
+  useCards,
+  useCreateAnnouncement,
+  useDeleteAnnouncement,
+  useUpdateAnnouncement,
+} from "@/app/hooks/cardData/useCardData";
+
+// Types remain the same
 type Announcement = {
   id: string;
   title: string;
   description: string;
-  imageUrl: string; 
+  imageUrl: string;
   allowAll: boolean;
   specificCollege: string | null;
   excludeCollege: string | null;
@@ -63,7 +68,6 @@ type Announcement = {
 
 type AnnouncementInput = Omit<Announcement, "id">;
 
-// Form schema
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -76,14 +80,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-
-// TechUniversityForm component
-type TechUniversityFormProps = {
+function TechUniversityForm({
+  initialData,
+  onSubmit,
+}: {
   initialData?: Announcement | null;
   onSubmit: (data: FormValues) => void;
-};
-
-function TechUniversityForm({ initialData, onSubmit }: { initialData?: Announcement | null; onSubmit: (data: FormValues) => void }) {
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -105,86 +108,86 @@ function TechUniversityForm({ initialData, onSubmit }: { initialData?: Announcem
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Tech University Form</CardTitle>
-        <CardDescription>Enter details for the Tech University announcement</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Image URL</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="allowAll"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Allow All</FormLabel>
-                    <FormDescription>
-                      Check this if the announcement is for all colleges
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
+    <div className="w-full max-w-lg mx-auto">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3">
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Title</FormLabel>
+                <FormControl>
+                  <Input {...field} className="text-sm h-8" />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    className="text-sm min-h-[60px] max-h-[100px]"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Image URL</FormLabel>
+                <FormControl>
+                  <Input {...field} className="text-sm h-8" />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="allowAll"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-2 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="mt-1"
+                  />
+                </FormControl>
+                <div className="space-y-0.5">
+                  <FormLabel className="text-sm">Allow All</FormLabel>
+                  <FormDescription className="text-xs">
+                    Check this if the announcement is for all colleges
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
+          <div className="grid grid-cols-2 gap-3">
             <FormField
               control={form.control}
               name="specificCollege"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Specific College</FormLabel>
+                  <FormLabel className="text-sm">Specific College</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value || undefined}
                   >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a college" />
+                      <SelectTrigger className="text-sm h-8">
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -193,7 +196,7 @@ function TechUniversityForm({ initialData, onSubmit }: { initialData?: Announcem
                       <SelectItem value="arts">Arts</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -202,14 +205,14 @@ function TechUniversityForm({ initialData, onSubmit }: { initialData?: Announcem
               name="excludeCollege"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Exclude College</FormLabel>
+                  <FormLabel className="text-sm">Exclude College</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value || undefined}
                   >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a college to exclude" />
+                      <SelectTrigger className="text-sm h-8">
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -218,40 +221,47 @@ function TechUniversityForm({ initialData, onSubmit }: { initialData?: Announcem
                       <SelectItem value="arts">Arts</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="order"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Order</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+          </div>
+          <FormField
+            control={form.control}
+            name="order"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Order</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseInt(e.target.value, 10))
+                    }
+                    className="text-sm h-8"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            size="sm"
+            className="w-auto"
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 }
-
-// TechUniversityTable component
 export default function TechUniversityTable() {
-  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [editingAnnouncement, setEditingAnnouncement] =
+    useState<Announcement | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const { data: cards, isLoading, error } = useCards();
@@ -289,89 +299,117 @@ export default function TechUniversityTable() {
   };
 
   const handleAdd = async (newAnnouncement: AnnouncementInput) => {
-  try {
-    await createAnnouncementMutation.mutateAsync(newAnnouncement);
-    setIsAddDialogOpen(false);
-  } catch (error) {
-    console.error("Error adding announcement:", error);
-  }
-};
+    try {
+      await createAnnouncementMutation.mutateAsync(newAnnouncement);
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding announcement:", error);
+    }
+  };
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Cards</h2>
+    <div className="container mx-auto px-4 py-6 md:py-10 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h2 className="text-xl md:text-2xl lg:text-3xl text-primary">Cards</h2>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button size="sm" className="w-auto">
               <Plus className="mr-2 h-4 w-4" /> Add Card Data
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add New Announcement</DialogTitle>
+          <DialogContent className="w-full max-w-lg">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-lg">
+                Add New Announcement
+              </DialogTitle>
             </DialogHeader>
             <TechUniversityForm onSubmit={handleAdd} />
           </DialogContent>
         </Dialog>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Allow All</TableHead>
-            <TableHead>Specific College</TableHead>
-            <TableHead>Exclude College</TableHead>
-            <TableHead>Order</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {cards?.map((announcement: Announcement) => (
-            <TableRow key={announcement.id}>
-              <TableCell>{announcement.title}</TableCell>
-              <TableCell>{announcement.description}</TableCell>
-              <TableCell>{announcement.allowAll ? "Yes" : "No"}</TableCell>
-              <TableCell>{announcement.specificCollege || "N/A"}</TableCell>
-              <TableCell>{announcement.excludeCollege || "N/A"}</TableCell>
-              <TableCell>{announcement.order}</TableCell>
-              <TableCell>
-                <div className="flex space-x-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEdit(announcement)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Edit Announcement</DialogTitle>
-                      </DialogHeader>
-                      <TechUniversityForm
-                        initialData={editingAnnouncement}
-                        onSubmit={handleSave}
-                      />
-                    </DialogContent>
-                  </Dialog>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleDelete(announcement.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                
-                  </Button>
-                </div>
-              </TableCell>
+
+      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xs whitespace-nowrap">Title</TableHead>
+              <TableHead className="text-xs whitespace-nowrap">
+                Description
+              </TableHead>
+              <TableHead className="text-xs whitespace-nowrap">
+                Allow All
+              </TableHead>
+              <TableHead className="text-xs whitespace-nowrap">
+                Specific College
+              </TableHead>
+              <TableHead className="text-xs whitespace-nowrap">
+                Exclude College
+              </TableHead>
+              <TableHead className="text-xs whitespace-nowrap">Order</TableHead>
+              <TableHead className="text-xs whitespace-nowrap">
+                Actions
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {cards?.map((announcement: Announcement) => (
+              <TableRow key={announcement.id}>
+                <TableCell className="text-xs font-medium">
+                  {announcement.title}
+                </TableCell>
+                <TableCell className="text-xs max-w-[200px] truncate">
+                  {announcement.description}
+                </TableCell>
+                <TableCell className="text-xs">
+                  {announcement.allowAll ? "Yes" : "No"}
+                </TableCell>
+                <TableCell className="text-xs">
+                  {announcement.specificCollege || "N/A"}
+                </TableCell>
+                <TableCell className="text-xs">
+                  {announcement.excludeCollege || "N/A"}
+                </TableCell>
+                <TableCell className="text-xs">{announcement.order}</TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(announcement)}
+                          className="h-7 w-7"
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="w-full max-w-lg">
+                        <DialogHeader className="mb-4">
+                          <DialogTitle className="text-lg">
+                            Edit Announcement
+                          </DialogTitle>
+                        </DialogHeader>
+                        <TechUniversityForm
+                          initialData={editingAnnouncement}
+                          onSubmit={handleSave}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(announcement.id)}
+                      className="h-7 w-7"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
