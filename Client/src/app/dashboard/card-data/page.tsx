@@ -1,35 +1,11 @@
 "use client";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Pencil, Trash2 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-type Announcement = {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  allowAll: boolean;
-  specificCollege: string | null;
-  excludeCollege: string | null;
-  order: number;
-};
-
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Pencil, Trash2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -50,15 +26,44 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useCards, useCreateAnnouncement, useDeleteAnnouncement, useUpdateAnnouncement } from "@/app/hooks/cardData/useCardData";
+const   API_BASE_URL = 'http://localhost:5001/api';
+// Types
+type Announcement = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string; 
+  allowAll: boolean;
+  specificCollege: string | null;
+  excludeCollege: string | null;
+  order: number;
+};
 
+type AnnouncementInput = Omit<Announcement, "id">;
+
+// Form schema
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -71,24 +76,21 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+
+// TechUniversityForm component
 type TechUniversityFormProps = {
   initialData?: Announcement | null;
   onSubmit: (data: FormValues) => void;
 };
 
-const TechUniversityForm = ({
-  initialData,
-  onSubmit,
-}: TechUniversityFormProps) => {
+function TechUniversityForm({ initialData, onSubmit }: { initialData?: Announcement | null; onSubmit: (data: FormValues) => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
-      title: "Welcome to Tech University",
-      description:
-        "Discover the latest updates and courses offered at Tech University.",
-      imageUrl: "https://example.com/images/welcome-tech-university.jpg",
+      title: "",
+      description: "",
+      imageUrl: "",
       allowAll: true,
       specificCollege: null,
       excludeCollege: null,
@@ -106,13 +108,11 @@ const TechUniversityForm = ({
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Tech University Form</CardTitle>
-        <CardDescription>
-          Enter details for the Tech University announcement
-        </CardDescription>
+        <CardDescription>Enter details for the Tech University announcement</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="title"
@@ -232,9 +232,7 @@ const TechUniversityForm = ({
                     <Input
                       type="number"
                       {...field}
-                      onChange={(e) =>
-                        field.onChange(parseInt(e.target.value, 10))
-                      }
+                      onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
                     />
                   </FormControl>
                   <FormMessage />
@@ -249,57 +247,74 @@ const TechUniversityForm = ({
       </CardContent>
     </Card>
   );
-};
+}
 
-const mockAnnouncements: Announcement[] = [
-  {
-    id: "1",
-    title: "Welcome to Tech University",
-    description:
-      "Discover the latest updates and courses offered at Tech University.",
-    imageUrl: "https://example.com/images/welcome-tech-university.jpg",
-    allowAll: true,
-    specificCollege: null,
-    excludeCollege: null,
-    order: 1,
-  },
-  {
-    id: "2",
-    title: "New Computer Science Course",
-    description: "Enroll in our new AI and Machine Learning course.",
-    imageUrl: "https://example.com/images/cs-course.jpg",
-    allowAll: false,
-    specificCollege: "engineering",
-    excludeCollege: null,
-    order: 2,
-  },
-];
+// TechUniversityTable component
+export default function TechUniversityTable() {
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-export function TechUniversityTable() {
-  const [announcements, setAnnouncements] =
-    useState<Announcement[]>(mockAnnouncements);
-  const [editingAnnouncement, setEditingAnnouncement] =
-    useState<Announcement | null>(null);
+  const { data: cards, isLoading, error } = useCards();
+  const createAnnouncementMutation = useCreateAnnouncement();
+  const updateAnnouncementMutation = useUpdateAnnouncement();
+  const deleteAnnouncementMutation = useDeleteAnnouncement();
 
   const handleEdit = (announcement: Announcement) => {
-    setEditingAnnouncement(announcement);
+    setEditingAnnouncement({
+      ...announcement,
+      imageUrl: announcement.imageUrl || "",
+    });
   };
 
-  const handleDelete = (id: string) => {
-    setAnnouncements(announcements.filter((a) => a.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteAnnouncementMutation.mutateAsync(id);
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
+    }
   };
 
-  const handleSave = (updatedAnnouncement: Announcement) => {
-    setAnnouncements(
-      announcements.map((a) =>
-        a.id === updatedAnnouncement.id ? updatedAnnouncement : a
-      )
-    );
-    setEditingAnnouncement(null);
+  const handleSave = async (updatedAnnouncement: AnnouncementInput) => {
+    try {
+      if (editingAnnouncement) {
+        await updateAnnouncementMutation.mutateAsync({
+          id: editingAnnouncement.id,
+          ...updatedAnnouncement,
+        });
+        setEditingAnnouncement(null);
+      }
+    } catch (error) {
+      console.error("Error updating announcement:", error);
+    }
   };
+
+  const handleAdd = async (newAnnouncement: AnnouncementInput) => {
+  try {
+    await createAnnouncementMutation.mutateAsync(newAnnouncement);
+    setIsAddDialogOpen(false);
+  } catch (error) {
+    console.error("Error adding announcement:", error);
+  }
+};
 
   return (
     <div className="container mx-auto py-10">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Cards</h2>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" /> Add Card Data
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add New Announcement</DialogTitle>
+            </DialogHeader>
+            <TechUniversityForm onSubmit={handleAdd} />
+          </DialogContent>
+        </Dialog>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -313,7 +328,7 @@ export function TechUniversityTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {announcements.map((announcement) => (
+          {cards?.map((announcement: Announcement) => (
             <TableRow key={announcement.id}>
               <TableCell>{announcement.title}</TableCell>
               <TableCell>{announcement.description}</TableCell>
@@ -339,9 +354,7 @@ export function TechUniversityTable() {
                       </DialogHeader>
                       <TechUniversityForm
                         initialData={editingAnnouncement}
-                        onSubmit={(data: FormValues) =>
-                          handleSave({ ...data, id: announcement.id })
-                        }
+                        onSubmit={handleSave}
                       />
                     </DialogContent>
                   </Dialog>
@@ -351,6 +364,7 @@ export function TechUniversityTable() {
                     onClick={() => handleDelete(announcement.id)}
                   >
                     <Trash2 className="h-4 w-4" />
+                
                   </Button>
                 </div>
               </TableCell>
