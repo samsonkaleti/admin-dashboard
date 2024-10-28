@@ -1,5 +1,6 @@
 // server.js
 const collegeRoutes = require('./routes/collegeRoutes'); 
+const pdfRoutes = require('./routes/pdfRoutes')
 const cardRoutes = require('./routes/cardRoute');  // Import the card routes file
 const authRoutes = require('./routes/authRoutes');
 const express = require('express');
@@ -28,6 +29,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use('/api/auth', authRoutes);
 app.use('/api', collegeRoutes);
 app.use('/api', cardRoutes);
+app.use('/api/pdfs', pdfRoutes);
 // Start the server
 app.listen(PORT, () => {
   logger.info(`Server is running on http://localhost:${PORT}`);
