@@ -5,6 +5,20 @@ const router = express.Router();
 /**
  * @swagger
  * /api/cards:
+ *   get:
+ *     summary: Get all cards
+ *     tags: [Cards]
+ *     responses:
+ *       200:
+ *         description: A list of cards
+ *       500:
+ *         description: Error fetching cards
+ */
+router.get('/cards', cardController.getAllCards);
+
+/**
+ * @swagger
+ * /api/cards:
  *   post:
  *     summary: Create a new card
  *     tags: [Cards]

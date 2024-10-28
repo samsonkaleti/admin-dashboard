@@ -1,101 +1,101 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+  import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-type Announcement = {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  allowAll: boolean;
-  specificCollege: string | null;
-  excludeCollege: string | null;
-  order: number;
-};
+  type Card = {
+    id: string;
+    title: string;
+    description: string;
+    imageUrl: string;
+    allowAll: boolean;
+    specificCollege: string | null;
+    excludeCollege: string | null;
+    order: number;
+  };
 
-type AnnouncementInput = Omit<Announcement, 'id'>;
-const API_BASE_URL = 'http://localhost:5001/api';
+  type CardInput = Omit<Card, 'id'>;
+  const API_BASE_URL = 'http://localhost:5001/api';
 
-async function fetchCards() {
-  const response = await fetch(`${API_BASE_URL}/cards`);
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
+  async function fetchCards() {
+    const response = await fetch(`${API_BASE_URL}/cards`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
   }
-  return response.json();
-}
 
-async function createAnnouncement(newAnnouncement: AnnouncementInput) {
-  const response = await fetch(`${API_BASE_URL}/cards`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(newAnnouncement),
-  });
-  if (!response.ok) {
-    throw new Error('Failed to create announcement');
+  async function createCard(newCard: CardInput) {
+    const response = await fetch(`${API_BASE_URL}/cards`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newCard),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create card');
+    }
+    return response.json();
   }
-  return response.json();
-}
 
-async function updateAnnouncement(id: string, updatedAnnouncement: AnnouncementInput) {
-  const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(updatedAnnouncement),
-  });
-  if (!response.ok) {
-    throw new Error('Failed to update announcement');
+  async function updateCard(id: string, updatedCard: CardInput) {
+    const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedCard),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update card');
+    }
+    return response.json();
   }
-  return response.json();
-}
 
-async function deleteAnnouncement(id: string) {
-  const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) {
-    throw new Error('Failed to delete announcement');
+  async function deleteCard(id: string) {
+    const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete card');
+    }
+    return response.json();
   }
-  return response.json();
-}
 
-export function useCards() {
-  return useQuery({
-    queryKey: ['cards'],
-    queryFn: fetchCards,
-  });
-}
+  export function useCards() {
+    return useQuery({
+      queryKey: ['cards'],
+      queryFn: fetchCards,
+    });
+  }
 
-export function useCreateAnnouncement() {
-  const queryClient = useQueryClient();
+  export function useCreateCard() {
+    const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: createAnnouncement,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cards'] });
-    },
-  });
-}
+    return useMutation({
+      mutationFn: createCard,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['cards'] });
+      },
+    });
+  }
 
-export function useUpdateAnnouncement() {
-  const queryClient = useQueryClient();
+  export function useUpdateCard() {
+    const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id, ...data }: Announcement) => updateAnnouncement(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cards'] });
-    },
-  });
-}
+    return useMutation({
+      mutationFn: ({ id, ...data }: Card) => updateCard(id, data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['cards'] });
+      },
+    });
+  }
 
-export function useDeleteAnnouncement() {
-  const queryClient = useQueryClient();
+  export function useDeleteCard() {
+    const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: deleteAnnouncement,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cards'] });
-    },
-  });
-}
+    return useMutation({
+      mutationFn: deleteCard,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['cards'] });
+      },
+    });
+  }

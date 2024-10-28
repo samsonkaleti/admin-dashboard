@@ -27,7 +27,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 // Your routes will be here
 app.use('/api/auth', authRoutes);
 app.use('/api', collegeRoutes);
-app.use("/api/cards", cardRoutes);
+app.use('/api', cardRoutes);
 // Start the server
 app.listen(PORT, () => {
   logger.info(`Server is running on http://localhost:${PORT}`);

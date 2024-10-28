@@ -49,13 +49,13 @@ import {
 } from "@/components/ui/card";
 import {
   useCards,
-  useCreateAnnouncement,
-  useDeleteAnnouncement,
-  useUpdateAnnouncement,
+  useCreateCard,
+  useDeleteCard,
+  useUpdateCard,
 } from "@/app/hooks/cardData/useCardData";
 
 // Types remain the same
-type Announcement = {
+type Card = {
   id: string;
   title: string;
   description: string;
@@ -66,7 +66,7 @@ type Announcement = {
   order: number;
 };
 
-type AnnouncementInput = Omit<Announcement, "id">;
+type CardInput = Omit<Card, "id">;
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -84,7 +84,7 @@ function TechUniversityForm({
   initialData,
   onSubmit,
 }: {
-  initialData?: Announcement | null;
+  initialData?: Card | null;
   onSubmit: (data: FormValues) => void;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -168,7 +168,7 @@ function TechUniversityForm({
                 <div className="space-y-0.5">
                   <FormLabel className="text-sm">Allow All</FormLabel>
                   <FormDescription className="text-xs">
-                    Check this if the announcement is for all colleges
+                    Check this if the Card is for all colleges
                   </FormDescription>
                 </div>
               </FormItem>
@@ -260,53 +260,63 @@ function TechUniversityForm({
   );
 }
 export default function TechUniversityTable() {
-  const [editingAnnouncement, setEditingAnnouncement] =
-    useState<Announcement | null>(null);
+  const [editingCard, setEditingCard] =
+    useState<Card | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const { data: cards, isLoading, error } = useCards();
-  const createAnnouncementMutation = useCreateAnnouncement();
-  const updateAnnouncementMutation = useUpdateAnnouncement();
-  const deleteAnnouncementMutation = useDeleteAnnouncement();
-
-  const handleEdit = (announcement: Announcement) => {
-    setEditingAnnouncement({
-      ...announcement,
-      imageUrl: announcement.imageUrl || "",
+  const createCardMutation = useCreateCard();
+  const updateCardMutation = useUpdateCard();
+  const deleteCardMutation = useDeleteCard();
+  const handleEdit = (card: Card) => {
+    setEditingCard({
+      ...card,
+      imageUrl: card.imageUrl || "",
     });
   };
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteAnnouncementMutation.mutateAsync(id);
+      await deleteCardMutation.mutateAsync(id);
+      // Manually update the cache to remove the deleted card
+      useQueryClient.setQueryData(['cards'], (oldData: Card[] | undefined) => 
+        oldData ? oldData.filter(card => card.id !== id) : []
+      );
     } catch (error) {
-      console.error("Error deleting announcement:", error);
+      console.error("Error deleting Card:", error);
     }
   };
 
-  const handleSave = async (updatedAnnouncement: AnnouncementInput) => {
+  const handleSave = async (updatedCard: CardInput) => {
     try {
-      if (editingAnnouncement) {
-        await updateAnnouncementMutation.mutateAsync({
-          id: editingAnnouncement.id,
-          ...updatedAnnouncement,
+      if (editingCard) {
+        await updateCardMutation.mutateAsync({
+          id: editingCard.id,
+          ...updatedCard,
         });
-        setEditingAnnouncement(null);
+        setEditingCard(null);
+        // Manually update the cache with the updated card
+        useQueryClient.setQueryData(['cards'], (oldData: Card[] | undefined) => 
+          oldData ? oldData.map(card => card.id === editingCard.id ? { ...card, ...updatedCard } : card) : []
+        );
       }
     } catch (error) {
-      console.error("Error updating announcement:", error);
+      console.error("Error updating Card:", error);
     }
   };
 
-  const handleAdd = async (newAnnouncement: AnnouncementInput) => {
+  const handleAdd = async (newCard: CardInput) => {
     try {
-      await createAnnouncementMutation.mutateAsync(newAnnouncement);
+      const addedCard = await createCardMutation.mutateAsync(newCard);
       setIsAddDialogOpen(false);
+      // Manually update the cache with the new card
+      useQueryClient.setQueryData(['cards'], (oldData: Card[] | undefined) => 
+        oldData ? [...oldData, addedCard] : [addedCard]
+      );
     } catch (error) {
-      console.error("Error adding announcement:", error);
+      console.error("Error adding Card:", error);
     }
   };
-
   return (
     <div className="container mx-auto px-4 py-6 md:py-10 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -320,7 +330,7 @@ export default function TechUniversityTable() {
           <DialogContent className="w-full max-w-lg">
             <DialogHeader className="mb-4">
               <DialogTitle className="text-lg">
-                Add New Announcement
+                Add New Card
               </DialogTitle>
             </DialogHeader>
             <TechUniversityForm onSubmit={handleAdd} />
@@ -352,24 +362,24 @@ export default function TechUniversityTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {cards?.map((announcement: Announcement) => (
-              <TableRow key={announcement.id}>
+            {cards?.map((card: Card) => (
+              <TableRow key={card.id}>
                 <TableCell className="text-xs font-medium">
-                  {announcement.title}
+                  {card.title}
                 </TableCell>
                 <TableCell className="text-xs max-w-[200px] truncate">
-                  {announcement.description}
+                  {card.description}
                 </TableCell>
                 <TableCell className="text-xs">
-                  {announcement.allowAll ? "Yes" : "No"}
+                  {card.allowAll ? "Yes" : "No"}
                 </TableCell>
                 <TableCell className="text-xs">
-                  {announcement.specificCollege || "N/A"}
+                  {card.specificCollege || "N/A"}
                 </TableCell>
                 <TableCell className="text-xs">
-                  {announcement.excludeCollege || "N/A"}
+                  {card.excludeCollege || "N/A"}
                 </TableCell>
-                <TableCell className="text-xs">{announcement.order}</TableCell>
+                <TableCell className="text-xs">{card.order}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
                     <Dialog>
@@ -377,20 +387,19 @@ export default function TechUniversityTable() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEdit(announcement)}
-                          className="h-7 w-7"
+                          onClick={() => handleEdit(card._id)}
                         >
-                          <Pencil className="h-3 w-3" />
+                          <Pencil className="h-3 w-3 text-blue-500" />
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="w-full max-w-lg">
                         <DialogHeader className="mb-4">
                           <DialogTitle className="text-lg">
-                            Edit Announcement
+                            Edit card
                           </DialogTitle>
                         </DialogHeader>
                         <TechUniversityForm
-                          initialData={editingAnnouncement}
+                          initialData={editingCard}
                           onSubmit={handleSave}
                         />
                       </DialogContent>
@@ -398,10 +407,9 @@ export default function TechUniversityTable() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(announcement.id)}
-                      className="h-7 w-7"
+                      onClick={() => handleDelete(card._id)}
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-3 w-3 text-red-500" />
                     </Button>
                   </div>
                 </TableCell>
