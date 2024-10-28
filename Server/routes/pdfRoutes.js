@@ -1,15 +1,22 @@
 const express = require('express');
-const pdfController = require('../controllers/pdfController'); // Adjust the path as necessary
-const multer = require('multer');
-const upload = multer(); // Initialize multer to handle file uploads
 const router = express.Router();
+const multer = require('multer');
+const pdfController = require('../controllers/pdfController');
 
-/**
- * @swagger
- * tags:
- *   name: PDFs
- *   description: API to manage PDF uploads
- */
+// Configure multer
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/pdf') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only PDF files are allowed'));
+        }
+    }
+});
 
 /**
  * @swagger
@@ -24,77 +31,49 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               id:
- *                 type: number
+ *               file:
+ *                 type: string
+ *                 format: binary
  *               year:
- *                 type: number
+ *                 type: string
  *               course:
  *                 type: string
  *               subject:
  *                 type: string
- *               fileName:
- *                 type: string
- *               pdfFile:
- *                 type: string
- *                 format: binary
  *     responses:
  *       201:
  *         description: PDF uploaded successfully
  *       400:
- *         description: No file uploaded
+ *         description: Invalid input
  *       500:
- *         description: Error uploading PDF
+ *         description: Server error
  */
-router.post('/', upload.single('pdfFile'), pdfController.createPdf);
+router.post('/', upload.single('file'), pdfController.createPdf);
 
 /**
  * @swagger
  * /api/pdfs:
  *   get:
- *     summary: Get all uploaded PDFs
+ *     summary: Get all PDFs
  *     tags: [PDFs]
  *     responses:
  *       200:
- *         description: A list of uploaded PDFs
+ *         description: List of all PDFs
  *       500:
- *         description: Error fetching PDFs
+ *         description: Server error
  */
 router.get('/', pdfController.getAllPdfs);
 
 /**
  * @swagger
  * /api/pdfs/{id}:
- *   get:
- *     summary: Get a PDF by ID
- *     tags: [PDFs]
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: PDF ID
- *         schema:
- *           type: number
- *     responses:
- *       200:
- *         description: PDF details
- *       404:
- *         description: PDF not found
- *       500:
- *         description: Error fetching PDF
- */
-router.get('/:id', pdfController.getPdfById);
-
-/**
- * @swagger
- * /api/pdfs/{id}:
  *   put:
- *     summary: Update a PDF by ID
+ *     summary: Update a PDF
  *     tags: [PDFs]
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: PDF ID
  *         schema:
  *           type: number
  *     requestBody:
@@ -104,38 +83,35 @@ router.get('/:id', pdfController.getPdfById);
  *           schema:
  *             type: object
  *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
  *               year:
- *                 type: number
+ *                 type: string
  *               course:
  *                 type: string
  *               subject:
  *                 type: string
- *               fileName:
- *                 type: string
- *               pdfFile:
- *                 type: string
- *                 format: binary
  *     responses:
  *       200:
  *         description: PDF updated successfully
  *       404:
  *         description: PDF not found
  *       500:
- *         description: Error updating PDF
+ *         description: Server error
  */
-router.put('/:id', upload.single('pdfFile'), pdfController.updatePdfById);
+router.put('/:id', upload.single('file'), pdfController.updatePdfById);
 
 /**
  * @swagger
  * /api/pdfs/{id}:
  *   delete:
- *     summary: Delete a PDF by ID
+ *     summary: Delete a PDF
  *     tags: [PDFs]
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: PDF ID
  *         schema:
  *           type: number
  *     responses:
@@ -144,8 +120,35 @@ router.put('/:id', upload.single('pdfFile'), pdfController.updatePdfById);
  *       404:
  *         description: PDF not found
  *       500:
- *         description: Error deleting PDF
+ *         description: Server error
  */
 router.delete('/:id', pdfController.deletePdfById);
+
+/**
+ * @swagger
+ * /api/pdfs/download/{id}:
+ *   get:
+ *     summary: Download a PDF
+ *     tags: [PDFs]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: PDF file
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: PDF not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/download/:id', pdfController.downloadPdf); 
 
 module.exports = router;

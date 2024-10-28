@@ -3,27 +3,30 @@ const mongoose = require("mongoose");
 const PdfUploadSchema = mongoose.Schema({
     id: {
         type: Number,
-        unique: true,
-        required: true
+        required: true,
+        unique: true
     },
     year: {
-        type: Number,
-        required: true
+        type: String,
+        required: true,
+        enum: ['2022', '2023', '2024'] // Match frontend options
     },
     course: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     subject: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     fileName: {
         type: String,
         required: true
     },
     fileData: {
-        type: Buffer, // Store the binary data of the PDF
+        type: Buffer,
         required: true
     },
     uploadDate: {
@@ -33,5 +36,4 @@ const PdfUploadSchema = mongoose.Schema({
 });
 
 const PdfUpload = mongoose.model("PdfUpload", PdfUploadSchema);
-
 module.exports = PdfUpload;

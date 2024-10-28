@@ -1,109 +1,150 @@
 const PdfUpload = require('../models/PdfUpload');
 
+const pdfController = {
+    // Create PDF
+    createPdf: async (req, res) => {
+        try {
+            // Check if file exists
+            if (!req.file) {
+                return res.status(400).json({ error: "Please upload a PDF file" });
+            }
 
-exports.createPdf = async (req, res) => {
-    try {
-        // Extract metadata from the request body
-        const { id, year, course, subject, fileName } = req.body;
+            // Validate file type
+            if (req.file.mimetype !== 'application/pdf') {
+                return res.status(400).json({ error: "Only PDF files are allowed" });
+            }
 
-        // Check if a file was uploaded
-        if (!req.file) {
-            return res.status(400).json({ error: "No file uploaded." });
+            // Extract data from request
+            const { year, course, subject } = req.body;
+            
+            // Validate required fields
+            if (!year || !course || !subject) {
+                return res.status(400).json({ 
+                    error: "Year, course, and subject are required" 
+                });
+            }
+
+            // Generate unique ID
+            const id = Date.now();
+
+            // Create new PDF document
+            const newPdf = new PdfUpload({
+                id,
+                year,
+                course,
+                subject,
+                fileName: req.file.originalname,
+                fileData: req.file.buffer
+            });
+
+            await newPdf.save();
+
+            res.status(201).json({
+                message: "PDF uploaded successfully",
+                pdf: {
+                    id: newPdf.id,
+                    year: newPdf.year,
+                    course: newPdf.course,
+                    subject: newPdf.subject,
+                    fileName: newPdf.fileName,
+                    uploadDate: newPdf.uploadDate
+                }
+            });
+        } catch (err) {
+            console.error("Error uploading PDF:", err);
+            res.status(500).json({ error: "Failed to upload PDF" });
         }
+    },
 
-        // Create a new instance of the PdfUpload model
-        const newPdf = new PdfUpload({
-            id,
-            year,
-            course,
-            subject,
-            fileName,
-            fileData: req.file.buffer, // Store the binary data of the uploaded PDF
-            uploadDate: Date.now(),
-        });
+    // Get all PDFs
+    getAllPdfs: async (req, res) => {
+        try {
+            const pdfs = await PdfUpload.find().select('-fileData');
+            res.status(200).json(pdfs);
+        } catch (err) {
+            console.error("Error fetching PDFs:", err);
+            res.status(500).json({ error: "Failed to fetch PDFs" });
+        }
+    },
 
-        // Save the new PDF upload to the database
-        await newPdf.save();
+    // Update PDF
+    updatePdfById: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { year, course, subject } = req.body;
 
-        // Send a success response
-        res.status(201).json({ message: "PDF uploaded successfully!", newPdf });
-    } catch (err) {
-        console.error("Error uploading PDF:", err);
-        res.status(500).json({ error: "Failed to upload PDF." });
+            const updateData = {
+                year,
+                course,
+                subject
+            };
+
+            if (req.file) {
+                if (req.file.mimetype !== 'application/pdf') {
+                    return res.status(400).json({ error: "Only PDF files are allowed" });
+                }
+                updateData.fileName = req.file.originalname;
+                updateData.fileData = req.file.buffer;
+            }
+
+            const updatedPdf = await PdfUpload.findOneAndUpdate(
+                { id: parseInt(id) },
+                updateData,
+                { new: true }
+            ).select('-fileData');
+
+            if (!updatedPdf) {
+                return res.status(404).json({ error: "PDF not found" });
+            }
+
+            res.status(200).json({
+                message: "PDF updated successfully",
+                pdf: updatedPdf
+            });
+        } catch (err) {
+            console.error("Error updating PDF:", err);
+            res.status(500).json({ error: "Failed to update PDF" });
+        }
+    },
+
+    // Delete PDF
+    deletePdfById: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const deletedPdf = await PdfUpload.findOneAndDelete({ id: parseInt(id) });
+
+            if (!deletedPdf) {
+                return res.status(404).json({ error: "PDF not found" });
+            }
+
+            res.status(200).json({ message: "PDF deleted successfully" });
+        } catch (err) {
+            console.error("Error deleting PDF:", err);
+            res.status(500).json({ error: "Failed to delete PDF" });
+        }
+    },
+
+    // Download PDF
+    downloadPdf: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const pdf = await PdfUpload.findOne({ id: parseInt(id) });
+
+            if (!pdf) {
+                return res.status(404).json({ error: "PDF not found" });
+            }
+
+            res.set({
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': `attachment; filename="${pdf.fileName}"`,
+            });
+
+            res.send(pdf.fileData);
+        } catch (err) {
+            console.error("Error downloading PDF:", err);
+            res.status(500).json({ error: "Failed to download PDF" });
+        }
     }
 };
 
-// Get all PDFs
-exports.getAllPdfs = async (req, res) => {
-    try {
-        const pdfs = await PdfUpload.find();
-        res.status(200).json(pdfs);
-    } catch (err) {
-        console.error("Error fetching PDFs:", err);
-        res.status(500).json({ error: "Failed to fetch PDFs." });
-    }
-};
-
-// Get a PDF by ID
-exports.getPdfById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const pdf = await PdfUpload.findOne({ id });
-
-        if (!pdf) {
-            return res.status(404).json({ error: "PDF not found." });
-        }
-
-        res.status(200).json(pdf);
-    } catch (err) {
-        console.error("Error fetching PDF:", err);
-        res.status(500).json({ error: "Failed to fetch PDF." });
-    }
-};
-
-// Update a PDF by ID
-exports.updatePdfById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { year, course, subject, fileName } = req.body;
-
-        // Find the PDF by ID
-        const pdf = await PdfUpload.findOne({ id });
-        if (!pdf) {
-            return res.status(404).json({ error: "PDF not found." });
-        }
-
-        // Update the fields
-        pdf.year = year || pdf.year;
-        pdf.course = course || pdf.course;
-        pdf.subject = subject || pdf.subject;
-        pdf.fileName = fileName || pdf.fileName;
-        if (req.file) {
-            pdf.fileData = req.file.buffer;
-        }
-
-        // Save the updated PDF
-        await pdf.save();
-        res.status(200).json({ message: "PDF updated successfully!", pdf });
-    } catch (err) {
-        console.error("Error updating PDF:", err);
-        res.status(500).json({ error: "Failed to update PDF." });
-    }
-};
-
-// Delete a PDF by ID
-exports.deletePdfById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const pdf = await PdfUpload.findOneAndDelete({ id });
-
-        if (!pdf) {
-            return res.status(404).json({ error: "PDF not found." });
-        }
-
-        res.status(200).json({ message: "PDF deleted successfully." });
-    } catch (err) {
-        console.error("Error deleting PDF:", err);
-        res.status(500).json({ error: "Failed to delete PDF." });
-    }
-};
+module.exports = pdfController;
