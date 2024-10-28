@@ -36,20 +36,20 @@
     return response.json();
   }
 
-  async function updateCard(id: string, updatedCard: CardInput) {
-    const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updatedCard),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to update card');
-    }
-    return response.json();
+  // API call to update the card
+async function updateCard(id: string, updatedCard: CardInput) {
+  const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ cardDetails: updatedCard }), // Wrap in `cardDetails`
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update card');
   }
-
+  return response.json();
+}
   async function deleteCard(id: string) {
     const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
       method: 'DELETE',
@@ -78,16 +78,18 @@
     });
   }
 
-  export function useUpdateCard() {
-    const queryClient = useQueryClient();
+  // React Query Mutation Hook
+export function useUpdateCard() {
+  const queryClient = useQueryClient();
 
-    return useMutation({
-      mutationFn: ({ id, ...data }: Card) => updateCard(id, data),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['cards'] });
-      },
-    });
-  }
+  return useMutation({
+    mutationFn: ({ id, ...data }: Card) => updateCard(id, data),
+    onSuccess: () => {
+      // Invalidate 'cards' query to refetch updated data
+      queryClient.invalidateQueries({ queryKey: ['cards'] });
+    },
+  });
+}
 
   export function useDeleteCard() {
     const queryClient = useQueryClient();
