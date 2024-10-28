@@ -48,6 +48,7 @@ exports.updateCardById = async (req, res) => {
   const { cardDetails } = req.body;
 
   try {
+    // Update the card by ID with the new details
     const updatedCard = await Card.findByIdAndUpdate(
       id,
       cardDetails,
@@ -58,11 +59,14 @@ exports.updateCardById = async (req, res) => {
       return res.status(404).json({ message: 'Card not found' });
     }
 
+    // Send the updated card data back
     return res.status(200).json({ message: 'Card updated successfully', card: updatedCard });
   } catch (error) {
+    // Handle errors with a clear response
     return res.status(500).json({ message: 'Error updating card', error: error.message });
   }
 };
+
 
 // Delete card by ID
 exports.deleteCardById = async (req, res) => {

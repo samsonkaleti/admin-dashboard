@@ -16,6 +16,22 @@ const router = express.Router();
  */
 router.get('/cards', cardController.getAllCards);
 
+
+/**
+ * @swagger
+ * /api/cards/{id}:
+ *   get:
+ *     summary: Get Card by ID
+ *     tags: [Card]
+ *     responses:
+ *       200:
+ *         description: A card is returned
+ *       500:
+ *         description: Error fetching card
+ */
+router.get('/cards/:id', cardController.getCardById);
+
+
 /**
  * @swagger
  * /api/cards:
@@ -38,7 +54,7 @@ router.get('/cards', cardController.getAllCards);
  *       500:
  *         description: Some server error
  */
-router.post('/', cardController.createCard);
+router.post('/cards', cardController.createCard);
 
 /**
  * @swagger
@@ -71,7 +87,7 @@ router.post('/', cardController.createCard);
  *       500:
  *         description: Some error happened
  */
-router.put('/:id', cardController.updateCardById);
+router.put('/cards/:id', cardController.updateCardById);
 
 /**
  * @swagger
@@ -92,7 +108,7 @@ router.put('/:id', cardController.updateCardById);
  *       404:
  *         description: The card was not found
  */
-router.delete('/:id', cardController.deleteCardById);
+router.delete('/cards/:id', cardController.deleteCardById);
 
 /**
  * @swagger
