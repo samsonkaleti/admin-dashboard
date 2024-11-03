@@ -1,5 +1,16 @@
 const mongoose = require("mongoose");
 
+const FileSchema = new mongoose.Schema({
+    fileName: {
+        type: String,
+        required: true
+    },
+    fileData: {
+        type: Buffer,
+        required: true
+    }
+});
+
 const PdfUploadSchema = mongoose.Schema({
     id: {
         type: Number,
@@ -33,14 +44,7 @@ const PdfUploadSchema = mongoose.Schema({
         required: true,
         trim: true
     },
-    fileName: {
-        type: String,
-        required: true
-    },
-    fileData: {
-        type: Buffer,
-        required: true
-    },
+    files: [FileSchema],  // Array of files
     uploadDate: {
         type: Date,
         default: Date.now
