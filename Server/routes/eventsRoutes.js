@@ -1,11 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../config/multerConfig')
-const eventController = require('../controllers/eventcontroller')
+const multer = require('multer');
+const eventController = require('../controllers/eventcontroller');
 
-// Configure multer for file uploads
+// Configure multer storage for handling image uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads'); // Ensure the 'uploads' directory exists
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `${file.fieldname}-${uniqueSuffix}.${file.originalname.split('.').pop()}`);
+  }
+});
 
-
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Not an image! Please upload an image.'), false);
+    }
+  }
+});
 /**
  * @swagger
  * /api/events:
@@ -18,31 +36,57 @@ const eventController = require('../controllers/eventcontroller')
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - title
+ *               - collegeName
+ *               - street
+ *               - city
+ *               - state
+ *               - zip
+ *               - startDate
+ *               - startTime
+ *               - endDate
+ *               - endTime
+ *               - thumbnail
+ *               - eventSpeaker
+ *               - modeOfEvent
  *             properties:
  *               title:
  *                 type: string
  *               collegeName:
  *                 type: string
- *               address:
- *                 type: object
- *                 properties:
- *                   street:
- *                     type: string
- *                   city:
- *                     type: string
- *                   state:
- *                     type: string
- *                   zip:
- *                     type: string
- *               time:
- *                 type: object
- *                 properties:
- *                   start:
- *                     type: string
- *                     format: date-time
- *                   end:
- *                     type: string
- *                     format: date-time
+ *               street:
+ *                 type: string
+ *                 description: Street address
+ *               city:
+ *                 type: string
+ *                 description: City name
+ *               state:
+ *                 type: string
+ *                 description: State name
+ *               zip:
+ *                 type: string
+ *                 description: ZIP code
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *                 description: Event start date (YYYY-MM-DD)
+ *               startTime:
+ *                 type: string
+ *                 format: time
+ *                 description: Event start time (HH:mm)
+ *               endDate:
+ *                 type: string
+ *                 format: date
+ *                 description: Event end date (YYYY-MM-DD)
+ *               endTime:
+ *                 type: string
+ *                 format: time
+ *                 description: Event end time (HH:mm)
+ *               modeOfEvent:
+ *                 type: string
+ *                 enum: [online, offline, hybrid]
+ *                 default: offline
  *               thumbnail:
  *                 type: string
  *                 format: binary
@@ -53,8 +97,6 @@ const eventController = require('../controllers/eventcontroller')
  *         description: Event created successfully
  *       400:
  *         description: Invalid input
- *       500:
- *         description: Server error
  */
 router.post('/', upload.single('thumbnail'), eventController.createEvent);
 
@@ -67,8 +109,12 @@ router.post('/', upload.single('thumbnail'), eventController.createEvent);
  *     responses:
  *       200:
  *         description: List of all events
- *       500:
- *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Event'
  */
 router.get('/', eventController.getAllEvents);
 
@@ -79,18 +125,20 @@ router.get('/', eventController.getAllEvents);
  *     summary: Get an event by ID
  *     tags: [Events]
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Event retrieved successfully
+ *         description: Event found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Event'
  *       404:
  *         description: Event not found
- *       500:
- *         description: Server error
  */
 router.get('/:id', eventController.getEventById);
 
@@ -101,13 +149,12 @@ router.get('/:id', eventController.getEventById);
  *     summary: Update an event
  *     tags: [Events]
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
  *     requestBody:
- *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
@@ -117,26 +164,29 @@ router.get('/:id', eventController.getEventById);
  *                 type: string
  *               collegeName:
  *                 type: string
- *               address:
- *                 type: object
- *                 properties:
- *                   street:
- *                     type: string
- *                   city:
- *                     type: string
- *                   state:
- *                     type: string
- *                   zip:
- *                     type: string
- *               time:
- *                 type: object
- *                 properties:
- *                   start:
- *                     type: string
- *                     format: date-time
- *                   end:
- *                     type: string
- *                     format: date-time
+ *               address.street:
+ *                 type: string
+ *               address.city:
+ *                 type: string
+ *               address.state:
+ *                 type: string
+ *               address.zip:
+ *                 type: string
+ *               time.startDate:
+ *                 type: string
+ *                 format: date
+ *               time.startTime:
+ *                 type: string
+ *                 format: time
+ *               time.endDate:
+ *                 type: string
+ *                 format: date
+ *               time.endTime:
+ *                 type: string
+ *                 format: time
+ *               modeOfEvent:
+ *                 type: string
+ *                 enum: [online, offline, hybrid]
  *               thumbnail:
  *                 type: string
  *                 format: binary
@@ -147,8 +197,6 @@ router.get('/:id', eventController.getEventById);
  *         description: Event updated successfully
  *       404:
  *         description: Event not found
- *       500:
- *         description: Server error
  */
 router.put('/:id', upload.single('thumbnail'), eventController.updateEventById);
 
@@ -159,8 +207,8 @@ router.put('/:id', upload.single('thumbnail'), eventController.updateEventById);
  *     summary: Delete an event
  *     tags: [Events]
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -169,8 +217,6 @@ router.put('/:id', upload.single('thumbnail'), eventController.updateEventById);
  *         description: Event deleted successfully
  *       404:
  *         description: Event not found
- *       500:
- *         description: Server error
  */
 router.delete('/:id', eventController.deleteEventById);
 
