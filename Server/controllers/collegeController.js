@@ -1,4 +1,98 @@
-const College = require('../models/Colleges'); // Adjust the path as necessary
+const College = require('../models/Colleges'); // Adjust the path as necessary 
+
+
+
+
+// Get all programs for a specific college
+exports.getCollegePrograms = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const college = await College.findById(id);
+    if (!college) {
+      return res.status(404).json({ message: 'College not found' });
+    }
+    return res.status(200).json(college.programs);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error fetching programs', error: error.message });
+  }
+};
+
+// Add a new program to a college
+exports.addProgram = async (req, res) => {
+  const { id } = req.params;
+  const programData = req.body;
+
+  try {
+    const college = await College.findById(id);
+    if (!college) {
+      return res.status(404).json({ message: 'College not found' });
+    }
+
+    college.programs.push(programData);
+    await college.save();
+
+    return res.status(200).json({
+      message: 'Program added successfully',
+      program: programData
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error adding program', error: error.message });
+  }
+};
+
+// Search colleges based on various criteria
+exports.searchColleges = async (req, res) => {
+  const { regulatoryBody, program, specialization } = req.query;
+  let query = {};
+
+  if (regulatoryBody) {
+    query.regulatoryBody = regulatoryBody;
+  }
+
+  if (program) {
+    query['programs.name'] = program;
+  }
+
+  if (specialization) {
+    query['programs.specializations'] = specialization;
+  }
+
+  try {
+    const colleges = await College.find(query);
+    return res.status(200).json(colleges);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error searching colleges', error: error.message });
+  }
+};
+
+// Add a new regulation to a program
+exports.addRegulation = async (req, res) => {
+  const { id } = req.params;
+  const { programName, regulation } = req.body;
+
+  try {
+    const college = await College.findById(id);
+    if (!college) {
+      return res.status(404).json({ message: 'College not found' });
+    }
+
+    const program = college.programs.find(p => p.name === programName);
+    if (!program) {
+      return res.status(404).json({ message: 'Program not found' });
+    }
+
+    program.regulations.push(regulation);
+    await college.save();
+
+    return res.status(200).json({
+      message: 'Regulation added successfully',
+      regulation
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error adding regulation', error: error.message });
+  }
+};
 
 // Create a new college
 exports.createCollege = async (req, res) => {
