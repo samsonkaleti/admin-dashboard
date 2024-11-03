@@ -16,6 +16,7 @@ const navItems = [
   { href: "/dashboard/pdf-uploads", label: "PDF Uploads" },
   { href: "/dashboard/print-station", label: "Print Station" },
   { href: "/dashboard/student-details", label: "Student Details" },
+  { href: "/dashboard/events", label: "Event Management" },
   { href: "/dashboard/internships", label: "Internships" },
 ];
 

@@ -12,6 +12,7 @@ import {
   Users,
   Briefcase,
   UserCog,
+  CalendarRange,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -69,6 +70,11 @@ const sidebarNavItems = [
     title: "User Management",
     href: "/dashboard/user-management",
     icon: UserCog,
+  },
+  {
+    title: "Event Manasgement",
+    href: "/dashboard/events",
+    icon: CalendarRange,
   },
   {
     title: "Notifications",

@@ -16,6 +16,7 @@ import {
   Briefcase,
   UserCog,
   Bell,
+  CalendarRange,
 } from "lucide-react";
 
 const sidebarNavItems = [
@@ -58,6 +59,11 @@ const sidebarNavItems = [
     title: "User Management",
     href: "/dashboard/user-management",
     icon: UserCog,
+  },
+  {
+    title: "Event Manasgement",
+    href: "/dashboard/events",
+    icon: CalendarRange,
   },
   {
     title: "Notifications",
