@@ -5,6 +5,7 @@ const pdfRoutes = require('./routes/pdfRoutes')
 const cardRoutes = require('./routes/cardRoute');  // Import the card routes file
 const authRoutes = require('./routes/authRoutes');
 const express = require('express');
+const path = require("path");
 const cors = require('cors');
 const { swaggerUi, swaggerSpecs } = require('./swagger/swagger');
 const connectDB = require('./config/db'); // Import MongoDB connection
@@ -30,7 +31,7 @@ app.use(ipLogger);
 
 // Swagger UI route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Your routes will be here
 app.use('/api/auth', authRoutes);
 app.use('/api', collegeRoutes);

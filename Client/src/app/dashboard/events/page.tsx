@@ -84,7 +84,11 @@ const EventCard = ({
       {/* Image Section */}
       <div className="relative aspect-[3/2] overflow-hidden bg-purple-50">
         <img
-          src={event.thumbnail || "./logo2.png"}
+          src={
+            event.thumbnail
+              ? `http://localhost:5001/${event.thumbnail}`
+              : "./logo2.png"
+          }
           alt={event.title}
           className="w-full h-full object-cover"
         />
@@ -275,7 +279,7 @@ const EventManagement = () => {
     });
     setIsDialogOpen(true);
   };
-
+  console.log("events", events);
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -600,5 +604,3 @@ const EventManagement = () => {
 };
 
 export default EventManagement;
-
-
