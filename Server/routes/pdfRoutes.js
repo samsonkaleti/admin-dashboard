@@ -1,22 +1,79 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const pdfController = require('../controllers/pdfController');
+const pdfController = require('../controllers/pdfController'); 
+const uploadMiddleware = require('../middleware/uploadMiddleware');
 
-// Configure multer
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
-    },
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'application/pdf') {
-            cb(null, true);
-        } else {
-            cb(new Error('Only PDF files are allowed'));
-        }
-    }
-});
+/**
+ * @swagger
+ * tags:
+ *   name: PDFs
+ *   description: PDF management API endpoints
+ * 
+ * components:
+ *   schemas:
+ *     PDF:
+ *       type: object
+ *       required:
+ *         - id
+ *         - academicYear
+ *         - regulation
+ *         - course
+ *         - subject
+ *         - fileName
+ *       properties:
+ *         id:
+ *           type: number
+ *           description: The auto-generated id of the PDF
+ *         academicYear:
+ *           type: object
+ *           properties:
+ *             year:
+ *               type: string
+ *               enum: ['1st Year', '2nd Year', '3rd Year', '4th Year']
+ *             semester:
+ *               type: string
+ *               enum: ['1st Semester', '2nd Semester']
+ *         regulation:
+ *           type: string
+ *           enum: ['R20', 'R21']
+ *         course:
+ *           type: string
+ *         subject:
+ *           type: string
+ *         fileName:
+ *           type: string
+ *         uploadDate:
+ *           type: string
+ *           format: date-time
+ *   responses:
+ *     BadRequest:
+ *       description: Invalid input or validation error
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *     NotFound:
+ *       description: Resource not found
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *     ServerError:
+ *       description: Internal server error
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ */
 
 /**
  * @swagger
@@ -30,25 +87,54 @@ const upload = multer({
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - file
+ *               - academicYear.year
+ *               - academicYear.semester
+ *               - regulation
+ *               - course
+ *               - subject
  *             properties:
  *               file:
  *                 type: string
  *                 format: binary
- *               year:
+ *                 description: PDF file to upload (max 5MB)
+ *               academicYear.year:
  *                 type: string
+ *                 enum: ['1st Year', '2nd Year', '3rd Year', '4th Year']
+ *                 description: Academic year
+ *               academicYear.semester:
+ *                 type: string
+ *                 enum: ['1st Semester', '2nd Semester']
+ *                 description: Semester
+ *               regulation:
+ *                 type: string
+ *                 enum: ['R20', 'R21']
+ *                 description: Regulation code
  *               course:
  *                 type: string
+ *                 description: Course name
  *               subject:
  *                 type: string
+ *                 description: Subject name
  *     responses:
  *       201:
  *         description: PDF uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 pdf:
+ *                   $ref: '#/components/schemas/PDF'
  *       400:
- *         description: Invalid input
+ *         $ref: '#/components/responses/BadRequest'
  *       500:
- *         description: Server error
+ *         $ref: '#/components/responses/ServerError'
  */
-router.post('/', upload.single('file'), pdfController.createPdf);
+router.post('/', uploadMiddleware, pdfController.createPdf);
 
 /**
  * @swagger
@@ -56,11 +142,41 @@ router.post('/', upload.single('file'), pdfController.createPdf);
  *   get:
  *     summary: Get all PDFs
  *     tags: [PDFs]
+ *     parameters:
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: string
+ *           enum: ['1st Year', '2nd Year', '3rd Year', '4th Year']
+ *         description: Filter by academic year
+ *       - in: query
+ *         name: semester
+ *         schema:
+ *           type: string
+ *           enum: ['1st Semester', '2nd Semester']
+ *         description: Filter by semester
+ *       - in: query
+ *         name: regulation
+ *         schema:
+ *           type: string
+ *           enum: ['R20', 'R21']
+ *         description: Filter by regulation
+ *       - in: query
+ *         name: course
+ *         schema:
+ *           type: string
+ *         description: Filter by course
  *     responses:
  *       200:
- *         description: List of all PDFs
+ *         description: List of PDFs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PDF'
  *       500:
- *         description: Server error
+ *         $ref: '#/components/responses/ServerError'
  */
 router.get('/', pdfController.getAllPdfs);
 
@@ -71,11 +187,12 @@ router.get('/', pdfController.getAllPdfs);
  *     summary: Update a PDF
  *     tags: [PDFs]
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: number
+ *         description: PDF ID
  *     requestBody:
  *       required: true
  *       content:
@@ -86,8 +203,16 @@ router.get('/', pdfController.getAllPdfs);
  *               file:
  *                 type: string
  *                 format: binary
- *               year:
+ *                 description: New PDF file (optional)
+ *               academicYear.year:
  *                 type: string
+ *                 enum: ['1st Year', '2nd Year', '3rd Year', '4th Year']
+ *               academicYear.semester:
+ *                 type: string
+ *                 enum: ['1st Semester', '2nd Semester']
+ *               regulation:
+ *                 type: string
+ *                 enum: ['R20', 'R21']
  *               course:
  *                 type: string
  *               subject:
@@ -95,12 +220,21 @@ router.get('/', pdfController.getAllPdfs);
  *     responses:
  *       200:
  *         description: PDF updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 pdf:
+ *                   $ref: '#/components/schemas/PDF'
  *       404:
- *         description: PDF not found
+ *         $ref: '#/components/responses/NotFound'
  *       500:
- *         description: Server error
+ *         $ref: '#/components/responses/ServerError'
  */
-router.put('/:id', upload.single('file'), pdfController.updatePdfById);
+router.put('/:id', uploadMiddleware, pdfController.updatePdfById);
 
 /**
  * @swagger
@@ -109,18 +243,26 @@ router.put('/:id', upload.single('file'), pdfController.updatePdfById);
  *     summary: Delete a PDF
  *     tags: [PDFs]
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: number
+ *         description: PDF ID to delete
  *     responses:
  *       200:
  *         description: PDF deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       404:
- *         description: PDF not found
+ *         $ref: '#/components/responses/NotFound'
  *       500:
- *         description: Server error
+ *         $ref: '#/components/responses/ServerError'
  */
 router.delete('/:id', pdfController.deletePdfById);
 
@@ -128,14 +270,15 @@ router.delete('/:id', pdfController.deletePdfById);
  * @swagger
  * /api/pdfs/download/{id}:
  *   get:
- *     summary: Download a PDF
+ *     summary: Download a PDF file
  *     tags: [PDFs]
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: number
+ *         description: PDF ID to download
  *     responses:
  *       200:
  *         description: PDF file
@@ -145,10 +288,10 @@ router.delete('/:id', pdfController.deletePdfById);
  *               type: string
  *               format: binary
  *       404:
- *         description: PDF not found
+ *         $ref: '#/components/responses/NotFound'
  *       500:
- *         description: Server error
+ *         $ref: '#/components/responses/ServerError'
  */
-router.get('/download/:id', pdfController.downloadPdf); 
+router.get('/download/:id', pdfController.downloadPdf);
 
 module.exports = router;

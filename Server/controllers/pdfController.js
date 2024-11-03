@@ -15,12 +15,12 @@ const pdfController = {
             }
 
             // Extract data from request
-            const { year, course, subject } = req.body;
+            const { 'academicYear.year': year, 'academicYear.semester': semester, regulation, course, subject } = req.body;
             
             // Validate required fields
-            if (!year || !course || !subject) {
+            if (!year || !semester || !regulation || !course || !subject) {
                 return res.status(400).json({ 
-                    error: "Year, course, and subject are required" 
+                    error: "Academic year, semester, regulation, course, and subject are required" 
                 });
             }
 
@@ -30,7 +30,11 @@ const pdfController = {
             // Create new PDF document
             const newPdf = new PdfUpload({
                 id,
-                year,
+                academicYear: {
+                    year,
+                    semester
+                },
+                regulation,
                 course,
                 subject,
                 fileName: req.file.originalname,
@@ -43,7 +47,8 @@ const pdfController = {
                 message: "PDF uploaded successfully",
                 pdf: {
                     id: newPdf.id,
-                    year: newPdf.year,
+                    academicYear: newPdf.academicYear,
+                    regulation: newPdf.regulation,
                     course: newPdf.course,
                     subject: newPdf.subject,
                     fileName: newPdf.fileName,
@@ -59,7 +64,18 @@ const pdfController = {
     // Get all PDFs
     getAllPdfs: async (req, res) => {
         try {
-            const pdfs = await PdfUpload.find().select('-fileData');
+            const { year, semester } = req.query;
+            let query = {};
+
+            // Add filters if provided
+            if (year) {
+                query['academicYear.year'] = year;
+            }
+            if (semester) {
+                query['academicYear.semester'] = semester;
+            }
+
+            const pdfs = await PdfUpload.find(query).select('-fileData');
             res.status(200).json(pdfs);
         } catch (err) {
             console.error("Error fetching PDFs:", err);
@@ -71,13 +87,20 @@ const pdfController = {
     updatePdfById: async (req, res) => {
         try {
             const { id } = req.params;
-            const { year, course, subject } = req.body;
+            const { 'academicYear.year': year, 'academicYear.semester': semester, regulation, course, subject } = req.body;
 
             const updateData = {
-                year,
+                'academicYear.year': year,
+                'academicYear.semester': semester,
+                regulation,
                 course,
                 subject
             };
+
+            // Remove undefined fields
+            Object.keys(updateData).forEach(key => 
+                updateData[key] === undefined && delete updateData[key]
+            );
 
             if (req.file) {
                 if (req.file.mimetype !== 'application/pdf') {
