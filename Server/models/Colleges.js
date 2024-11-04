@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Regulation Schema
 const regulationSchema = new mongoose.Schema({
@@ -21,7 +21,7 @@ const programSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-     // e.g., "B.Tech" or "M.Tech"
+    // e.g., "B.Tech" or "M.Tech"
   },
   specializations: {
     type: [String], // Array for specializations like CSE, ECE, EEE, CSM
@@ -32,7 +32,7 @@ const programSchema = new mongoose.Schema({
     required: true, // Array of years, e.g., [1, 2, 3, 4]
   },
   regulations: {
-    type: [regulationSchema], // Array of regulations specific to the program
+    type: [regulationSchema],
   },
 });
 
@@ -84,6 +84,6 @@ const collegeSchema = new mongoose.Schema({
 });
 
 // Create the College model
-const College = mongoose.model('College', collegeSchema);
+const College = mongoose.model("College", collegeSchema);
 
 module.exports = College;

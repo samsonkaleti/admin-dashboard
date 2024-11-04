@@ -1,7 +1,4 @@
-const College = require('../models/Colleges'); // Adjust the path as necessary 
-
-
-
+const College = require("../models/Colleges"); // Adjust the path as necessary
 
 // Get all programs for a specific college
 exports.getCollegePrograms = async (req, res) => {
@@ -10,11 +7,13 @@ exports.getCollegePrograms = async (req, res) => {
   try {
     const college = await College.findById(id);
     if (!college) {
-      return res.status(404).json({ message: 'College not found' });
+      return res.status(404).json({ message: "College not found" });
     }
     return res.status(200).json(college.programs);
   } catch (error) {
-    return res.status(500).json({ message: 'Error fetching programs', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error fetching programs", error: error.message });
   }
 };
 
@@ -26,18 +25,20 @@ exports.addProgram = async (req, res) => {
   try {
     const college = await College.findById(id);
     if (!college) {
-      return res.status(404).json({ message: 'College not found' });
+      return res.status(404).json({ message: "College not found" });
     }
 
     college.programs.push(programData);
     await college.save();
 
     return res.status(200).json({
-      message: 'Program added successfully',
-      program: programData
+      message: "Program added successfully",
+      program: programData,
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Error adding program', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error adding program", error: error.message });
   }
 };
 
@@ -51,46 +52,54 @@ exports.searchColleges = async (req, res) => {
   }
 
   if (program) {
-    query['programs.name'] = program;
+    query["programs.name"] = program;
   }
 
   if (specialization) {
-    query['programs.specializations'] = specialization;
+    query["programs.specializations"] = specialization;
   }
 
   try {
     const colleges = await College.find(query);
     return res.status(200).json(colleges);
   } catch (error) {
-    return res.status(500).json({ message: 'Error searching colleges', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error searching colleges", error: error.message });
   }
 };
 
 // Add a new regulation to a program
+// Add a new regulation to a program
 exports.addRegulation = async (req, res) => {
   const { id } = req.params;
-  const { programName, regulation } = req.body;
+  const { programName, regulation, jntuselectedregulation } = req.body; // Extract jntuselectedregulation
 
   try {
     const college = await College.findById(id);
     if (!college) {
-      return res.status(404).json({ message: 'College not found' });
+      return res.status(404).json({ message: "College not found" });
     }
 
-    const program = college.programs.find(p => p.name === programName);
+    const program = college.programs.find((p) => p.name === programName);
     if (!program) {
-      return res.status(404).json({ message: 'Program not found' });
+      return res.status(404).json({ message: "Program not found" });
     }
 
-    program.regulations.push(regulation);
+    // Add the jntuselectedregulation to the regulation
+    regulation.jntuselectedregulation = jntuselectedregulation;
+
+    program.regulations.push(regulation); // Push the complete regulation object
     await college.save();
 
     return res.status(200).json({
-      message: 'Regulation added successfully',
-      regulation
+      message: "Regulation added successfully",
+      regulation,
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Error adding regulation', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error adding regulation", error: error.message });
   }
 };
 
@@ -106,9 +115,13 @@ exports.createCollege = async (req, res) => {
       details,
       programs,
     });
-    return res.status(201).json({ message: 'College created successfully', college: newCollege });
+    return res
+      .status(201)
+      .json({ message: "College created successfully", college: newCollege });
   } catch (error) {
-    return res.status(500).json({ message: 'Error creating college', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error creating college", error: error.message });
   }
 };
 
@@ -118,7 +131,9 @@ exports.getAllColleges = async (req, res) => {
     const colleges = await College.find();
     return res.status(200).json(colleges);
   } catch (error) {
-    return res.status(500).json({ message: 'Error fetching colleges', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error fetching colleges", error: error.message });
   }
 };
 
@@ -129,11 +144,13 @@ exports.getCollegeById = async (req, res) => {
   try {
     const college = await College.findById(id);
     if (!college) {
-      return res.status(404).json({ message: 'College not found' });
+      return res.status(404).json({ message: "College not found" });
     }
     return res.status(200).json(college);
   } catch (error) {
-    return res.status(500).json({ message: 'Error fetching college', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error fetching college", error: error.message });
   }
 };
 
@@ -150,12 +167,17 @@ exports.updateCollegeById = async (req, res) => {
     );
 
     if (!updatedCollege) {
-      return res.status(404).json({ message: 'College not found' });
+      return res.status(404).json({ message: "College not found" });
     }
 
-    return res.status(200).json({ message: 'College updated successfully', college: updatedCollege });
+    return res.status(200).json({
+      message: "College updated successfully",
+      college: updatedCollege,
+    });
   } catch (error) {
-    return res.status(500).json({ message: 'Error updating college', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error updating college", error: error.message });
   }
 };
 
@@ -166,60 +188,73 @@ exports.deleteCollegeById = async (req, res) => {
   try {
     const deletedCollege = await College.findByIdAndDelete(id);
     if (!deletedCollege) {
-      return res.status(404).json({ message: 'College not found' });
+      return res.status(404).json({ message: "College not found" });
     }
-    return res.status(200).json({ message: 'College deleted successfully' });
+    return res.status(200).json({ message: "College deleted successfully" });
   } catch (error) {
-    return res.status(500).json({ message: 'Error deleting college', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error deleting college", error: error.message });
   }
 };
 exports.getCollegeByCollegeName = async (req, res) => {
-    const { collegeName } = req.params; // Extract collegeName from the request params
-  
-    try {
-      const college = await College.findOne({ collegeName: collegeName });
-      if (!college) {
-        return res.status(404).json({ message: 'College not found' });
-      }
-      return res.status(200).json(college);
-    } catch (error) {
-      return res.status(500).json({ message: 'Error fetching college', error: error.message });
+  const { collegeName } = req.params; // Extract collegeName from the request params
+
+  try {
+    const college = await College.findOne({ collegeName: collegeName });
+    if (!college) {
+      return res.status(404).json({ message: "College not found" });
     }
-  };
-  
-  // Update a college by collegeName
-  exports.updateCollegeByCollegeName = async (req, res) => {
-    const { collegeName } = req.params; // Extract collegeName from the request params
-    const { regulatoryBody, domain, details, programs } = req.body; // Extract fields to update
-  
-    try {
-      const updatedCollege = await College.findOneAndUpdate(
-        { collegeName: collegeName }, // Find college by collegeName
-        { regulatoryBody, domain, details, programs }, // Fields to update
-        { new: true, runValidators: true } // Return updated document and run validation
-      );
-  
-      if (!updatedCollege) {
-        return res.status(404).json({ message: 'College not found' });
-      }
-  
-      return res.status(200).json({ message: 'College updated successfully', college: updatedCollege });
-    } catch (error) {
-      return res.status(500).json({ message: 'Error updating college', error: error.message });
+    return res.status(200).json(college);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error fetching college", error: error.message });
+  }
+};
+
+// Update a college by collegeName
+exports.updateCollegeByCollegeName = async (req, res) => {
+  const { collegeName } = req.params; // Extract collegeName from the request params
+  const { regulatoryBody, domain, details, programs } = req.body; // Extract fields to update
+
+  try {
+    const updatedCollege = await College.findOneAndUpdate(
+      { collegeName: collegeName }, // Find college by collegeName
+      { regulatoryBody, domain, details, programs }, // Fields to update
+      { new: true, runValidators: true } // Return updated document and run validation
+    );
+
+    if (!updatedCollege) {
+      return res.status(404).json({ message: "College not found" });
     }
-  };
-  
-  // Delete a college by collegeName
-  exports.deleteCollegeByCollegeName = async (req, res) => {
-    const { collegeName } = req.params; // Extract collegeName from the request params
-  
-    try {
-      const deletedCollege = await College.findOneAndDelete({ collegeName: collegeName });
-      if (!deletedCollege) {
-        return res.status(404).json({ message: 'College not found' });
-      }
-      return res.status(200).json({ message: 'College deleted successfully' });
-    } catch (error) {
-      return res.status(500).json({ message: 'Error deleting college', error: error.message });
+
+    return res.status(200).json({
+      message: "College updated successfully",
+      college: updatedCollege,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error updating college", error: error.message });
+  }
+};
+
+// Delete a college by collegeName
+exports.deleteCollegeByCollegeName = async (req, res) => {
+  const { collegeName } = req.params; // Extract collegeName from the request params
+
+  try {
+    const deletedCollege = await College.findOneAndDelete({
+      collegeName: collegeName,
+    });
+    if (!deletedCollege) {
+      return res.status(404).json({ message: "College not found" });
     }
-  };
+    return res.status(200).json({ message: "College deleted successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error deleting college", error: error.message });
+  }
+};

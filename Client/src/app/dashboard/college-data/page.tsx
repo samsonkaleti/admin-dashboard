@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import { Plus, Edit, Trash, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -72,13 +71,13 @@ const programOptions = [
     years: [1, 2, 3, 4],
     regulations: [
       {
-        type: "JNTUK",
-        regulation: "R20",
+        type: "JNTU",
+        regulation: "",
         validYears: [2020, 2021, 2022, 2023],
       },
       {
         type: "Autonomous",
-        regulation: "Autonomous Reg 2023",
+        regulation: "",
         validYears: [2023, 2024],
       },
     ],
@@ -89,9 +88,9 @@ const programOptions = [
     years: [1, 2],
     regulations: [
       {
-        type: "JNTUK",
-        regulation: "R19",
-        validYears: [2019, 2020, 2021, 2022],
+        type: "JNTU",
+        regulation: "N/A",
+        validYears: [2019, 2020],
       },
     ],
   },
@@ -127,7 +126,9 @@ export default function CollegeDataPage() {
   });
   const [customRegulations, setCustomRegulations] = useState<Regulation[]>([]);
   const [showOtherSpecialization, setShowOtherSpecialization] = useState(false);
-  const [showOtherRegulation, setShowOtherRegulation] = useState(false);
+  const [selectedJNTURegulation, setSelectedJNTURegulation] =
+    useState<string>("");
+  const [showJNTUDropdown, setShowJNTUDropdown] = useState(false);
 
   // Hooks
   const { data: collegeData, isLoading, error } = useGetColleges();
@@ -177,12 +178,10 @@ export default function CollegeDataPage() {
   };
 
   const getAllRegulations = () => {
-    const defaultRegs =
-      programOptions.find((p) => p.name === selectedProgram)?.regulations || [];
-    return [
-      ...defaultRegs,
-      { type: "Other", regulation: "Other", validYears: [] },
-    ];
+    const program = programOptions.find(
+      (program) => program.name === selectedProgram
+    );
+    return program ? program.regulations : [];
   };
 
   const handleAddOrUpdate = async () => {
@@ -191,7 +190,13 @@ export default function CollegeDataPage() {
         name: selectedProgram,
         specializations: selectedSpecializations,
         years: selectedYears,
-        regulations: selectedRegulations,
+        regulations: selectedRegulations.map((reg) => {
+          // Add the selected JNTU regulation to the JNTU regulation type
+          if (reg.type === "JNTU" && selectedJNTURegulation) {
+            return { ...reg, regulation: selectedJNTURegulation };
+          }
+          return reg;
+        }),
       },
     ];
 
@@ -547,101 +552,60 @@ export default function CollegeDataPage() {
                                       <input
                                         type="checkbox"
                                         value={reg.type}
-                                        checked={
-                                          reg.type === "Other"
-                                            ? showOtherRegulation
-                                            : selectedRegulations.some(
-                                                (r) => r.type === reg.type
-                                              )
-                                        }
+                                        checked={selectedRegulations.some(
+                                          (r) => r.type === reg.type
+                                        )}
                                         onChange={(e) => {
-                                          if (reg.type === "Other") {
-                                            setShowOtherRegulation(
-                                              e.target.checked
-                                            );
-                                          } else if (e.target.checked) {
+                                          if (e.target.checked) {
                                             setSelectedRegulations([
                                               ...selectedRegulations,
                                               reg,
                                             ]);
+                                            if (reg.type === "JNTU") {
+                                              setShowJNTUDropdown(true); // Show dropdown for JNTU
+                                            }
                                           } else {
                                             setSelectedRegulations(
                                               selectedRegulations.filter(
                                                 (r) => r.type !== reg.type
                                               )
                                             );
+                                            if (reg.type === "JNTU") {
+                                              setShowJNTUDropdown(false); // Hide dropdown if JNTU is unchecked
+                                            }
                                           }
                                         }}
                                         className="rounded border-input"
                                       />
-                                      <span>
-                                        {reg.type === "Other"
-                                          ? "Other"
-                                          : `${reg.regulation} (${reg.type})`}
-                                      </span>
+                                      <span>{reg.type}</span>
                                     </label>
                                   ))}
                                 </div>
 
-                                {showOtherRegulation && (
-                                  <div className="mt-4 space-y-4">
-                                    <div className="flex gap-2">
-                                      <Input
-                                        placeholder="Type (e.g., JNTUK)"
-                                        value={newRegulation.type}
-                                        onChange={(e) =>
-                                          setNewRegulation({
-                                            ...newRegulation,
-                                            type: e.target.value,
-                                          })
-                                        }
-                                        className="flex-1"
-                                      />
-                                      <Input
-                                        placeholder="Regulation (e.g., R20)"
-                                        value={newRegulation.regulation}
-                                        onChange={(e) =>
-                                          setNewRegulation({
-                                            ...newRegulation,
-                                            regulation: e.target.value,
-                                          })
-                                        }
-                                        className="flex-1"
-                                      />
-                                      <Button onClick={handleAddRegulation}>
-                                        Add
-                                      </Button>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                      {customRegulations.map((reg) => (
-                                        <Badge
-                                          key={reg.type}
-                                          variant="secondary"
-                                          className="px-2 py-1"
-                                        >
-                                          {`${reg.regulation} (${reg.type})`}
-                                          <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-4 w-4 ml-1"
-                                            onClick={() => {
-                                              setCustomRegulations(
-                                                customRegulations.filter(
-                                                  (r) => r.type !== reg.type
-                                                )
-                                              );
-                                              setSelectedRegulations(
-                                                selectedRegulations.filter(
-                                                  (r) => r.type !== reg.type
-                                                )
-                                              );
-                                            }}
-                                          >
-                                            <X className="h-3 w-3" />
-                                          </Button>
-                                        </Badge>
-                                      ))}
-                                    </div>
+                                {/* JNTU Regulations Dropdown */}
+                                {showJNTUDropdown && (
+                                  <div className="mt-4 space-y-2">
+                                    <Label htmlFor="jntuRegulation">
+                                      JNTU Regulation
+                                    </Label>
+                                    <select
+                                      id="jntuRegulation"
+                                      value={selectedJNTURegulation}
+                                      onChange={(e) =>
+                                        setSelectedJNTURegulation(
+                                          e.target.value
+                                        )
+                                      }
+                                      className="w-full p-2 border rounded-md bg-background text-foreground"
+                                    >
+                                      <option value="">
+                                        Select Regulation
+                                      </option>
+                                      <option value="R20">R20</option>
+                                      <option value="R19">R19</option>
+                                      <option value="R18">R18</option>
+                                      <option value="R17">R17</option>
+                                    </select>
                                   </div>
                                 )}
                               </div>

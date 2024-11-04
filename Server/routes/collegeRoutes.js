@@ -1,5 +1,5 @@
-const express = require('express');
-const collegeController = require('../controllers/collegeController');
+const express = require("express");
+const collegeController = require("../controllers/collegeController");
 const router = express.Router();
 
 /**
@@ -73,7 +73,7 @@ const router = express.Router();
  *       500:
  *         description: Error creating college
  */
-router.post('/colleges', collegeController.createCollege);
+router.post("/colleges", collegeController.createCollege);
 
 /**
  * @swagger
@@ -87,7 +87,7 @@ router.post('/colleges', collegeController.createCollege);
  *       500:
  *         description: Error fetching colleges
  */
-router.get('/colleges', collegeController.getAllColleges);
+router.get("/colleges", collegeController.getAllColleges);
 
 /**
  * @swagger
@@ -108,7 +108,7 @@ router.get('/colleges', collegeController.getAllColleges);
  *       404:
  *         description: College not found
  */
-router.get('/colleges/:id', collegeController.getCollegeById);
+router.get("/colleges/:id", collegeController.getCollegeById);
 
 /**
  * @swagger
@@ -129,7 +129,10 @@ router.get('/colleges/:id', collegeController.getCollegeById);
  *       404:
  *         description: College not found
  */
-router.get('/colleges/name/:collegeName', collegeController.getCollegeByCollegeName);
+router.get(
+  "/colleges/name/:collegeName",
+  collegeController.getCollegeByCollegeName
+);
 
 /**
  * @swagger
@@ -202,7 +205,7 @@ router.get('/colleges/name/:collegeName', collegeController.getCollegeByCollegeN
  *       404:
  *         description: College not found
  */
-router.put('/colleges/:id', collegeController.updateCollegeById);
+router.put("/colleges/:id", collegeController.updateCollegeById);
 
 /**
  * @swagger
@@ -242,7 +245,10 @@ router.put('/colleges/:id', collegeController.updateCollegeById);
  *       404:
  *         description: College not found
  */
-router.put('/colleges/name/:collegeName', collegeController.updateCollegeByCollegeName);
+router.put(
+  "/colleges/name/:collegeName",
+  collegeController.updateCollegeByCollegeName
+);
 
 /**
  * @swagger
@@ -263,7 +269,7 @@ router.put('/colleges/name/:collegeName', collegeController.updateCollegeByColle
  *       404:
  *         description: College not found
  */
-router.delete('/colleges/:id', collegeController.deleteCollegeById);
+router.delete("/colleges/:id", collegeController.deleteCollegeById);
 
 /**
  * @swagger
@@ -284,7 +290,10 @@ router.delete('/colleges/:id', collegeController.deleteCollegeById);
  *       404:
  *         description: College not found
  */
-router.delete('/colleges/name/:collegeName', collegeController.deleteCollegeByCollegeName);
+router.delete(
+  "/colleges/name/:collegeName",
+  collegeController.deleteCollegeByCollegeName
+);
 
 /**
  * @swagger
@@ -305,7 +314,7 @@ router.delete('/colleges/name/:collegeName', collegeController.deleteCollegeByCo
  *       404:
  *         description: College not found
  */
-router.get('/colleges/:id/programs', collegeController.getCollegePrograms);
+router.get("/colleges/:id/programs", collegeController.getCollegePrograms);
 
 /**
  * @swagger
@@ -347,7 +356,7 @@ router.get('/colleges/:id/programs', collegeController.getCollegePrograms);
  *       404:
  *         description: College not found
  */
-router.post('/colleges/:id/programs', collegeController.addProgram);
+router.post("/colleges/:id/programs", collegeController.addProgram);
 
 /**
  * @swagger
@@ -372,7 +381,7 @@ router.post('/colleges/:id/programs', collegeController.addProgram);
  *       200:
  *         description: List of matching colleges
  */
-router.get('/colleges/search', collegeController.searchColleges);
+router.get("/colleges/search", collegeController.searchColleges);
 
 /**
  * @swagger
@@ -411,6 +420,6 @@ router.get('/colleges/search', collegeController.searchColleges);
  *       404:
  *         description: College or program not found
  */
-router.post('/colleges/:id/regulations', collegeController.addRegulation);
+router.post("/colleges/:id/regulations", collegeController.addRegulation);
 
 module.exports = router;
