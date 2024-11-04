@@ -33,6 +33,9 @@ const uploadMiddleware = (req, res, next) => {
                     errorMessage = 'Unexpected field name for files';
                     break;
             }
+
+
+            
             
             return res.status(400).json({
                 error: errorMessage,
