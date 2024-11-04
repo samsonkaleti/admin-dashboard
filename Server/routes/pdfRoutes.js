@@ -2,62 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pdfController = require('../controllers/pdfController'); 
 const uploadMiddleware = require('../middleware/uploadMiddleware');
-
-/**
- * @swagger
- * tags:
- *   name: PDFs
- *   description: PDF management API endpoints
- * 
- * components:
- *   schemas:
- *     PDF:
- *       type: object
- *       required:
- *         - id
- *         - academicYear
- *         - regulation
- *         - course
- *         - subject
- *         - files
- *       properties:
- *         id:
- *           type: number
- *           description: The auto-generated id of the PDF document
- *         academicYear:
- *           type: object
- *           properties:
- *             year:
- *               type: string
- *               enum: ['1st Year', '2nd Year', '3rd Year', '4th Year']
- *             semester:
- *               type: string
- *               enum: ['1st Semester', '2nd Semester']
- *         regulation:
- *           type: string
- *           enum: ['R20', 'R21']
- *         course:
- *           type: string
- *         subject:
- *           type: string
- *         files:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               fileName:
- *                 type: string
- *               uploadDate:
- *                 type: string
- *                 format: date-time
- *         uploadDate:
- *           type: string
- *           format: date-time
- * 
- * 
- * 
- * 
- */
+const { authMiddleware, authorizeRoles } = require('../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -111,7 +56,7 @@ const uploadMiddleware = require('../middleware/uploadMiddleware');
  *                 pdf:
  *                   $ref: '#/components/schemas/PDF'
  */
-router.post('/', uploadMiddleware, pdfController.createPdfs);
+router.post('/', authMiddleware, authorizeRoles(['Admin', 'faculty']), uploadMiddleware, pdfController.createPdfs);
 
 /**
  * @swagger
@@ -140,8 +85,7 @@ router.post('/', uploadMiddleware, pdfController.createPdfs);
  *               items:
  *                 $ref: '#/components/schemas/PDF'
  */
-router.get('/', pdfController.getAllPdfs);
-
+router.get('/', authMiddleware, authorizeRoles(['Admin', 'Uploader', 'Student']), pdfController.getAllPdfs);
 /**
  * @swagger
  * /api/pdfs/{id}:
@@ -175,8 +119,9 @@ router.get('/', pdfController.getAllPdfs);
  *                 type: string
  *               subject:
  *                 type: string
+ * 
  */
-router.put('/:id', uploadMiddleware, pdfController.updatePdfById);
+router.put('/:id', authMiddleware, authorizeRoles(['Admin', 'Uploader']), uploadMiddleware, pdfController.updatePdfById);
 
 /**
  * @swagger
@@ -191,7 +136,7 @@ router.put('/:id', uploadMiddleware, pdfController.updatePdfById);
  *         schema:
  *           type: number
  */
-router.delete('/:id', pdfController.deletePdfById);
+router.delete('/:id', authMiddleware, authorizeRoles(['Admin']), pdfController.deletePdfById);
 
 /**
  * @swagger
@@ -219,7 +164,7 @@ router.delete('/:id', pdfController.deletePdfById);
  *               type: string
  *               format: binary
  */
-router.get('/download/:id/:fileIndex', pdfController.downloadPdf);
+router.get('/download/:id/:fileIndex', authMiddleware, authorizeRoles(['Admin', 'Uploader', 'Student']), pdfController.downloadPdf);
 
 /**
  * @swagger
@@ -242,6 +187,6 @@ router.get('/download/:id/:fileIndex', pdfController.downloadPdf);
  *               type: string
  *               format: binary
  */
-router.get('/download-all/:id', pdfController.downloadAllPdfs);
+router.get('/download-all/:id', authMiddleware, authorizeRoles(['Admin', 'Uploader']), pdfController.downloadAllPdfs);
 
 module.exports = router;

@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const eventController = require('../controllers/eventcontroller');
+const eventController = require('../controllers/eventcontroller'); 
+const {authMiddleware} = require('../middleware/authMiddleware')
 
 // Configure multer storage for handling image uploads
 const storage = multer.diskStorage({
@@ -116,7 +117,7 @@ router.post('/', upload.single('thumbnail'), eventController.createEvent);
  *               items:
  *                 $ref: '#/components/schemas/Event'
  */
-router.get('/', eventController.getAllEvents);
+router.get('/',authMiddleware, eventController.getAllEvents);
 
 /**
  * @swagger
