@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const redisClient = require("../config/redis"); // Redis client
 
-// User Signup
+
 // User Signup
 exports.signup = async (req, res) => {
   const { username, email, password, role, yearOfJoining } = req.body;

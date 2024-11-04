@@ -49,6 +49,9 @@ const PdfUploadSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     }
+
+
+    
 });
 
 // Virtual getter to combine year and semester for backwards compatibility

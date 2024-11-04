@@ -148,6 +148,10 @@ const pdfController = {
         }
     },
 
+
+
+
+    
     // Delete PDF document
     deletePdfById: async (req, res) => {
         try {

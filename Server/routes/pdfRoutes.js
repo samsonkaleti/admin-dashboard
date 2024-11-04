@@ -53,6 +53,10 @@ const uploadMiddleware = require('../middleware/uploadMiddleware');
  *         uploadDate:
  *           type: string
  *           format: date-time
+ * 
+ * 
+ * 
+ * 
  */
 
 /**
