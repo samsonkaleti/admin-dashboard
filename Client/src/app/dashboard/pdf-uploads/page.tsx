@@ -37,6 +37,7 @@ import {
 type PDFUpload = {
   id: number;
   year: string;
+  semester: string;
   course: string;
   subject: string;
   fileName: string;
@@ -46,14 +47,16 @@ export default function PDFUploadPage() {
   const [pdfUploads, setPDFUploads] = useState<PDFUpload[]>([
     {
       id: 1,
-      year: "2023",
+      year: "1st Year",
+      semester: "1st Semester",
       course: "Computer Science",
       subject: "Algorithms",
       fileName: "algorithms_2023.pdf",
     },
     {
       id: 2,
-      year: "2022",
+      year: "3rd Year",
+      semester: "2nd Semester",
       course: "Physics",
       subject: "Quantum Mechanics",
       fileName: "quantum_mechanics_2022.pdf",
@@ -62,6 +65,7 @@ export default function PDFUploadPage() {
 
   const [newUpload, setNewUpload] = useState<Omit<PDFUpload, "id">>({
     year: "",
+    semester: "",
     course: "",
     subject: "",
     fileName: "",
@@ -72,16 +76,29 @@ export default function PDFUploadPage() {
 
   const courses = ["Computer Science", "Physics", "Mathematics"]; // Add your course options here
   const subjects = ["Algorithms", "Quantum Mechanics", "Calculus"]; // Add your subject options here
+  const semesters = ["1st Semester", "2nd Semester"];
 
   const handleNew = () => {
-    setNewUpload({ year: "", course: "", subject: "", fileName: "" });
+    setNewUpload({
+      year: "",
+      semester: "",
+      course: "",
+      subject: "",
+      fileName: "",
+    });
     setEditingId(null);
     setIsDialogOpen(true);
   };
 
   const handleAdd = () => {
     setPDFUploads([...pdfUploads, { ...newUpload, id: Date.now() }]);
-    setNewUpload({ year: "", course: "", subject: "", fileName: "" });
+    setNewUpload({
+      year: "",
+      semester: "",
+      course: "",
+      subject: "",
+      fileName: "",
+    });
     setIsDialogOpen(false);
   };
 
@@ -90,6 +107,7 @@ export default function PDFUploadPage() {
     if (uploadToEdit) {
       setNewUpload({
         year: uploadToEdit.year,
+        semester: uploadToEdit.semester,
         course: uploadToEdit.course,
         subject: uploadToEdit.subject,
         fileName: uploadToEdit.fileName,
@@ -105,7 +123,13 @@ export default function PDFUploadPage() {
         upload.id === editingId ? { ...upload, ...newUpload } : upload
       )
     );
-    setNewUpload({ year: "", course: "", subject: "", fileName: "" });
+    setNewUpload({
+      year: "",
+      semester: "",
+      course: "",
+      subject: "",
+      fileName: "",
+    });
     setEditingId(null);
     setIsDialogOpen(false);
   };
@@ -174,6 +198,31 @@ export default function PDFUploadPage() {
                         </SelectItem>
                       )
                     )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label
+                  htmlFor="semester"
+                  className="text-right text-sm font-medium"
+                >
+                  Semester
+                </Label>
+                <Select
+                  value={newUpload.semester}
+                  onValueChange={(value) =>
+                    setNewUpload({ ...newUpload, semester: value })
+                  }
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select semester" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {semesters.map((semester) => (
+                      <SelectItem key={semester} value={semester}>
+                        {semester}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
