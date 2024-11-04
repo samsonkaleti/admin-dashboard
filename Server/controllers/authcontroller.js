@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const redisClient = require("../config/redis"); // Redis client
 
 // User Signup
+// User Signup
 exports.signup = async (req, res) => {
   const { username, email, password, role, yearOfJoining } = req.body;
 
@@ -31,10 +32,12 @@ exports.signup = async (req, res) => {
     });
     await newUser.save();
 
-    return res.status(200).json({
-      message: "User registered successfully, OTP sent to email",
-      userId: newUser._id,
-    });
+    return res
+      .status(200)
+      .json({
+        message: "User registered successfully, OTP sent to email",
+        userId: newUser._id,
+      });
   } catch (error) {
     return res
       .status(500)
@@ -90,9 +93,12 @@ exports.login = async (req, res) => {
 
     // Check if the user is verified
     if (!user.isVerified) {
-      return res.status(400).json({
-        message: "User not verified. Please verify the OTP sent to your email",
-      });
+      return res
+        .status(400)
+        .json({
+          message:
+            "User not verified. Please verify the OTP sent to your email",
+        });
     }
 
     // Compare the entered password with the stored hash
