@@ -78,7 +78,7 @@ const programOptions = [
       {
         type: "Autonomous",
         regulation: "",
-        validYears: [2023, 2024],
+        validYears: [2021, 2022, 2023, 2024],
       },
     ],
   },
@@ -119,12 +119,12 @@ export default function CollegeDataPage() {
   const [customSpecializations, setCustomSpecializations] = useState<string[]>(
     []
   );
-  const [newRegulation, setNewRegulation] = useState<Regulation>({
-    type: "",
-    regulation: "",
-    validYears: [],
-  });
-  const [customRegulations, setCustomRegulations] = useState<Regulation[]>([]);
+  // const [newRegulation, setNewRegulation] = useState<Regulation>({
+  //   type: "",
+  //   regulation: "",
+  //   validYears: [],
+  // });
+  // const [customRegulations, setCustomRegulations] = useState<Regulation[]>([]);
   const [showOtherSpecialization, setShowOtherSpecialization] = useState(false);
   const [selectedJNTURegulation, setSelectedJNTURegulation] =
     useState<string>("");
@@ -158,17 +158,17 @@ export default function CollegeDataPage() {
     );
   };
 
-  const handleAddRegulation = () => {
-    if (newRegulation.type && newRegulation.regulation) {
-      const regulation = {
-        ...newRegulation,
-        validYears: [new Date().getFullYear()],
-      };
-      setCustomRegulations([...customRegulations, regulation]);
-      setSelectedRegulations([...selectedRegulations, regulation]);
-      setNewRegulation({ type: "", regulation: "", validYears: [] });
-    }
-  };
+  // const handleAddRegulation = () => {
+  //   if (newRegulation.type && newRegulation.regulation) {
+  //     const regulation = {
+  //       ...newRegulation,
+  //       validYears: [new Date().getFullYear()],
+  //     };
+  //     setCustomRegulations([...customRegulations, regulation]);
+  //     setSelectedRegulations([...selectedRegulations, regulation]);
+  //     setNewRegulation({ type: "", regulation: "", validYears: [] });
+  //   }
+  // };
 
   const getAllSpecializations = () => {
     const defaultSpecs =
@@ -242,7 +242,7 @@ export default function CollegeDataPage() {
     setSelectedYears([]);
     setSelectedRegulations([]);
     setCustomSpecializations([]);
-    setCustomRegulations([]);
+    // setCustomRegulations([]);
     setEditId(null);
     setDialogOpen(true);
   };

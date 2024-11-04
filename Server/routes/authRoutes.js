@@ -1,7 +1,6 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authController = require('../controllers/authcontroller');
-
+const authController = require("../controllers/authcontroller");
 
 /**
  * @swagger
@@ -89,7 +88,7 @@ const authController = require('../controllers/authcontroller');
  *                   type: string
  *                   example: "Detailed error message"
  */
-router.post('/signup', authController.signup);
+router.post("/signup", authController.signup);
 
 /**
  * @swagger
@@ -164,7 +163,7 @@ router.post('/signup', authController.signup);
  *                   type: string
  *                   example: "Detailed error message"
  */
-router.post('/login', authController.login);
+router.post("/login", authController.login);
 
 /**
  * @swagger
@@ -226,6 +225,6 @@ router.post('/login', authController.login);
  *                   type: string
  *                   example: "Detailed error message"
  */
-router.post('/verify-otp', authController.verifyOTP);
+router.post("/verify-otp", authController.verifyOTP);
 
 module.exports = router;

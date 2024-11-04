@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Pencil, Trash2, FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -70,6 +69,9 @@ export default function PDFUploadPage() {
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const courses = ["Computer Science", "Physics", "Mathematics"]; // Add your course options here
+  const subjects = ["Algorithms", "Quantum Mechanics", "Calculus"]; // Add your subject options here
 
   const handleNew = () => {
     setNewUpload({ year: "", course: "", subject: "", fileName: "" });
@@ -165,11 +167,13 @@ export default function PDFUploadPage() {
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
-                    {["2022", "2023", "2024"].map((year) => (
-                      <SelectItem key={year} value={year}>
-                        {year}
-                      </SelectItem>
-                    ))}
+                    {["1st Year", "2nd Year", "3rd Year", "4th Year"].map(
+                      (year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -180,15 +184,23 @@ export default function PDFUploadPage() {
                 >
                   Course
                 </Label>
-                <Input
-                  id="course"
+                <Select
                   value={newUpload.course}
-                  onChange={(e) =>
-                    setNewUpload({ ...newUpload, course: e.target.value })
+                  onValueChange={(value) =>
+                    setNewUpload({ ...newUpload, course: value })
                   }
-                  className="col-span-3"
-                  placeholder="Enter course name"
-                />
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select course" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {courses.map((course) => (
+                      <SelectItem key={course} value={course}>
+                        {course}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label
@@ -197,15 +209,23 @@ export default function PDFUploadPage() {
                 >
                   Subject
                 </Label>
-                <Input
-                  id="subject"
+                <Select
                   value={newUpload.subject}
-                  onChange={(e) =>
-                    setNewUpload({ ...newUpload, subject: e.target.value })
+                  onValueChange={(value) =>
+                    setNewUpload({ ...newUpload, subject: value })
                   }
-                  className="col-span-3"
-                  placeholder="Enter subject name"
-                />
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select subject" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subjects.map((subject) => (
+                      <SelectItem key={subject} value={subject}>
+                        {subject}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label
@@ -257,34 +277,28 @@ export default function PDFUploadPage() {
               </TableHeader>
               <TableBody>
                 {pdfUploads.map((upload) => (
-                  <TableRow key={upload.id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">{upload.year}</TableCell>
+                  <TableRow key={upload.id}>
+                    <TableCell>{upload.year}</TableCell>
                     <TableCell className="hidden sm:table-cell">
                       {upload.course}
                     </TableCell>
                     <TableCell>{upload.subject}</TableCell>
-                    <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
+                    <TableCell className="hidden lg:table-cell">
                       {upload.fileName}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleEdit(upload.id)}
-                          className="h-8 w-8 hover:bg-primary/10"
-                        >
-                          <Pencil className="h-4 w-4 text-primary" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleDelete(upload.id)}
-                          className="h-8 w-8 hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleEdit(upload.id)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleDelete(upload.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}

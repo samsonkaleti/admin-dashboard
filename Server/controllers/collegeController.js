@@ -1,4 +1,4 @@
-const College = require("../models/Colleges"); // Adjust the path as necessary
+const College = require("../models/Colleges");
 
 // Get all programs for a specific college
 exports.getCollegePrograms = async (req, res) => {
