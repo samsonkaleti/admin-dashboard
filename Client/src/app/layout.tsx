@@ -8,7 +8,19 @@ import "./globals.css";
 import { AppLayout } from "@/components/layout/app-layout";
 import { AuthLayout } from "@/components/layout/auth-layout";
 
-const authPages = ["/login", "/signup","/privacy"];
+const authPages = ["/login", "/signup", "/privacy"];
+const validRoutes = [
+  "/",
+  "/dashboard/college-data",
+  "/dashboard/card-data",
+  "/dashboard/pdf-uploads",
+  "/dashboard/print-station",
+  "/dashboard/student-details",
+  "/dashboard/internships",
+  "/dashboard/user-management",
+  "/dashboard/events",
+  "/dashboard/notifications",
+];
 
 export default function RootLayout({
   children,
@@ -18,6 +30,7 @@ export default function RootLayout({
   const [queryClient] = useState(() => new QueryClient());
   const pathname = usePathname();
   const isAuthPage = authPages.includes(pathname);
+  const isValidRoute = validRoutes.includes(pathname);
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -29,7 +42,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryClientProvider client={queryClient}>
-            {isAuthPage ? (
+            {/* Show AuthLayout if it's an auth page or if the route is invalid */}
+            {isAuthPage || !isValidRoute ? (
               <AuthLayout>{children}</AuthLayout>
             ) : (
               <AppLayout>{children}</AppLayout>

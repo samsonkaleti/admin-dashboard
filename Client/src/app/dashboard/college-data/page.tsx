@@ -589,6 +589,7 @@ export default function CollegeDataPage() {
                                       JNTU Regulation
                                     </Label>
                                     <select
+                                    title="JNTU Regulation"
                                       id="jntuRegulation"
                                       value={selectedJNTURegulation}
                                       onChange={(e) =>
