@@ -1,8 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const pdfController = require('../controllers/pdfController'); 
-const uploadMiddleware = require('../middleware/uploadMiddleware');
-const { authMiddleware, authorizeRoles } = require('../middleware/authMiddleware');
+const pdfController = require("../controllers/pdfController");
+const uploadMiddleware = require("../middleware/uploadMiddleware");
+const { authMiddleware } = require("../middleware/authMiddleware");
+const { authorizeRoles } = require("../middleware/authorizeRoles");
 
 /**
  * @swagger
@@ -56,7 +57,13 @@ const { authMiddleware, authorizeRoles } = require('../middleware/authMiddleware
  *                 pdf:
  *                   $ref: '#/components/schemas/PDF'
  */
-router.post('/', authMiddleware, authorizeRoles(['Admin', 'faculty']), uploadMiddleware, pdfController.createPdfs);
+router.post(
+  "/",
+  authMiddleware,
+  authorizeRoles("Admin", "faculty"),
+  uploadMiddleware,
+  pdfController.createPdfs
+);
 
 /**
  * @swagger
@@ -85,7 +92,12 @@ router.post('/', authMiddleware, authorizeRoles(['Admin', 'faculty']), uploadMid
  *               items:
  *                 $ref: '#/components/schemas/PDF'
  */
-router.get('/', authMiddleware, authorizeRoles(['Admin', 'Uploader', 'Student']), pdfController.getAllPdfs);
+router.get(
+  "/", // Ensure this is the correct route path
+  authMiddleware,
+  authorizeRoles("Admin", "Uploader", "Student"), // Use strings directly, not an array
+  pdfController.getAllPdfs
+);
 /**
  * @swagger
  * /api/pdfs/{id}:
@@ -119,9 +131,15 @@ router.get('/', authMiddleware, authorizeRoles(['Admin', 'Uploader', 'Student'])
  *                 type: string
  *               subject:
  *                 type: string
- * 
+ *
  */
-router.put('/:id', authMiddleware, authorizeRoles(['Admin', 'Uploader']), uploadMiddleware, pdfController.updatePdfById);
+router.put(
+  "/:id",
+  authMiddleware,
+  authorizeRoles("Admin", "Uploader"),
+  uploadMiddleware,
+  pdfController.updatePdfById
+);
 
 /**
  * @swagger
@@ -136,7 +154,12 @@ router.put('/:id', authMiddleware, authorizeRoles(['Admin', 'Uploader']), upload
  *         schema:
  *           type: number
  */
-router.delete('/:id', authMiddleware, authorizeRoles(['Admin']), pdfController.deletePdfById);
+router.delete(
+  "/:id",
+  authMiddleware,
+  authorizeRoles("Admin"),
+  pdfController.deletePdfById
+);
 
 /**
  * @swagger
@@ -164,7 +187,12 @@ router.delete('/:id', authMiddleware, authorizeRoles(['Admin']), pdfController.d
  *               type: string
  *               format: binary
  */
-router.get('/download/:id/:fileIndex', authMiddleware, authorizeRoles(['Admin', 'Uploader', 'Student']), pdfController.downloadPdf);
+router.get(
+  "/download/:id/:fileIndex",
+  authMiddleware,
+  authorizeRoles("Admin", "Uploader", "Student"),
+  pdfController.downloadPdf
+);
 
 /**
  * @swagger
@@ -187,6 +215,11 @@ router.get('/download/:id/:fileIndex', authMiddleware, authorizeRoles(['Admin', 
  *               type: string
  *               format: binary
  */
-router.get('/download-all/:id', authMiddleware, authorizeRoles(['Admin', 'Uploader']), pdfController.downloadAllPdfs);
+router.get(
+  "/download-all/:id",
+  authMiddleware,
+  authorizeRoles("Admin", "Uploader"),
+  pdfController.downloadAllPdfs
+);
 
 module.exports = router;
