@@ -61,7 +61,7 @@ const sidebarNavItems = [
     icon: UserCog,
   },
   {
-    title: "Event Manasgement",
+    title: "Event Management",
     href: "/dashboard/events",
     icon: CalendarRange,
   },
