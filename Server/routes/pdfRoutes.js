@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const pdfController = require("../controllers/pdfController");
-const uploadMiddleware = require("../middleware/uploadMiddleware");
-const { authMiddleware } = require("../middleware/authMiddleware");
-const { authorizeRoles } = require("../middleware/authorizeRoles");
+// const uploadMiddleware = require("../middleware/uploadMiddleware");
+// const { authMiddleware } = require("../middleware/authMiddleware");
+// const { authorizeRoles } = require("../middleware/authorizeRoles");
 
 /**
  * @swagger
@@ -59,9 +59,9 @@ const { authorizeRoles } = require("../middleware/authorizeRoles");
  */
 router.post(
   "/",
-  authMiddleware,
-  authorizeRoles("Admin", "faculty"),
-  uploadMiddleware,
+  // authMiddleware,
+  // authorizeRoles("Admin", "faculty"),
+  // uploadMiddleware,
   pdfController.createPdfs
 );
 
@@ -94,8 +94,8 @@ router.post(
  */
 router.get(
   "/", // Ensure this is the correct route path
-  authMiddleware,
-  authorizeRoles("Admin", "Uploader", "Student"), // Use strings directly, not an array
+  // authMiddleware,
+  // authorizeRoles("Admin", "Uploader", "Student"), // Use strings directly, not an array
   pdfController.getAllPdfs
 );
 /**
@@ -135,9 +135,9 @@ router.get(
  */
 router.put(
   "/:id",
-  authMiddleware,
-  authorizeRoles("Admin", "Uploader"),
-  uploadMiddleware,
+  // authMiddleware,
+  // authorizeRoles("Admin", "Uploader"),
+  // uploadMiddleware,
   pdfController.updatePdfById
 );
 
@@ -156,8 +156,8 @@ router.put(
  */
 router.delete(
   "/:id",
-  authMiddleware,
-  authorizeRoles("Admin"),
+  // authMiddleware,
+  // authorizeRoles("Admin"),
   pdfController.deletePdfById
 );
 
@@ -189,8 +189,8 @@ router.delete(
  */
 router.get(
   "/download/:id/:fileIndex",
-  authMiddleware,
-  authorizeRoles("Admin", "Uploader", "Student"),
+  // authMiddleware,
+  // authorizeRoles("Admin", "Uploader", "Student"),
   pdfController.downloadPdf
 );
 
@@ -217,8 +217,8 @@ router.get(
  */
 router.get(
   "/download-all/:id",
-  authMiddleware,
-  authorizeRoles("Admin", "Uploader"),
+  // authMiddleware,
+  // authorizeRoles("Admin", "Uploader"),
   pdfController.downloadAllPdfs
 );
 
