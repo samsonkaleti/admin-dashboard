@@ -1,3 +1,4 @@
+"use client";
 import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,6 +12,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 
 import logo2 from "@/utils/logo2.png";
 import logo from "@/utils/logo.png";
@@ -21,6 +23,12 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true); // This will run only on the client
+  }, []);
+
   return (
     // Simplified background - white for light mode, black for dark mode
     <div className="min-h-screen w-full bg-white dark:bg-black">

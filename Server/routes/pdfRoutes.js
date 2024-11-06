@@ -98,6 +98,7 @@ router.get(
   // authorizeRoles("Admin", "Uploader", "Student"), // Use strings directly, not an array
   pdfController.getAllPdfs
 );
+
 /**
  * @swagger
  * /api/pdfs/{id}:
