@@ -1,5 +1,5 @@
 "use client";
-import { Metadata } from "next";
+// import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Github } from "lucide-react";
@@ -17,10 +17,10 @@ import { useEffect, useState } from "react";
 import logo2 from "@/utils/logo2.png";
 import logo from "@/utils/logo.png";
 
-export const metadata: Metadata = {
-  title: "Login - Campusify",
-  description: "Login to your Campusify account",
-};
+// export const metadata: Metadata = {
+//   title: "Login - Campusify",
+//   description: "Login to your Campusify account",
+// };
 
 export default function LoginPage() {
   const [isClient, setIsClient] = useState(false);
