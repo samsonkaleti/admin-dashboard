@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pdfController = require("../controllers/pdfController");
-// const uploadMiddleware = require("../middleware/uploadMiddleware");
+const uploadMiddleware = require("../middleware/uploadMiddleware");
 // const { authMiddleware } = require("../middleware/authMiddleware");
 // const { authorizeRoles } = require("../middleware/authorizeRoles");
 
@@ -61,7 +61,7 @@ router.post(
   "/",
   // authMiddleware,
   // authorizeRoles("Admin", "faculty"),
-  // uploadMiddleware,
+  uploadMiddleware,
   pdfController.createPdfs
 );
 
