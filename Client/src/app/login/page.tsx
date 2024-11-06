@@ -1,7 +1,8 @@
 "use client";
 // import { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
+import dynamic from "next/dynamic";
 import { Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,8 @@ import logo from "@/utils/logo.png";
 //   description: "Login to your Campusify account",
 // };
 
+const ClientSideImage = dynamic(() => import("next/image"), { ssr: false });
+
 export default function LoginPage() {
   const [isClient, setIsClient] = useState(false);
 
@@ -38,7 +41,7 @@ export default function LoginPage() {
         <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:items-center lg:justify-center lg:p-8 lg:w-1/2">
           <div className="relative h-64 w-full">
             {isClient && (
-              <Image
+              <ClientSideImage
                 src={logo2}
                 alt="Campusify Logo"
                 layout="fill"
@@ -58,7 +61,7 @@ export default function LoginPage() {
             <CardHeader className="space-y-2 text-center">
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative h-16 w-32">
-                  <Image
+                  <ClientSideImage
                     src={logo}
                     alt="Campusify"
                     layout="fill"
