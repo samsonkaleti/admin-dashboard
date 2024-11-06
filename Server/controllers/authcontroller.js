@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const College = require("../models/Colleges");
 const generateOTP = require("../utils/otpGenerator");
 const { sendOTP } = require("../services/emailService");
 const jwt = require("jsonwebtoken");
@@ -12,32 +13,39 @@ exports.signup = async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Check if the user is a student or an admin/uploader
+    const isStudent = role === 'Student';
+
     const newUser = await User.create({
       username,
       email,
       password: hashedPassword,
       role,
       yearOfJoining,
-      isVerified: false,
+      isVerified: isStudent ? false : true, // Admins and uploaders are automatically verified
     });
 
-    const otp = generateOTP();
-    console.log(otp); // Generate OTP
-    await sendOTP(newUser.email, otp); // Send OTP via email
+    // Generate and send OTP only for students
+    if (isStudent) {
+      const otp = generateOTP();
+      console.log(otp); // Generate OTP
+      await sendOTP(newUser.email, otp); // Send OTP via email
 
-    // Store OTP and its expiration time in the user model
-    newUser.otp.push({
-      code: otp,
-      expiration: Date.now() + 5 * 60 * 1000, // Expires in 5 minutes
-    });
-    await newUser.save();
-
-    return res
-      .status(200)
-      .json({
-        message: "User registered successfully, OTP sent to email",
-        userId: newUser._id,
+      // Store OTP and its expiration time in the user model
+      newUser.otp.push({
+        code: otp,
+        expiration: Date.now() + 5 * 60 * 1000, // Expires in 5 minutes
       });
+      await newUser.save();
+    }
+
+    return res.status(200).json({
+      message: isStudent
+        ? "User registered successfully, OTP sent to email"
+        : "User registered successfully",
+      userId: newUser._id,
+    });
   } catch (error) {
     return res
       .status(500)
@@ -79,7 +87,76 @@ exports.verifyOTP = async (req, res) => {
       .status(500)
       .json({ message: "Error verifying OTP", error: error.message });
   }
+}; 
+
+
+// userDetails
+
+
+
+// User Details Submission
+exports.userDetails = async (req, res) => {
+  const { firstName, lastName, phoneNo, email, selectedRegulation } = req.body;
+  const userDomain = email.split('@')[1]; // Extract domain from email 
+  console.log("User Domain: " + userDomain);
+
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the user is a student or an admin/uploader
+    const isStudent = user.role === 'student';
+
+    // Find college by domain
+    const college = await College.findOne({ domain: userDomain });
+    if (!college) {
+      return res.status(400).json({ message: "Domain not matching with any college." });
+    }
+
+    // Fetch only regulation names from the college model
+    const regulations = college.programs.flatMap(program => 
+      program.regulations.map(reg => reg.regulation) // Extract only regulation names
+    );
+
+    // Check if the selected regulation is valid
+    if (!regulations.includes(selectedRegulation)) {
+      return res.status(400).json({ message: "Selected regulation is not valid." });
+    }
+
+    // Update user fields with provided details
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.phone = phoneNo;
+
+    // Add the selected regulation to the user's regulations array
+    user.regulations = selectedRegulation;
+
+    // Verify the user for admins and uploaders
+    if (!isStudent) {
+      user.isVerified = true;
+    }
+
+    await user.save(); // Save updated user profile
+
+    return res.status(200).json({
+      regulations,
+      message: "User details updated successfully"
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Error fetching regulations",
+      error: error.message,
+    });
+  }
 };
+
+
+
+
 
 // User Login
 exports.login = async (req, res) => {

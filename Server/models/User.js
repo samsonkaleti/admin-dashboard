@@ -4,51 +4,66 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
+    unique: true
   },
   email: {
     type: String,
     required: true,
-    unique: true,
-    match: /.+\@.+\..+/,
+    unique: true
   },
   password: {
     type: String,
-    required: true,
+    required: true
   },
   role: {
     type: String,
-    enum: ['Student', 'Admin', 'Uploader'],
-    required: true,
+    enum: ['student', 'admin', 'uploader'],
+    required: true
   },
-  college: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'College',
+  firstName: {
+    type: String,
+    required: function() {
+      return this.role === 'student';
+    }
+  },
+  lastName: {
+    type: String,
+    required: function() {
+      return this.role === 'student';
+    }
+  },
+  phone: {
+    type: String,
+    required: function() {
+      return this.role === 'student';
+    }
   },
   yearOfJoining: {
     type: Number,
-    required: true,
-  },
-  regulations: [{
-    type: String,
-  }],
-  profile: {
-    firstName: String,
-    lastName: String,
-    phone: String,
+    required: function() {
+      return this.role === 'student';
+    }
   },
   isVerified: {
     type: Boolean,
-    default: false, // Default to false, meaning the user is not verified initially
+    default: false
   },
-  otp: [{ 
-    code: { type: String, required: true },  // OTP code
-    expiration: { type: Date, required: true } // OTP expiration time
-  }],
-  createdAt: {
+  otp: [
+    {
+      code: String,
+      expiration: Date
+    }
+  ],
+  regulations: [String] ,
+
+  resetPasswordToken: {
+    type: String,
+    default: undefined
+  },
+  resetPasswordExpires: {
     type: Date,
-    default: Date.now,
-  },
+    default: undefined
+  }
 });
 
 const User = mongoose.model('User', userSchema);

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const authController = require("../controllers/authcontroller")
+const authController = require("../controllers/authcontroller") 
+const resetPasswordController = require("../controllers/resetPasswordController")
 
 /**
  * @swagger
@@ -225,6 +226,211 @@ router.post("/login", authController.login);
  *                   type: string
  *                   example: "Detailed error message"
  */
-router.post("/verify-otp", authController.verifyOTP);
+router.post("/verify-otp", authController.verifyOTP);    
+
+
+/**
+ * @swagger
+ * /api/auth/user-details:
+ *   post:
+ *     summary: Update user details and fetch college regulations
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - phoneNo
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 description: User's first name
+ *                 example: "Sam"
+ *               lastName:
+ *                 type: string
+ *                 description: User's last name
+ *                 example: "Kaleti"
+ *               phoneNo:
+ *                 type: string
+ *                 description: User's phone number
+ *                 example: "9951252653"
+ *     responses:
+ *       200:
+ *         description: User details updated successfully, and regulations fetched
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 regulations:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of college regulations based on user's email domain
+ *                   example: ["Regulation A", "Regulation B"]
+ *                 message:
+ *                   type: string
+ *                   example: "User details updated successfully"
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User not found"
+ *       500:
+ *         description: Error fetching regulations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error fetching regulations"
+ *                 error:
+ *                   type: string
+ *                   example: "Detailed error message"
+ */
+router.post("/user-details", authController.userDetails); 
+
+
+
+// routes.js
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Auth]
+ *     description: Sends an email with a password reset link to the user.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: The user's email address to send the password reset link.
+ *                 example: johndoe@example.com
+ *     responses:
+ *       200:
+ *         description: A password reset link has been sent to the user's email.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Password reset link sent to email.
+ *       400:
+ *         description: Invalid email format or email not registered.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid email format or user not registered.
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error sending password reset email.
+ *                 error:
+ *                   type: string
+ *                   example: "Detailed error message"
+ */
+
+router.post('/reset-password', resetPasswordController.resetPassword); 
+
+
+/**
+ * @swagger
+ * /api/auth/confirm-reset-password:
+ *   post:
+ *     summary: Confirm password reset
+ *     tags: [Auth]
+ *     description: Confirms the new password after the user has received the reset link.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: The token sent to the user's email for password reset.
+ *                 example: "abcdef123456"
+ *               newPassword:
+ *                 type: string
+ *                 description: The new password the user wants to set.
+ *                 example: "NewPassword123"
+ *     responses:
+ *       200:
+ *         description: Password updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Password updated successfully.
+ *       400:
+ *         description: Invalid token or weak password.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid token or password does not meet security requirements.
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error updating password.
+ *                 error:
+ *                   type: string
+ *                   example: "Detailed error message"
+ */
+
+
+router.post('/confirm-reset-password', resetPasswordController.confirmResetPassword);
+
+
+
+
+
 
 module.exports = router;
