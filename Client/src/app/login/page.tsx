@@ -37,13 +37,15 @@ export default function LoginPage() {
         {/* Left section - hidden on mobile/tablet */}
         <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:items-center lg:justify-center lg:p-8 lg:w-1/2">
           <div className="relative h-64 w-full">
-            <Image
-              src={logo2}
-              alt="Campusify Logo"
-              layout="fill"
-              objectFit="contain"
-              priority
-            />
+            {isClient && (
+              <Image
+                src={logo2}
+                alt="Campusify Logo"
+                layout="fill"
+                objectFit="contain"
+                priority
+              />
+            )}
           </div>
           <h2 className="mt-8 max-w-xl text-center text-3xl font-bold leading-tight text-gray-700 dark:text-gray-200">
             Transform Your Campus Operations with Campusify
