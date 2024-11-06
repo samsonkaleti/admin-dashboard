@@ -1,8 +1,9 @@
-"use client";
-import { useState } from "react";
-import { Pencil, Trash2, FileUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+"use client"
+
+import { useState } from "react"
+import { Pencil, Trash2, FileUp, Download } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -10,133 +11,186 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
+import { useCreatePdf } from "@/app/hooks/pdfUploads/useCreatePdfUpload"
+import { useGetAllPdfs } from "@/app/hooks/pdfUploads/useGetAllPdfs"
+import { useUpdatePdf } from "@/app/hooks/pdfUploads/useUpdatePdf"
+import { useDeletePdf } from "@/app/hooks/pdfUploads/useDeletePdf"
+import { useDownloadPdf } from "@/app/hooks/pdfUploads/useDownloadPdf"
 
 type PDFUpload = {
-  id: number;
-  year: string;
-  semester: string;
-  course: string;
-  subject: string;
-  fileName: string;
-};
+  id: number
+  academicYear: {
+    year: string
+    semester: string
+  }
+  regulation: string
+  course: string
+  subject: string
+  files: File[]
+  uploadDate: string
+}
 
 export default function PDFUploadPage() {
-  const [pdfUploads, setPDFUploads] = useState<PDFUpload[]>([
-    {
-      id: 1,
-      year: "1st Year",
-      semester: "1st Semester",
-      course: "Computer Science",
-      subject: "Algorithms",
-      fileName: "algorithms_2023.pdf",
-    },
-    {
-      id: 2,
-      year: "3rd Year",
-      semester: "2nd Semester",
-      course: "Physics",
-      subject: "Quantum Mechanics",
-      fileName: "quantum_mechanics_2022.pdf",
-    },
-  ]);
-
-  const [newUpload, setNewUpload] = useState<Omit<PDFUpload, "id">>({
-    year: "",
-    semester: "",
+  const [newUpload, setNewUpload] = useState<Omit<PDFUpload, "id" | "files" | "uploadDate">>({
+    academicYear: { year: "", semester: "" },
+    regulation: "",
     course: "",
     subject: "",
-    fileName: "",
-  });
+  })
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
 
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const courses = ["Computer Science", "Physics", "Mathematics"]; // Add your course options here
-  const subjects = ["Algorithms", "Quantum Mechanics", "Calculus"]; // Add your subject options here
-  const semesters = ["1st Semester", "2nd Semester"];
+  const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"]
+  const semesters = ["1st Semester", "2nd Semester"]
+  const regulations = ["R24", "R20", "R19", "R16", "R13"]
+  
+  const { data: pdfUploads, isLoading, isError, error } = useGetAllPdfs()
+  const createPdfMutation = useCreatePdf()
+  const updatePdfMutation = useUpdatePdf()
+  const deletePdfMutation = useDeletePdf()
+  const { downloadPdf, isDownloading } = useDownloadPdf()
 
   const handleNew = () => {
     setNewUpload({
-      year: "",
-      semester: "",
+      academicYear: { year: "", semester: "" },
+      regulation: "",
       course: "",
       subject: "",
-      fileName: "",
-    });
-    setEditingId(null);
-    setIsDialogOpen(true);
-  };
+    })
+    setSelectedFiles([])
+    setEditingId(null)
+    setIsDialogOpen(true)
+  }
 
-  const handleAdd = () => {
-    setPDFUploads([...pdfUploads, { ...newUpload, id: Date.now() }]);
-    setNewUpload({
-      year: "",
-      semester: "",
-      course: "",
-      subject: "",
-      fileName: "",
-    });
-    setIsDialogOpen(false);
-  };
+  const handleAdd = async () => {
+    try {
+      if (selectedFiles.length === 0) {
+        throw new Error("Please upload at least one PDF file")
+      }
+
+      const formData = new FormData()
+      formData.append("academicYear.year", newUpload.academicYear.year)
+      formData.append("academicYear.semester", newUpload.academicYear.semester)
+      formData.append("regulation", newUpload.regulation)
+      formData.append("course", newUpload.course)
+      formData.append("subject", newUpload.subject)
+      selectedFiles.forEach((file) => formData.append("files", file))
+
+      await createPdfMutation.mutateAsync(formData)
+
+      setIsDialogOpen(false)
+      setNewUpload({
+        academicYear: { year: "", semester: "" },
+        regulation: "",
+        course: "",
+        subject: "",
+      })
+      setSelectedFiles([])
+    } catch (error) {
+      console.error("Error uploading PDF:", error)
+      // Handle error (e.g., show error message to user)
+    }
+  }
 
   const handleEdit = (id: number) => {
-    const uploadToEdit = pdfUploads.find((upload) => upload.id === id);
-    if (uploadToEdit) {
+    const pdfToEdit = pdfUploads?.find(pdf => pdf.id === id)
+    if (pdfToEdit) {
       setNewUpload({
-        year: uploadToEdit.year,
-        semester: uploadToEdit.semester,
-        course: uploadToEdit.course,
-        subject: uploadToEdit.subject,
-        fileName: uploadToEdit.fileName,
-      });
-      setEditingId(id);
-      setIsDialogOpen(true);
+        academicYear: pdfToEdit.academicYear,
+        regulation: pdfToEdit.regulation,
+        course: pdfToEdit.course,
+        subject: pdfToEdit.subject,
+      })
+      setEditingId(id)
+      setIsDialogOpen(true)
     }
-  };
+  }
 
-  const handleUpdate = () => {
-    setPDFUploads(
-      pdfUploads.map((upload) =>
-        upload.id === editingId ? { ...upload, ...newUpload } : upload
-      )
-    );
-    setNewUpload({
-      year: "",
-      semester: "",
-      course: "",
-      subject: "",
-      fileName: "",
-    });
-    setEditingId(null);
-    setIsDialogOpen(false);
-  };
+  const handleUpdate = async () => {
+    if (editingId === null) return
 
-  const handleDelete = (id: number) => {
-    setPDFUploads(pdfUploads.filter((upload) => upload.id !== id));
-  };
+    try {
+      const updatedPdf: PDFUpload = {
+        id: editingId,
+        ...newUpload,
+        files: selectedFiles,
+        uploadDate: new Date().toISOString(),
+      }
+
+      await updatePdfMutation.mutateAsync(updatedPdf)
+
+      setIsDialogOpen(false)
+      setEditingId(null)
+      setNewUpload({
+        academicYear: { year: "", semester: "" },
+        regulation: "",
+        course: "",
+        subject: "",
+      })
+      setSelectedFiles([])
+    } catch (error) {
+      console.error("Error updating PDF:", error)
+      // Handle error (e.g., show error message to user)
+    }
+  }
+
+  const handleDeleteConfirmation = (id: number) => {
+    setDeletingId(id)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleDelete = async () => {
+    if (deletingId === null) return
+
+    try {
+      await deletePdfMutation.mutateAsync(deletingId)
+      setIsDeleteDialogOpen(false)
+      setDeletingId(null)
+    } catch (error) {
+      console.error("Error deleting PDF:", error)
+     }
+  }
+
+   
+
+  const handleDownload = async (id: number, fileIndex: number) => {
+    try {
+      await downloadPdf(id, fileIndex)
+    } catch (error) {
+      console.error("Error downloading PDF:", error)
+      // Handle error (e.g., show error message to user)
+    }
+  }
+
+  if (isLoading) return <div>Loading...</div>
+  if (isError) return <div>Error: {error.message}</div>
 
   return (
     <Card className="w-full max-w-[95vw] mx-auto">
@@ -182,22 +236,23 @@ export default function PDFUploadPage() {
                   Year
                 </Label>
                 <Select
-                  value={newUpload.year}
+                  value={newUpload.academicYear.year}
                   onValueChange={(value) =>
-                    setNewUpload({ ...newUpload, year: value })
+                    setNewUpload({
+                      ...newUpload,
+                      academicYear: { ...newUpload.academicYear, year: value },
+                    })
                   }
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
-                    {["1st Year", "2nd Year", "3rd Year", "4th Year"].map(
-                      (year) => (
-                        <SelectItem key={year} value={year}>
-                          {year}
-                        </SelectItem>
-                      )
-                    )}
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -209,9 +264,12 @@ export default function PDFUploadPage() {
                   Semester
                 </Label>
                 <Select
-                  value={newUpload.semester}
+                  value={newUpload.academicYear.semester}
                   onValueChange={(value) =>
-                    setNewUpload({ ...newUpload, semester: value })
+                    setNewUpload({
+                      ...newUpload,
+                      academicYear: { ...newUpload.academicYear, semester: value },
+                    })
                   }
                 >
                   <SelectTrigger className="col-span-3">
@@ -228,28 +286,44 @@ export default function PDFUploadPage() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label
+                  htmlFor="regulation"
+                  className="text-right text-sm font-medium"
+                >
+                  Regulation
+                </Label>
+                <Select
+                  value={newUpload.regulation}
+                  onValueChange={(value) =>
+                    setNewUpload({ ...newUpload, regulation: value })
+                  }
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select regulation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {regulations.map((regulation) => (
+                      <SelectItem key={regulation} value={regulation}>
+                        {regulation}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label
                   htmlFor="course"
                   className="text-right text-sm font-medium"
                 >
                   Course
                 </Label>
-                <Select
+                <Input
+                  id="course"
                   value={newUpload.course}
-                  onValueChange={(value) =>
-                    setNewUpload({ ...newUpload, course: value })
+                  onChange={(e) =>
+                    setNewUpload({ ...newUpload, course: e.target.value })
                   }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select course" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {courses.map((course) => (
-                      <SelectItem key={course} value={course}>
-                        {course}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  className="col-span-3"
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label
@@ -258,40 +332,29 @@ export default function PDFUploadPage() {
                 >
                   Subject
                 </Label>
-                <Select
+                <Input
+                  id="subject"
                   value={newUpload.subject}
-                  onValueChange={(value) =>
-                    setNewUpload({ ...newUpload, subject: value })
+                  onChange={(e) =>
+                    setNewUpload({ ...newUpload, subject: e.target.value })
                   }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select subject" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subjects.map((subject) => (
-                      <SelectItem key={subject} value={subject}>
-                        {subject}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  className="col-span-3"
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label
                   htmlFor="file"
                   className="text-right text-sm font-medium"
                 >
-                  File
+                  File(s)
                 </Label>
                 <Input
                   id="file"
                   type="file"
                   accept=".pdf"
+                  multiple
                   onChange={(e) =>
-                    setNewUpload({
-                      ...newUpload,
-                      fileName: e.target.files?.[0]?.name || "",
-                    })
+                    setSelectedFiles(Array.from(e.target.files || []))
                   }
                   className="col-span-3"
                 />
@@ -300,9 +363,33 @@ export default function PDFUploadPage() {
             <Button
               onClick={editingId ? handleUpdate : handleAdd}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              disabled={createPdfMutation.isPending || updatePdfMutation.isPending}
             >
-              {editingId ? "Update PDF" : "Upload PDF"}
+              {createPdfMutation.isPending || updatePdfMutation.isPending
+                ? "Processing..."
+                : editingId
+                ? "Update PDF"
+                : "Upload PDF"}
             </Button>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Deletion</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this PDF? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDelete} disabled={deletePdfMutation.isPending}>
+                {deletePdfMutation.isPending ? "Deleting..." : "Delete"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -312,12 +399,16 @@ export default function PDFUploadPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="font-semibold">Year</TableHead>
+                  <TableHead className="font-semibold">Semester</TableHead>
                   <TableHead className="font-semibold hidden sm:table-cell">
+                    Regulation
+                  </TableHead>
+                  <TableHead className="font-semibold hidden md:table-cell">
                     Course
                   </TableHead>
                   <TableHead className="font-semibold">Subject</TableHead>
                   <TableHead className="font-semibold hidden lg:table-cell">
-                    File Name
+                    Files
                   </TableHead>
                   <TableHead className="text-right font-semibold">
                     Actions
@@ -325,29 +416,46 @@ export default function PDFUploadPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pdfUploads.map((upload) => (
+                {pdfUploads?.map((upload) => (
                   <TableRow key={upload.id}>
-                    <TableCell>{upload.year}</TableCell>
+                    <TableCell>{upload.academicYear.year}</TableCell>
+                    <TableCell>{upload.academicYear.semester}</TableCell>
                     <TableCell className="hidden sm:table-cell">
+                      {upload.regulation}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
                       {upload.course}
                     </TableCell>
                     <TableCell>{upload.subject}</TableCell>
                     <TableCell className="hidden lg:table-cell">
-                      {upload.fileName}
+                      {upload.files.length} file(s)
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"
+                        className="text-green-500"
                         onClick={() => handleEdit(upload.id)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
-                        onClick={() => handleDelete(upload.id)}
+                        className="text-red-500"
+                        onClick={() => handleDeleteConfirmation(upload.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                      {upload.files.map((file, index) => (
+                        <Button
+                          key={index}
+                          variant="ghost"
+                          className="text-blue-500"
+                          onClick={() => handleDownload(upload.id, index)}
+                          disabled={isDownloading}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      ))}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -357,5 +465,5 @@ export default function PDFUploadPage() {
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
