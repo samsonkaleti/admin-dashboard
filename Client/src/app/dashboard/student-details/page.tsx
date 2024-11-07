@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Search, FileText, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,35 +33,18 @@ import {
   SelectValue,
   SelectContent,
 } from "@/components/ui/select";
+import { useGetStudents } from "../../hooks/students/useGetStudents";
 
 type Student = {
-  id: number;
-  name: string;
-  registrationId: string;
+  _id: number;
+  username: string;
   course: string;
   printDocuments: string[];
   internshipApplications: string[];
 };
 
 export default function StudentDetailsPage() {
-  const [students, setStudents] = useState<Student[]>([
-    {
-      id: 1,
-      name: "Alice Johnson",
-      registrationId: "REG001",
-      course: "Computer Science",
-      printDocuments: ["Thesis.pdf", "Assignment1.pdf"],
-      internshipApplications: ["Tech Corp", "Innovate Inc"],
-    },
-    {
-      id: 2,
-      name: "Bob Smith",
-      registrationId: "REG002",
-      course: "Physics",
-      printDocuments: ["Lab Report.pdf"],
-      internshipApplications: ["Research Lab"],
-    },
-  ]);
+  const { data: students = [], isLoading, error } = useGetStudents(); // Use the custom hook
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [selectedCollege, setSelectedCollege] = useState<string | null>(null);
@@ -74,12 +56,13 @@ export default function StudentDetailsPage() {
     "Medical School",
   ];
 
-  const filteredStudents = students.filter(
-    (student) =>
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.registrationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.course.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error.message}</p>;
+  }
 
   return (
     <Card className="w-full">
@@ -93,7 +76,7 @@ export default function StudentDetailsPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Responsive Filter Section */}
+        {/* Filter and Search Section */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           {/* College Select */}
           <div className="w-full sm:w-1/3">
@@ -117,7 +100,7 @@ export default function StudentDetailsPage() {
             </Select>
           </div>
 
-          {/* Search Section */}
+          {/* Search Input */}
           <div className="flex-1">
             <Label
               htmlFor="search"
@@ -140,7 +123,7 @@ export default function StudentDetailsPage() {
           </div>
         </div>
 
-        {/* Responsive Table */}
+        {/* Student Table */}
         <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
@@ -154,22 +137,23 @@ export default function StudentDetailsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredStudents.map((student) => (
-                <TableRow key={student.id}>
+              {students.map((student: Student) => (
+                <TableRow key={student._id}>
                   <TableCell className="font-medium">
-                    <div>{student.name}</div>
+                    <div>{student.username}</div>
                     <div className="text-sm text-muted-foreground sm:hidden">
-                      {student.registrationId}
+                      {student.username}
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    {student.registrationId}
+                    {student._id}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     {student.course}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      {/* Document and Application Dialogs */}
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -189,7 +173,7 @@ export default function StudentDetailsPage() {
                           </DialogHeader>
                           <div className="py-4">
                             <h3 className="font-medium text-base mb-3">
-                              Documents for {selectedStudent?.name}
+                              Documents for {selectedStudent?.username}
                             </h3>
                             <ul className="space-y-2">
                               {selectedStudent?.printDocuments.map(
@@ -227,7 +211,7 @@ export default function StudentDetailsPage() {
                           </DialogHeader>
                           <div className="py-4">
                             <h3 className="font-medium text-base mb-3">
-                              Applications for {selectedStudent?.name}
+                              Applications for {selectedStudent?.username}
                             </h3>
                             <ul className="space-y-2">
                               {selectedStudent?.internshipApplications.map(
