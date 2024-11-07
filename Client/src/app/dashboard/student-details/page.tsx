@@ -44,7 +44,7 @@ type Student = {
 };
 
 export default function StudentDetailsPage() {
-  const { data: students = [], isLoading, error } = useGetStudents(); // Use the custom hook
+  const { data: students = [], isLoading, error } = useGetStudents();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [selectedCollege, setSelectedCollege] = useState<string | null>(null);
@@ -76,9 +76,7 @@ export default function StudentDetailsPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Filter and Search Section */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          {/* College Select */}
           <div className="w-full sm:w-1/3">
             <Label
               htmlFor="college-select"
@@ -99,8 +97,6 @@ export default function StudentDetailsPage() {
               </SelectContent>
             </Select>
           </div>
-
-          {/* Search Input */}
           <div className="flex-1">
             <Label
               htmlFor="search"
@@ -122,8 +118,6 @@ export default function StudentDetailsPage() {
             </div>
           </div>
         </div>
-
-        {/* Student Table */}
         <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
@@ -153,7 +147,6 @@ export default function StudentDetailsPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      {/* Document and Application Dialogs */}
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -191,7 +184,6 @@ export default function StudentDetailsPage() {
                           </div>
                         </DialogContent>
                       </Dialog>
-
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
