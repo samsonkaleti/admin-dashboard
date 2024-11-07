@@ -1,7 +1,5 @@
 "use client";
-// import { Metadata } from "next";
 import Link from "next/link";
-// import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,14 +12,8 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-
 import logo2 from "@/utils/logo2.png";
 import logo from "@/utils/logo.png";
-
-// export const metadata: Metadata = {
-//   title: "Login - Campusify",
-//   description: "Login to your Campusify account",
-// };
 
 const ClientSideImage = dynamic(() => import("next/image"), { ssr: false });
 
@@ -29,7 +21,7 @@ export default function LoginPage() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true); // This will run only on the client
+    setIsClient(true);
   }, []);
 
   return (
@@ -151,7 +143,7 @@ export default function LoginPage() {
             </CardContent>
             <CardFooter className="flex flex-col space-y-4 text-center">
               <p className="px-2 text-sm text-muted-foreground dark:text-gray-400">
-                Don&apos;t have an account?{" "}
+                Dont have an account?{" "}
                 <Link
                   href="/signup"
                   className="text-secondary hover:underline hover:underline-offset-"
