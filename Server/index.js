@@ -4,6 +4,7 @@ const eventsRoutes = require("./routes/eventsRoutes");
 const pdfRoutes = require("./routes/pdfRoutes");
 const cardRoutes = require("./routes/cardRoute"); // Import the card routes file
 const authRoutes = require("./routes/authRoutes");
+const studentRoutes = require("./routes/studentRoutes");
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
@@ -38,6 +39,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth", authRoutes);
 app.use("/api", collegeRoutes);
 app.use("/api", cardRoutes);
+app.use("/api", studentRoutes);
 app.use("/api/pdfs", pdfRoutes);
 app.use("/api/events", eventsRoutes);
 // Start the server
