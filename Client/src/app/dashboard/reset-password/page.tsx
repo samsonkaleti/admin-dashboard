@@ -1,47 +1,66 @@
-// pages/reset-password/index.js
-'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function ResetPassword() {
-  const [email, setEmail] = useState('');
-  const [resetToken, setResetToken] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [message, setMessage] = useState("");
   const [step, setStep] = useState(1); // 1: Request reset, 2: Enter new password
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleRequestReset = async (e) => {
+  const handleRequestReset = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5001/api/auth/reset-password', { email });
+      console.log("Requesting reset password with email:", email); // Debugging
+      const response = await axios.post(
+        "http://localhost:5001/api/auth/reset-password",
+        { email }
+      );
       setMessage(response.data.message);
       setStep(2);
-    } catch (error) {
-      setMessage(error.response?.data?.message || 'An error occurred');
+    } catch (error: unknown) {
+      console.error("Error during reset password request:", error); // Debugging
+      // Type guard for error handling
+      if (axios.isAxiosError(error)) {
+        setMessage(error.response?.data?.message || "An error occurred");
+      } else {
+        setMessage("An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleConfirmReset = async (e) => {
+  const handleConfirmReset = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5001/api/auth/confirm-reset-password', {
-        resetToken,
-        newPassword
-      });
+      console.log("Reset token and new password:", { resetToken, newPassword }); // Debugging
+      const response = await axios.post(
+        "http://localhost:5001/api/auth/confirm-reset-password",
+        {
+          resetToken,
+          newPassword,
+        }
+      );
       setMessage(response.data.message);
       // Redirect to login after successful password reset
       setTimeout(() => {
-        router.push('/login');
+        router.push("/login");
       }, 3000);
-    } catch (error) {
-      setMessage(error.response?.data?.message || 'An error occurred');
+    } catch (error: unknown) {
+      console.error("Error during password reset confirmation:", error); // Debugging
+      // Type guard for error handling
+      if (axios.isAxiosError(error)) {
+        setMessage(error.response?.data?.message || "An error occurred");
+      } else {
+        setMessage("An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -57,7 +76,13 @@ export default function ResetPassword() {
         </div>
 
         {message && (
-          <div className={`p-4 rounded-md ${message.includes('error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+          <div
+            className={`p-4 rounded-md ${
+              message.includes("error")
+                ? "bg-red-100 text-red-700"
+                : "bg-green-100 text-green-700"
+            }`}
+          >
             {message}
           </div>
         )}
@@ -65,7 +90,10 @@ export default function ResetPassword() {
         {step === 1 ? (
           <form className="mt-8 space-y-6" onSubmit={handleRequestReset}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <input
@@ -84,17 +112,24 @@ export default function ResetPassword() {
                 type="submit"
                 disabled={loading}
                 className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
-                  ${loading ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'} 
+                  ${
+                    loading
+                      ? "bg-indigo-400"
+                      : "bg-indigo-600 hover:bg-indigo-700"
+                  } 
                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
               >
-                {loading ? 'Sending...' : 'Send Reset Link'}
+                {loading ? "Sending..." : "Send Reset Link"}
               </button>
             </div>
           </form>
         ) : (
           <form className="mt-8 space-y-6" onSubmit={handleConfirmReset}>
             <div>
-              <label htmlFor="token" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="token"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Reset Token
               </label>
               <input
@@ -109,7 +144,10 @@ export default function ResetPassword() {
             </div>
 
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="newPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
                 New Password
               </label>
               <input
@@ -128,10 +166,14 @@ export default function ResetPassword() {
                 type="submit"
                 disabled={loading}
                 className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
-                  ${loading ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'} 
+                  ${
+                    loading
+                      ? "bg-indigo-400"
+                      : "bg-indigo-600 hover:bg-indigo-700"
+                  } 
                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
               >
-                {loading ? 'Resetting...' : 'Reset Password'}
+                {loading ? "Resetting..." : "Reset Password"}
               </button>
             </div>
           </form>

@@ -418,8 +418,10 @@ router.post("/reset-password", resetPasswordController.resetPassword);
  *                   type: string
  *                   example: "Detailed error message"
  */
+// Route to confirm password reset
 router.post(
   "/confirm-reset-password",
   resetPasswordController.confirmResetPassword
 );
+
 module.exports = router;
