@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const redisClient = require("../config/redis"); // Redis client
 
-
 // User Signup
 exports.signup = async (req, res) => {
   const { username, email, password, role, yearOfJoining } = req.body;
@@ -15,7 +14,7 @@ exports.signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Check if the user is a student or an admin/uploader
-    const isStudent = role === 'Student';
+    const isStudent = role === "Student";
 
     const newUser = await User.create({
       username,
@@ -87,17 +86,11 @@ exports.verifyOTP = async (req, res) => {
       .status(500)
       .json({ message: "Error verifying OTP", error: error.message });
   }
-}; 
+};
 
-
-// userDetails
-
-
-
-// User Details Submission
 exports.userDetails = async (req, res) => {
   const { firstName, lastName, phoneNo, email, selectedRegulation } = req.body;
-  const userDomain = email.split('@')[1]; // Extract domain from email 
+  const userDomain = email.split("@")[1]; // Extract domain from email
   console.log("User Domain: " + userDomain);
 
   try {
@@ -108,22 +101,26 @@ exports.userDetails = async (req, res) => {
     }
 
     // Check if the user is a student or an admin/uploader
-    const isStudent = user.role === 'student';
+    const isStudent = user.role === "student";
 
     // Find college by domain
     const college = await College.findOne({ domain: userDomain });
     if (!college) {
-      return res.status(400).json({ message: "Domain not matching with any college." });
+      return res
+        .status(400)
+        .json({ message: "Domain not matching with any college." });
     }
 
     // Fetch only regulation names from the college model
-    const regulations = college.programs.flatMap(program => 
-      program.regulations.map(reg => reg.regulation) // Extract only regulation names
+    const regulations = college.programs.flatMap(
+      (program) => program.regulations.map((reg) => reg.regulation) // Extract only regulation names
     );
 
     // Check if the selected regulation is valid
     if (!regulations.includes(selectedRegulation)) {
-      return res.status(400).json({ message: "Selected regulation is not valid." });
+      return res
+        .status(400)
+        .json({ message: "Selected regulation is not valid." });
     }
 
     // Update user fields with provided details
@@ -143,7 +140,7 @@ exports.userDetails = async (req, res) => {
 
     return res.status(200).json({
       regulations,
-      message: "User details updated successfully"
+      message: "User details updated successfully",
     });
   } catch (error) {
     console.error(error);
@@ -154,28 +151,26 @@ exports.userDetails = async (req, res) => {
   }
 };
 
-
-
-
-
-// User Login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    console.log(req.body); // Log the request body to ensure both email and password are provided
+
+    const user = await User.findOne({ email }).select("+password"); // Explicitly include password
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Log password and hash for debugging
+    console.log("Entered password:", password);
+    console.log("Stored hash password:", user.password);
+
     // Check if the user is verified
     if (!user.isVerified) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "User not verified. Please verify the OTP sent to your email",
-        });
+      return res.status(400).json({
+        message: "User not verified. Please verify the OTP sent to your email",
+      });
     }
 
     // Compare the entered password with the stored hash
@@ -190,6 +185,7 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+
     return res.status(200).json({ message: "Login successful", token });
   } catch (error) {
     return res

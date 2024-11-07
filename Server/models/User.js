@@ -19,33 +19,32 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["student", "admin", "uploader"],
-      default: "student",
+      enum: ["Student", "Admin", "Uploader"],
       required: true,
     },
     firstName: {
       type: String,
       required: function () {
-        return this.role === "student";
+        return this.role === "Student";
       },
     },
     lastName: {
       type: String,
       required: function () {
-        return this.role === "student";
+        return this.role === "Student";
       },
     },
     phone: {
       type: String,
       required: function () {
-        return this.role === "student";
+        return this.role === "Student";
       },
       match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"],
     },
     yearOfJoining: {
       type: Number,
       required: function () {
-        return this.role === "student";
+        return this.role === "Student";
       },
     },
     isVerified: {

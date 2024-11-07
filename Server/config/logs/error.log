@@ -1,2 +1,4 @@
 {"level":"error","message":"Uncaught Exception: listen EADDRINUSE: address already in use :::5001","timestamp":"2024-10-16T11:19:16.717Z"}
 {"level":"error","message":"Uncaught Exception: listen EADDRINUSE: address already in use :::5001","timestamp":"2024-10-17T07:28:41.136Z"}
+{"level":"error","message":"Unhandled Rejection: Cannot read properties of undefined (reading 'split')","timestamp":"2024-11-07T09:42:26.277Z"}
+{"level":"error","message":"Unhandled Rejection: Cannot read properties of undefined (reading 'split')","timestamp":"2024-11-07T09:58:22.200Z"}

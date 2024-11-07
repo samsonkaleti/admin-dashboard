@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const authController = require("../controllers/authcontroller") 
-const resetPasswordController = require("../controllers/resetPasswordController")
+const authController = require("../controllers/authcontroller");
+const resetPasswordController = require("../controllers/resetPasswordController");
 
 /**
  * @swagger
@@ -226,8 +226,7 @@ router.post("/login", authController.login);
  *                   type: string
  *                   example: "Detailed error message"
  */
-router.post("/verify-otp", authController.verifyOTP);    
-
+router.post("/verify-otp", authController.verifyOTP);
 
 /**
  * @swagger
@@ -299,11 +298,7 @@ router.post("/verify-otp", authController.verifyOTP);
  *                   type: string
  *                   example: "Detailed error message"
  */
-router.post("/user-details", authController.userDetails); 
-
-
-
-// routes.js
+router.post("/user-details", authController.userDetails);
 
 /**
  * @swagger
@@ -361,8 +356,7 @@ router.post("/user-details", authController.userDetails);
  *                   example: "Detailed error message"
  */
 
-router.post('/reset-password', resetPasswordController.resetPassword); 
-
+router.post("/reset-password", resetPasswordController.resetPassword);
 
 /**
  * @swagger
@@ -424,13 +418,8 @@ router.post('/reset-password', resetPasswordController.resetPassword);
  *                   type: string
  *                   example: "Detailed error message"
  */
-
-
-router.post('/confirm-reset-password', resetPasswordController.confirmResetPassword);
-
-
-
-
-
-
+router.post(
+  "/confirm-reset-password",
+  resetPasswordController.confirmResetPassword
+);
 module.exports = router;
