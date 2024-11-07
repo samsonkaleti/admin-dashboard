@@ -1,70 +1,70 @@
-const mongoose = require("mongoose");
+  const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema(
-  {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-      select: false,
-    },
-    role: {
-      type: String,
-      enum: ["Student", "Admin", "Uploader"],
-      required: true,
-    },
-    firstName: {
-      type: String,
-      required: function () {
-        return this.role === "Student";
+  const userSchema = new mongoose.Schema(
+    {
+      username: {
+        type: String,
+        required: true,
+        unique: true,
       },
-    },
-    lastName: {
-      type: String,
-      required: function () {
-        return this.role === "Student";
+      email: {
+        type: String,
+        required: true,
+        unique: true,
       },
-    },
-    phone: {
-      type: String,
-      required: function () {
-        return this.role === "Student";
+      password: {
+        type: String,
+        required: true,
+        select: false,
       },
-      match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"],
-    },
-    yearOfJoining: {
-      type: Number,
-      required: function () {
-        return this.role === "Student";
+      role: {
+        type: String,
+        enum: ["Student", "Admin", "Uploader"],
+        required: true,
       },
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    otp: [
-      {
-        code: { type: String, select: false },
-        expiration: { type: Date, select: false },
+      // firstName: {
+      //   type: String,
+      //   required: function () {
+      //     return this.role === "Student";
+      //   },
+      // },
+      // lastName: {
+      //   type: String,
+      //   required: function () {
+      //     return this.role === "Student";
+      //   },
+      // },
+      // phone: {
+      //   type: String,
+      //   required: function () {
+      //     return this.role === "Student";
+      //   },
+      //   match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"],
+      // },
+      yearOfJoining: {
+        type: Number,
+        required: function () {
+          return this.role === "Student";
+        },
       },
-    ],
-    regulations: [String],
+      isVerified: {
+        type: Boolean,
+        default: false,
+      },
+      otp: [
+        {
+          code: { type: String, select: false },
+          expiration: { type: Date, select: false },
+        },
+      ],
+      regulations: [String],
 
-    resetPasswordToken: String,
-    resetPasswordExpires: Date,
-  },
-  { timestamps: true }
-);
+      resetPasswordToken: String,
+      resetPasswordExpires: Date,
+    },
+    { timestamps: true }
+  );
 
-const User = mongoose.model("User", userSchema);
+  const User = mongoose.model("User", userSchema);
 
-module.exports = User;
+  module.exports = User;
