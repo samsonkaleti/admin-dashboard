@@ -1,5 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
-
+import { useQuery, useMutation } from "@tanstack/react-query";
 type PDFUpload = {
   id: number
   academicYear: {

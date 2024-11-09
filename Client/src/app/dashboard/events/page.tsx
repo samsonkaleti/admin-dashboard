@@ -40,6 +40,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Clock, MapPin, Trash2, Edit } from "lucide-react";
+import Image from "next/image";
 
 // Define form type
 interface EventFormValues {
@@ -83,12 +84,14 @@ const EventCard = ({
     <Card className="w-full max-w-[400px] mx-auto bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
       {/* Image Section */}
       <div className="relative aspect-[3/2] overflow-hidden bg-purple-50">
-        <img
+        <Image
           src={
             event.thumbnail
-              ? `http://localhost:5001/${event.thumbnail}`
+              ? `http://172.188.116.118:5001/${event.thumbnail}`
               : "./logo2.png"
           }
+          width={80}
+          height={80}
           alt={event.title}
           className="w-full h-full object-cover"
         />
@@ -553,9 +556,11 @@ const EventManagement = () => {
                         </div>
                         {previewUrl && (
                           <div className="mt-2">
-                            <img
+                            <Image
                               src={previewUrl}
                               alt="Preview"
+                              width={32}
+                              height={32}
                               className="h-32 w-32 object-cover rounded"
                             />
                           </div>

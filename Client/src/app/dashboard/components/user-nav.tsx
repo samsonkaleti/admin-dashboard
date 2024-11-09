@@ -1,6 +1,8 @@
+"use client"
+
 import React from "react";
 import { useTheme } from "next-themes";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -72,7 +74,7 @@ const sidebarNavItems = [
     icon: UserCog,
   },
   {
-    title: "Event Manasgement",
+    title: "Event Management",
     href: "/dashboard/events",
     icon: CalendarRange,
   },
@@ -116,6 +118,7 @@ export function Navbar() {
     typeof window !== "undefined" ? window.innerWidth < 1024 : false;
   const [windowWidth, setWindowWidth] = React.useState(isMobile);
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -125,6 +128,11 @@ export function Navbar() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const handleLogout = () => {
+    // Add any logout logic here (e.g., clearing tokens, etc.)
+    router.push('/login');
+  };
 
   return (
     <>
@@ -198,7 +206,7 @@ export function Navbar() {
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600 dark:text-red-400">
+                    <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
                     </DropdownMenuItem>
@@ -261,7 +269,7 @@ export function Navbar() {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600 dark:text-red-400">
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>

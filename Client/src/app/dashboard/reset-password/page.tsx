@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -17,20 +16,26 @@ export default function ResetPassword() {
     setLoading(true);
     try {
       console.log("Requesting reset password with email:", email); // Debugging
-      const response = await axios.post(
-        "http://localhost:5001/api/auth/reset-password",
-        { email }
-      );
-      setMessage(response.data.message);
-      setStep(2);
-    } catch (error: unknown) {
-      console.error("Error during reset password request:", error); // Debugging
-      // Type guard for error handling
-      if (axios.isAxiosError(error)) {
-        setMessage(error.response?.data?.message || "An error occurred");
-      } else {
-        setMessage("An unexpected error occurred");
+      const response = await fetch("http://172.188.116.118:5001/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setMessage(errorData.message || "An error occurred");
+        return;
       }
+
+      const data = await response.json();
+      setMessage(data.message);
+      setStep(2);
+    } catch (error) {
+      console.error("Error during reset password request:", error); // Debugging
+      setMessage("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -41,26 +46,32 @@ export default function ResetPassword() {
     setLoading(true);
     try {
       console.log("Reset token and new password:", { resetToken, newPassword }); // Debugging
-      const response = await axios.post(
-        "http://localhost:5001/api/auth/confirm-reset-password",
-        {
+      const response = await fetch("http://172.188.116.118:5001/api/auth/confirm-reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           resetToken,
           newPassword,
-        }
-      );
-      setMessage(response.data.message);
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setMessage(errorData.message || "An error occurred");
+        return;
+      }
+
+      const data = await response.json();
+      setMessage(data.message);
       // Redirect to login after successful password reset
       setTimeout(() => {
         router.push("/login");
       }, 3000);
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("Error during password reset confirmation:", error); // Debugging
-      // Type guard for error handling
-      if (axios.isAxiosError(error)) {
-        setMessage(error.response?.data?.message || "An error occurred");
-      } else {
-        setMessage("An unexpected error occurred");
-      }
+      setMessage("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
