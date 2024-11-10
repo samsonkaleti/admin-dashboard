@@ -130,7 +130,7 @@ export function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    // Add any logout logic here (e.g., clearing tokens, etc.)
+    sessionStorage.removeItem('auth_token')
     router.push('/login');
   };
 

@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Card,
   CardContent,
@@ -41,7 +40,8 @@ import { useEffect, useState } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import logo2 from "@/utils/logo2.png"
 import logo from "@/utils/logo.png"
-import { useSignUp, useVerifyOTP, useCompleteProfileMutation } from "../hooks/auth/useAuth"
+import { useSignUp, useVerifyOTP, useCompleteProfileMutation, useLogin } from "../hooks/auth/useAuth"
+import { useRouter } from "next/navigation"
 type SignupRequest = {
   username: string;
   email: string;
@@ -96,6 +96,8 @@ function LoginPageContent() {
   const [signUpEmail, setSignUpEmail] = useState("")
   const [isCompleteProfileOpen, setIsCompleteProfileOpen] = useState(false)
   const [collegeRegulations, setCollegeRegulations] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   const signInForm = useForm({
     resolver: zodResolver(signInSchema),
@@ -140,11 +142,20 @@ function LoginPageContent() {
   const signUpMutation = useSignUp()
   const verifyOtpMutation = useVerifyOTP()
   const completeProfileMutation = useCompleteProfileMutation()
+  const loginMutation = useLogin()
 
-
-  const onSignInSubmit = (data: LoginRequest) => {
-    // Handle sign-in logic here
-    console.log("Sign-in data:", data)
+  const onSignInSubmit = async (data: LoginRequest) => {
+    try {
+      const response = await loginMutation.mutateAsync(data)
+      console.log("Login successful:", response)
+      // Store the token in localStorage or a secure cookie
+      sessionStorage.setItem('auth_token', response.token)
+      // Redirect to dashboard or home page
+      router.push('/')
+    } catch (error) {
+      console.error("Login error:", error)
+      setError("Invalid credentials. Please try again.")
+    }
   }
 
   const onSignUpSubmit = (data: SignupRequest) => {

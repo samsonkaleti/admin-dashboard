@@ -29,10 +29,15 @@ export type Event = {
 export type EventInput = Omit<Event, "_id">;
 
 const API_BASE_URL = "http://172.188.116.118:5001/api";
+const token = process.env.SECRET_TOKEN
 
 // API Functions
 async function fetchEvents() {
-  const response = await fetch("http://localhost:5001/api/events");
+  const response = await fetch(`${API_BASE_URL}/events`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  }) 
   if (!response.ok) {
     throw new Error("Failed to fetch events");
   }
