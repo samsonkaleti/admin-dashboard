@@ -32,7 +32,7 @@ const API_BASE_URL = "http://172.188.116.118:5001/api";
 
 // API Functions
 async function fetchEvents() {
-  const response = await fetch("http://localhost:5001/api/events");
+  const response = await fetch("http://172.188.116.118:5001/api/events");
   if (!response.ok) {
     throw new Error("Failed to fetch events");
   }

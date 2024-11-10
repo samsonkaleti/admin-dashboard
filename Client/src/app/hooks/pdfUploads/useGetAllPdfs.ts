@@ -17,7 +17,7 @@ async function fetchPdfs(year?: string, semester?: string): Promise<PDFUpload[]>
   if (year) params.append('year', year)
   if (semester) params.append('semester', semester)
 
-  const response = await fetch(`http://localhost:5001/api/pdfs?${params.toString()}`)
+  const response = await fetch(`http://172.188.116.118:5001/api/pdfs?${params.toString()}`)
   if (!response.ok) {
     throw new Error('Network response was not ok')
   }
