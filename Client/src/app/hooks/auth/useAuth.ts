@@ -10,7 +10,6 @@ type SignupRequest = {
 };
 
 type OtpVerificationRequest = {
-  email: string;
   otp: string;
 };
 

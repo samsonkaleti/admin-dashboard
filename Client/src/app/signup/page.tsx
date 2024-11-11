@@ -98,8 +98,9 @@ export default function SignupPage() {
 
   const onSignUpSubmit = async (data: SignupRequest) => {
     try {
-      await signUpMutation.mutateAsync(data);
-      router.push("/login");
+      const response = await signUpMutation.mutateAsync(data);
+      sessionStorage.setItem('signupEmail', response.email)
+      router.push("/otp-verification");
     } catch (error) {
       setError("Signup failed. Please try again.");
     }
