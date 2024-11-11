@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import dynamic from "next/dynamic"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import Link from "next/link";
+import dynamic from "next/dynamic";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -20,14 +20,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Form,
   FormControl,
@@ -35,13 +35,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { useEffect, useState } from "react"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import logo2 from "@/utils/logo2.png"
-import logo from "@/utils/logo.png"
-import { useSignUp, useVerifyOTP, useCompleteProfileMutation, useLogin } from "../hooks/auth/useAuth"
-import { useRouter } from "next/navigation"
+} from "@/components/ui/form";
+import { useEffect, useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import logo2 from "@/utils/logo2.png";
+import logo from "@/utils/logo.png";
+import {
+  useSignUp,
+  useVerifyOTP,
+  useCompleteProfileMutation,
+  useLogin,
+} from "../hooks/auth/useAuth";
+import { useRouter } from "next/navigation";
 type SignupRequest = {
   username: string;
   email: string;
@@ -60,44 +65,66 @@ type LoginRequest = {
   password: string;
 };
 
+const ClientSideImage = dynamic(() => import("next/image"), { ssr: false });
 
-const ClientSideImage = dynamic(() => import("next/image"), { ssr: false })
-
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-})
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" }),
+});
 
 const signUpSchema = z.object({
-  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
-  role: z.enum(["Student", "Admin", "Uploader"], { required_error: "Please select a role" }),
+  username: z
+    .string()
+    .min(3, { message: "Username must be at least 3 characters" }),
+  role: z.enum(["Student", "Admin", "Uploader"], {
+    required_error: "Please select a role",
+  }),
   email: z.string().email({ message: "Invalid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-  yearOfJoining: z.number().int().min(1900, { message: "Invalid year" }).max(new Date().getFullYear(), { message: "Year cannot be in the future" }),
-})
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" }),
+  yearOfJoining: z
+    .number()
+    .int()
+    .min(1900, { message: "Invalid year" })
+    .max(new Date().getFullYear(), { message: "Year cannot be in the future" }),
+});
 
 const otpVerificationSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
-  otp: z.string().length(6, { message: "OTP must be 6 characters" }).regex(/^[a-zA-Z0-9]{6}$/, { message: "OTP must be 6 alphanumeric characters" }),
-})
+  otp: z
+    .string()
+    .length(6, { message: "OTP must be 6 characters" })
+    .regex(/^[a-zA-Z0-9]{6}$/, {
+      message: "OTP must be 6 alphanumeric characters",
+    }),
+});
 
 const completeProfileSchema = z.object({
-  firstName: z.string().min(2, { message: "First name must be at least 2 characters" }),
-  lastName: z.string().min(2, { message: "Last name must be at least 2 characters" }),
-  phoneNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, { message: "Invalid phone number" }),
-})
+  firstName: z
+    .string()
+    .min(2, { message: "First name must be at least 2 characters" }),
+  lastName: z
+    .string()
+    .min(2, { message: "Last name must be at least 2 characters" }),
+  phoneNumber: z
+    .string()
+    .regex(/^\+?[1-9]\d{1,14}$/, { message: "Invalid phone number" }),
+});
 
 function LoginPageContent() {
-  const [isClient, setIsClient] = useState(false)
-  const [isSignUpOpen, setIsSignUpOpen] = useState(false)
-  const [isOtpVerificationOpen, setIsOtpVerificationOpen] = useState(false)
-  const [signUpEmail, setSignUpEmail] = useState("")
-  const [isCompleteProfileOpen, setIsCompleteProfileOpen] = useState(false)
-  const [collegeRegulations, setCollegeRegulations] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+  const [isClient, setIsClient] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [isOtpVerificationOpen, setIsOtpVerificationOpen] = useState(false);
+  const [signUpEmail, setSignUpEmail] = useState("");
+  const [isCompleteProfileOpen, setIsCompleteProfileOpen] = useState(false);
+  const [collegeRegulations, setCollegeRegulations] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const signInForm = useForm({
     resolver: zodResolver(signInSchema),
@@ -105,7 +132,7 @@ function LoginPageContent() {
       email: "",
       password: "",
     },
-  })
+  });
 
   const signUpForm = useForm({
     resolver: zodResolver(signUpSchema),
@@ -116,7 +143,7 @@ function LoginPageContent() {
       password: "",
       yearOfJoining: new Date().getFullYear(),
     },
-  })
+  });
 
   const otpVerificationForm = useForm({
     resolver: zodResolver(otpVerificationSchema),
@@ -124,7 +151,7 @@ function LoginPageContent() {
       email: "",
       otp: "",
     },
-  })
+  });
 
   const completeProfileForm = useForm({
     resolver: zodResolver(completeProfileSchema),
@@ -133,75 +160,78 @@ function LoginPageContent() {
       lastName: "",
       phoneNumber: "",
     },
-  })
+  });
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
-  const signUpMutation = useSignUp()
-  const verifyOtpMutation = useVerifyOTP()
-  const completeProfileMutation = useCompleteProfileMutation()
-  const loginMutation = useLogin()
+  const signUpMutation = useSignUp();
+  const verifyOtpMutation = useVerifyOTP();
+  const completeProfileMutation = useCompleteProfileMutation();
+  const loginMutation = useLogin();
 
   const onSignInSubmit = async (data: LoginRequest) => {
     try {
-      const response = await loginMutation.mutateAsync(data)
-      console.log("Login successful:", response)
+      const response = await loginMutation.mutateAsync(data);
+      console.log("Login successful:", response);
       // Store the token in localStorage or a secure cookie
-      sessionStorage.setItem('auth_token', response.token)
+      sessionStorage.setItem("auth_token", response.token);
       // Redirect to dashboard or home page
-      router.push('/')
+      router.push("/");
     } catch (error) {
-      console.error("Login error:", error)
-      setError("Invalid credentials. Please try again.")
+      console.error("Login error:", error);
+      setError("Invalid credentials. Please try again.");
     }
-  }
+  };
 
   const onSignUpSubmit = (data: SignupRequest) => {
     signUpMutation.mutate(data, {
       onSuccess: (response) => {
-        console.log("Signup successful:", response)
-        setSignUpEmail(data.email)
-        setIsSignUpOpen(false)
+        console.log("Signup successful:", response);
+        setSignUpEmail(data.email);
+        setIsSignUpOpen(false);
         if (data.role === "Student") {
-          setIsOtpVerificationOpen(true)
+          setIsOtpVerificationOpen(true);
         }
       },
       onError: (error) => {
-        console.error("Signup error:", error)
+        console.error("Signup error:", error);
         // Handle error (e.g., show error message to user)
       },
-    })
-  }
+    });
+  };
 
   const onOtpVerificationSubmit = (data: OtpVerificationRequest) => {
     verifyOtpMutation.mutate(data, {
       onSuccess: (response) => {
-        console.log("OTP verification successful:", response)
-        setIsOtpVerificationOpen(false)
+        console.log("OTP verification successful:", response);
+        setIsOtpVerificationOpen(false);
         // Handle successful verification (e.g., show success message, redirect to login)
       },
       onError: (error) => {
-        console.error("OTP verification error:", error)
+        console.error("OTP verification error:", error);
         // Handle error (e.g., show error message to user)
       },
-    })
-  }
+    });
+  };
 
   const onCompleteProfileSubmit = (data: any) => {
-    completeProfileMutation.mutate({ ...data, email: signUpEmail }, {
-      onSuccess: (response) => {
-        console.log("Profile completion successful:", response)
-        setIsCompleteProfileOpen(false)
-        // Handle successful profile completion (e.g., redirect to dashboard)
-      },
-      onError: (error) => {
-        console.error("Profile completion error:", error)
-        // Handle error (e.g., show error message to user)
-      },
-    })
-  }
+    completeProfileMutation.mutate(
+      { ...data, email: signUpEmail },
+      {
+        onSuccess: (response) => {
+          console.log("Profile completion successful:", response);
+          setIsCompleteProfileOpen(false);
+          // Handle successful profile completion (e.g., redirect to dashboard)
+        },
+        onError: (error) => {
+          console.error("Profile completion error:", error);
+          // Handle error (e.g., show error message to user)
+        },
+      }
+    );
+  };
 
   return (
     <div className="min-h-screen w-full bg-white dark:bg-black">
@@ -247,7 +277,10 @@ function LoginPageContent() {
             </CardHeader>
             <CardContent className="space-y-6">
               <Form {...signInForm}>
-                <form onSubmit={signInForm.handleSubmit(onSignInSubmit)} className="space-y-4">
+                <form
+                  onSubmit={signInForm.handleSubmit(onSignInSubmit)}
+                  className="space-y-4"
+                >
                   <FormField
                     control={signInForm.control}
                     name="email"
@@ -313,7 +346,10 @@ function LoginPageContent() {
                 Don&apos;t have an account?{" "}
                 <Dialog open={isSignUpOpen} onOpenChange={setIsSignUpOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="link" className="p-0 text-secondary hover:underline hover:underline-offset-4">
+                    <Button
+                      variant="link"
+                      className="p-0 text-secondary hover:underline hover:underline-offset-4"
+                    >
                       Sign up
                     </Button>
                   </DialogTrigger>
@@ -325,7 +361,10 @@ function LoginPageContent() {
                       </DialogDescription>
                     </DialogHeader>
                     <Form {...signUpForm}>
-                      <form onSubmit={signUpForm.handleSubmit(onSignUpSubmit)} className="space-y-4">
+                      <form
+                        onSubmit={signUpForm.handleSubmit(onSignUpSubmit)}
+                        className="space-y-4"
+                      >
                         <FormField
                           control={signUpForm.control}
                           name="username"
@@ -345,16 +384,23 @@ function LoginPageContent() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Role</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Select a role" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="Student">Student</SelectItem>
+                                  <SelectItem value="Student">
+                                    Student
+                                  </SelectItem>
                                   <SelectItem value="Admin">Admin</SelectItem>
-                                  <SelectItem value="Uploader">Uploader</SelectItem>
+                                  <SelectItem value="Uploader">
+                                    Uploader
+                                  </SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -368,7 +414,11 @@ function LoginPageContent() {
                             <FormItem>
                               <FormLabel>Email</FormLabel>
                               <FormControl>
-                                <Input {...field} type="email" placeholder="john@example.com" />
+                                <Input
+                                  {...field}
+                                  type="email"
+                                  placeholder="john@example.com"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -394,19 +444,31 @@ function LoginPageContent() {
                             <FormItem>
                               <FormLabel>Year of Joining</FormLabel>
                               <FormControl>
-                                <Input {...field} type="number" placeholder="2023" />
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  placeholder="2023"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                        <Button type="submit" className="w-full" disabled={signUpMutation.isPending}>
-                          {signUpMutation.isPending ? "Creating account..." : "Create account"}
+                        <Button
+                          type="submit"
+                          className="w-full"
+                          disabled={signUpMutation.isPending}
+                        >
+                          {signUpMutation.isPending
+                            ? "Creating account..."
+                            : "Create account"}
                         </Button>
                       </form>
                     </Form>
                     {signUpMutation.isError && (
-                      <p className="text-red-500 text-sm mt-2">Error creating account. Please try again.</p>
+                      <p className="text-red-500 text-sm mt-2">
+                        Error creating account. Please try again.
+                      </p>
                     )}
                   </DialogContent>
                 </Dialog>
@@ -432,16 +494,25 @@ function LoginPageContent() {
         </div>
       </div>
 
-      <Dialog open={isOtpVerificationOpen} onOpenChange={setIsOtpVerificationOpen}>
+      <Dialog
+        open={isOtpVerificationOpen}
+        onOpenChange={setIsOtpVerificationOpen}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Verify Your Email</DialogTitle>
             <DialogDescription>
-              Enter the OTP sent to your email to complete the registration process.
+              Enter the OTP sent to your email to complete the registration
+              process.
             </DialogDescription>
           </DialogHeader>
           <Form {...otpVerificationForm}>
-            <form onSubmit={otpVerificationForm.handleSubmit(onOtpVerificationSubmit)} className="space-y-4">
+            <form
+              onSubmit={otpVerificationForm.handleSubmit(
+                onOtpVerificationSubmit
+              )}
+              className="space-y-4"
+            >
               <FormField
                 control={otpVerificationForm.control}
                 name="email"
@@ -449,7 +520,12 @@ function LoginPageContent() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input {...field} type="email" placeholder="john@example.com" defaultValue={signUpEmail} />
+                      <Input
+                        {...field}
+                        type="email"
+                        placeholder="john@example.com"
+                        defaultValue={signUpEmail}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -462,24 +538,37 @@ function LoginPageContent() {
                   <FormItem>
                     <FormLabel>OTP</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter 6-character OTP" maxLength={6} />
+                      <Input
+                        {...field}
+                        placeholder="Enter 6-character OTP"
+                        maxLength={6}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={verifyOtpMutation.isPending}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={verifyOtpMutation.isPending}
+              >
                 {verifyOtpMutation.isPending ? "Verifying..." : "Verify OTP"}
               </Button>
             </form>
           </Form>
           {verifyOtpMutation.isError && (
-            <p className="text-red-500 text-sm mt-2">Error verifying OTP. Please try again.</p>
+            <p className="text-red-500 text-sm mt-2">
+              Error verifying OTP. Please try again.
+            </p>
           )}
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isCompleteProfileOpen} onOpenChange={setIsCompleteProfileOpen}>
+      <Dialog
+        open={isCompleteProfileOpen}
+        onOpenChange={setIsCompleteProfileOpen}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Complete Your Profile</DialogTitle>
@@ -488,7 +577,12 @@ function LoginPageContent() {
             </DialogDescription>
           </DialogHeader>
           <Form {...completeProfileForm}>
-            <form onSubmit={completeProfileForm.handleSubmit(onCompleteProfileSubmit)} className="space-y-4">
+            <form
+              onSubmit={completeProfileForm.handleSubmit(
+                onCompleteProfileSubmit
+              )}
+              className="space-y-4"
+            >
               <FormField
                 control={completeProfileForm.control}
                 name="firstName"
@@ -531,21 +625,31 @@ function LoginPageContent() {
               {collegeRegulations && (
                 <div className="mt-4">
                   <h3 className="font-semibold mb-2">College Regulations:</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{collegeRegulations}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {collegeRegulations}
+                  </p>
                 </div>
               )}
-              <Button type="submit" className="w-full" disabled={completeProfileMutation.isPending}>
-                {completeProfileMutation.isPending ? "Completing Profile..." : "Complete Profile"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={completeProfileMutation.isPending}
+              >
+                {completeProfileMutation.isPending
+                  ? "Completing Profile..."
+                  : "Complete Profile"}
               </Button>
             </form>
           </Form>
           {completeProfileMutation.isError && (
-            <p className="text-red-500 text-sm mt-2">Error completing profile. Please try again.</p>
+            <p className="text-red-500 text-sm mt-2">
+              Error completing profile. Please try again.
+            </p>
           )}
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
 export default function LoginPage() {
@@ -553,5 +657,5 @@ export default function LoginPage() {
     <QueryClientProvider client={queryClient}>
       <LoginPageContent />
     </QueryClientProvider>
-  )
+  );
 }

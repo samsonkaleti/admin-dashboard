@@ -1,12 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
-const API_URL = "https://172.188.116.118:5001/api";
+const API_URL = "http://172.188.116.118:5001/api";
 
 type SignupRequest = {
   username: string;
   email: string;
   password: string;
   role: string;
-  yearOfJoining: any;
+  yearOfJoining: number;
 };
 
 type OtpVerificationRequest = {
