@@ -14,9 +14,9 @@ const resetPasswordController = require("../controllers/resetPasswordController"
  * @swagger
  * /api/auth/signup:
  *   post:
- *     summary: User signup
+ *     summary: User signup or update user details
  *     tags: [Auth]
- *     description: Register a new user
+ *     description: Register a new user or update details of an existing user
  *     requestBody:
  *       required: true
  *       content:
@@ -24,32 +24,40 @@ const resetPasswordController = require("../controllers/resetPasswordController"
  *           schema:
  *             type: object
  *             required:
- *               - username
  *               - email
- *               - password
- *               - role
- *               - yearOfJoining
  *             properties:
  *               username:
  *                 type: string
- *                 description: User's full name
+ *                 description: User's full name (required for signup)
  *                 example: John Doe
  *               email:
  *                 type: string
- *                 description: User's email address (must be a college domain email)
- *                 example: johndoe@symfor.com
+ *                 description: User's email address (must be a college domain email for signup)
+ *                 example: johndoe@college.edu
  *               password:
  *                 type: string
- *                 description: User's password (min 8 characters)
+ *                 description: User's password (min 8 characters, required for signup)
  *                 example: Password123
  *               role:
  *                 type: string
- *                 description: Role of the user (student or admin)
+ *                 description: Role of the user (required for signup)
  *                 example: student
  *               yearOfJoining:
  *                 type: integer
- *                 description: The year the user joined the college
+ *                 description: Year the user joined (required for signup)
  *                 example: 2021
+ *               firstName:
+ *                 type: string
+ *                 description: User's first name (required for students)
+ *                 example: "Sam"
+ *               lastName:
+ *                 type: string
+ *                 description: User's last name (required for students)
+ *                 example: "Kaleti"
+ *               phone:
+ *                 type: string
+ *                 description: User's phone number (required for students)
+ *                 example: "9951252653"
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -65,8 +73,23 @@ const resetPasswordController = require("../controllers/resetPasswordController"
  *                   type: string
  *                   description: The ID of the newly registered user
  *                   example: 60c72b1f4f1a4e39d8a9357e
+ *       200:
+ *         description: User details updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User details updated successfully
+ *                 regulations:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Regulation A", "Regulation B"]
  *       400:
- *         description: Invalid input (email must be a college domain email or other validation error)
+ *         description: Invalid input or email not a college domain
  *         content:
  *           application/json:
  *             schema:
@@ -76,7 +99,7 @@ const resetPasswordController = require("../controllers/resetPasswordController"
  *                   type: string
  *                   example: Email must be a college domain email
  *       500:
- *         description: Internal server error
+ *         description: Error processing request
  *         content:
  *           application/json:
  *             schema:
@@ -84,12 +107,14 @@ const resetPasswordController = require("../controllers/resetPasswordController"
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Error registering user
+ *                   example: Error processing request
  *                 error:
  *                   type: string
- *                   example: "Detailed error message"
+ *                   example: Detailed error message
  */
 router.post("/signup", authController.signup);
+
+module.exports = router;
 
 /**
  * @swagger
@@ -227,78 +252,6 @@ router.post("/login", authController.login);
  *                   example: "Detailed error message"
  */
 router.post("/verify-otp", authController.verifyOTP);
-
-/**
- * @swagger
- * /api/auth/user-details:
- *   post:
- *     summary: Update user details and fetch college regulations
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - firstName
- *               - lastName
- *               - phoneNo
- *             properties:
- *               firstName:
- *                 type: string
- *                 description: User's first name
- *                 example: "Sam"
- *               lastName:
- *                 type: string
- *                 description: User's last name
- *                 example: "Kaleti"
- *               phoneNo:
- *                 type: string
- *                 description: User's phone number
- *                 example: "9951252653"
- *     responses:
- *       200:
- *         description: User details updated successfully, and regulations fetched
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 regulations:
- *                   type: array
- *                   items:
- *                     type: string
- *                   description: List of college regulations based on user's email domain
- *                   example: ["Regulation A", "Regulation B"]
- *                 message:
- *                   type: string
- *                   example: "User details updated successfully"
- *       404:
- *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "User not found"
- *       500:
- *         description: Error fetching regulations
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Error fetching regulations"
- *                 error:
- *                   type: string
- *                   example: "Detailed error message"
- */
-router.post("/user-details", authController.userDetails);
 
 /**
  * @swagger

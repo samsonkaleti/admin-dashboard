@@ -1,24 +1,24 @@
 import { useMutation } from "@tanstack/react-query";
-const API_URL = "http://172.188.116.118:5001/api";
+const API_URL = "https://172.188.116.118:5001/api";
 
 type SignupRequest = {
-    username: string;
-    email: string;
-    password: string;
-    role: string;
-    yearOfJoining: any;
-  };
+  username: string;
+  email: string;
+  password: string;
+  role: string;
+  yearOfJoining: any;
+};
 
 type OtpVerificationRequest = {
-    email: string;
-    otp: string;
-  };  
-  
-  type LoginRequest = {
-    email: string;
-    password: string;
-  };
-  
+  email: string;
+  otp: string;
+};
+
+type LoginRequest = {
+  email: string;
+  password: string;
+};
+
 export const useSignUp = () => {
   return useMutation({
     mutationFn: async (data: SignupRequest) => {
@@ -36,7 +36,7 @@ export const useSignUp = () => {
 };
 export const useVerifyOTP = () => {
   return useMutation({
-    mutationFn: async (data:OtpVerificationRequest) => {
+    mutationFn: async (data: OtpVerificationRequest) => {
       const response = await fetch(`${API_URL}/auth/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,24 +66,24 @@ export const useLogin = () => {
 };
 
 async function completeProfile(profileData: any) {
-    const response = await fetch(`${API_URL}/auth/complete-profile`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(profileData),
-    });
-  
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Error completing profile");
-    }
-  
-    return response.json();
+  const response = await fetch(`${API_URL}/auth/complete-profile`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(profileData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Error completing profile");
   }
-  
-  export const useCompleteProfileMutation = () => {
-    return useMutation({
-      mutationFn: completeProfile,
-    });
-  }
+
+  return response.json();
+}
+
+export const useCompleteProfileMutation = () => {
+  return useMutation({
+    mutationFn: completeProfile,
+  });
+}
