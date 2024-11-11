@@ -8,47 +8,208 @@ const redisClient = require("../config/redis"); // Redis client
 
 // User Signup
 exports.signup = async (req, res) => {
-  const { username, email, password, role, yearOfJoining } = req.body;
+  const {
+    username,
+    email,
+    password,
+    role,
+    yearOfJoining,
+    firstName,
+    lastName,
+    phoneNo,
+    selectedRegulation,
+  } = req.body;
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Check if the user is a student or an admin/uploader
-    const isStudent = role === "Student";
-
-    const newUser = await User.create({
-      username,
-      email,
-      password: hashedPassword,
-      role,
-      yearOfJoining,
-      isVerified: isStudent ? false : true, // Admins and uploaders are automatically verified
-    });
-
-    // Generate and send OTP only for students
-    if (isStudent) {
-      const otp = generateOTP();
-      console.log(otp); // Generate OTP
-      await sendOTP(newUser.email, otp); // Send OTP via email
-
-      // Store OTP and its expiration time in the user model
-      newUser.otp.push({
-        code: otp,
-        expiration: Date.now() + 5 * 60 * 1000, // Expires in 5 minutes
-      });
-      await newUser.save();
+    // Check if email is a college domain (adjust the domain as needed)
+    const collegeDomain = "@college.edu";
+    if (!email.endsWith(collegeDomain)) {
+      return res
+        .status(400)
+        .json({ message: "Email must be a college domain email" });
     }
 
-    return res.status(200).json({
-      message: isStudent
-        ? "User registered successfully, OTP sent to email"
-        : "User registered successfully",
-      userId: newUser._id,
-    });
+    // Check if the user already exists
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // If user exists, update their details if they are a student
+      if (user.role.toLowerCase() !== "student") {
+        return res.status(400).json({
+          message:
+            "User already exists and is not a student. Cannot update details.",
+        });
+      }
+
+      // Validate required fields for students
+      if (!firstName || !lastName || !phoneNo || !selectedRegulation) {
+        return res.status(400).json({
+          message:
+            "Missing required fields for updating student details: firstName, lastName, phoneNo, selectedRegulation",
+        });
+      }
+
+      // Validate phone number format
+      const phoneRegex = /^\d{10}$/;
+      if (!phoneRegex.test(phoneNo)) {
+        return res.status(400).json({
+          message: "Please enter a valid 10-digit phone number",
+        });
+      }
+
+      // Extract domain and find college
+      const userDomain = email.split("@")[1];
+      const college = await College.findOne({ domain: userDomain });
+      if (!college) {
+        return res.status(400).json({
+          message: "Domain not matching with any college.",
+        });
+      }
+
+      // Fetch regulations from the college
+      const regulations = college.programs.flatMap((program) =>
+        program.regulations.map((reg) => reg.regulation)
+      );
+
+      // Validate selected regulation
+      if (!regulations.includes(selectedRegulation)) {
+        return res
+          .status(400)
+          .json({ message: "Selected regulation is not valid." });
+      }
+
+      // Update user details
+      user.firstName = firstName;
+      user.lastName = lastName;
+      user.phone = phoneNo;
+      user.regulations = selectedRegulation;
+
+      // Verify the user if not a student
+      // (Assuming admins and uploaders are already verified during signup)
+
+      await user.save();
+
+      return res.status(200).json({
+        message: "User details updated successfully",
+        regulations,
+      });
+    } else {
+      // If user does not exist, proceed with signup
+      const { username, email, password, role, yearOfJoining } = req.body;
+
+      // Validate required fields for signup
+      if (!username || !email || !password || !role || !yearOfJoining) {
+        return res.status(400).json({
+          message:
+            "Missing required fields for signup: username, email, password, role, yearOfJoining",
+        });
+      }
+
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Determine if the user is a student
+      const isStudent = role.toLowerCase() === "student";
+
+      // Create new user object
+      const newUser = new User({
+        username,
+        email,
+        password: hashedPassword,
+        role: role.charAt(0).toUpperCase() + role.slice(1).toLowerCase(), // Capitalize role
+        yearOfJoining,
+        isVerified: isStudent ? false : true, // Admins and uploaders are automatically verified
+      });
+
+      // Save user to the database
+      await newUser.save();
+
+      // If the user is a student, handle user details and OTP
+      if (isStudent) {
+        const { firstName, lastName, phoneNo, selectedRegulation } = req.body;
+
+        // Validate required fields for students
+        if (!firstName || !lastName || !phoneNo || !selectedRegulation) {
+          return res.status(400).json({
+            message:
+              "Missing required fields for student signup: firstName, lastName, phoneNo, selectedRegulation",
+          });
+        }
+
+        // Validate phone number format
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phoneNo)) {
+          return res.status(400).json({
+            message: "Please enter a valid 10-digit phone number",
+          });
+        }
+
+        // Extract domain and find college
+        const userDomain = email.split("@")[1];
+        const college = await College.findOne({ domain: userDomain });
+        if (!college) {
+          return res.status(400).json({
+            message: "Domain not matching with any college.",
+          });
+        }
+
+        // Fetch regulations from the college
+        const regulations = college.programs.flatMap((program) =>
+          program.regulations.map((reg) => reg.regulation)
+        );
+
+        // Validate selected regulation
+        if (!regulations.includes(selectedRegulation)) {
+          return res
+            .status(400)
+            .json({ message: "Selected regulation is not valid." });
+        }
+
+        // Update user details
+        newUser.firstName = firstName;
+        newUser.lastName = lastName;
+        newUser.phone = phoneNo;
+        newUser.regulations = selectedRegulation;
+
+        // Generate and send OTP
+        const otp = generateOTP();
+        console.log(`Generated OTP for ${email}: ${otp}`); // For debugging purposes
+        await sendOTP(newUser.email, otp); // Implement this function to send OTP via email
+
+        // Store OTP and its expiration time in the user model
+        newUser.otp.push({
+          code: otp,
+          expiration: Date.now() + 5 * 60 * 1000, // Expires in 5 minutes
+        });
+
+        await newUser.save();
+
+        return res.status(201).json({
+          message: "User registered successfully, OTP sent to email",
+          userId: newUser._id,
+        });
+      }
+
+      // For non-student users
+      return res.status(201).json({
+        message: "User registered successfully",
+        userId: newUser._id,
+      });
+    }
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error registering user", error: error.message });
+    console.error("Signup Error:", error);
+
+    if (error.code === 11000) {
+      // Duplicate key error
+      return res
+        .status(400)
+        .json({ message: "Username or email already exists" });
+    }
+
+    return res.status(500).json({
+      message: "Error registering user",
+      error: error.message,
+    });
   }
 };
 
@@ -88,68 +249,68 @@ exports.verifyOTP = async (req, res) => {
   }
 };
 
-exports.userDetails = async (req, res) => {
-  const { firstName, lastName, phoneNo, email, selectedRegulation } = req.body;
-  const userDomain = email.split("@")[1]; // Extract domain from email
-  console.log("User Domain: " + userDomain);
+// exports.userDetails = async (req, res) => {
+//   const { firstName, lastName, phoneNo, email, selectedRegulation } = req.body;
+//   const userDomain = email.split("@")[1]; // Extract domain from email
+//   console.log("User Domain: " + userDomain);
 
-  try {
-    // Find the user by email
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+//   try {
+//     // Find the user by email
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
 
-    // Check if the user is a student or an admin/uploader
-    const isStudent = user.role === "student";
+//     // Check if the user is a student or an admin/uploader
+//     const isStudent = user.role === "student";
 
-    // Find college by domain
-    const college = await College.findOne({ domain: userDomain });
-    if (!college) {
-      return res
-        .status(400)
-        .json({ message: "Domain not matching with any college." });
-    }
+//     // Find college by domain
+//     const college = await College.findOne({ domain: userDomain });
+//     if (!college) {
+//       return res
+//         .status(400)
+//         .json({ message: "Domain not matching with any college." });
+//     }
 
-    // Fetch only regulation names from the college model
-    const regulations = college.programs.flatMap(
-      (program) => program.regulations.map((reg) => reg.regulation) // Extract only regulation names
-    );
+//     // Fetch only regulation names from the college model
+//     const regulations = college.programs.flatMap(
+//       (program) => program.regulations.map((reg) => reg.regulation) // Extract only regulation names
+//     );
 
-    // Check if the selected regulation is valid
-    if (!regulations.includes(selectedRegulation)) {
-      return res
-        .status(400)
-        .json({ message: "Selected regulation is not valid." });
-    }
+//     // Check if the selected regulation is valid
+//     if (!regulations.includes(selectedRegulation)) {
+//       return res
+//         .status(400)
+//         .json({ message: "Selected regulation is not valid." });
+//     }
 
-    // Update user fields with provided details
-    user.firstName = firstName;
-    user.lastName = lastName;
-    user.phone = phoneNo;
+//     // Update user fields with provided details
+//     user.firstName = firstName;
+//     user.lastName = lastName;
+//     user.phone = phoneNo;
 
-    // Add the selected regulation to the user's regulations array
-    user.regulations = selectedRegulation;
+//     // Add the selected regulation to the user's regulations array
+//     user.regulations = selectedRegulation;
 
-    // Verify the user for admins and uploaders
-    if (!isStudent) {
-      user.isVerified = true;
-    }
+//     // Verify the user for admins and uploaders
+//     if (!isStudent) {
+//       user.isVerified = true;
+//     }
 
-    await user.save(); // Save updated user profile
+//     await user.save(); // Save updated user profile
 
-    return res.status(200).json({
-      regulations,
-      message: "User details updated successfully",
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "Error fetching regulations",
-      error: error.message,
-    });
-  }
-};
+//     return res.status(200).json({
+//       regulations,
+//       message: "User details updated successfully",
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       message: "Error fetching regulations",
+//       error: error.message,
+//     });
+//   }
+// };
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -185,7 +346,7 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    sessionStorage.setItem('auth_token', token)
+    sessionStorage.setItem("auth_token", token);
 
     return res.status(200).json({ message: "Login successful", token });
   } catch (error) {
