@@ -4,7 +4,7 @@ const generateOTP = require("../utils/otpGenerator");
 const { sendOTP } = require("../services/emailService");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const redisClient = require("../config/redis"); // Redis client
+const redisClient = require("../config/redis");
 
 // User Signup
 exports.signup = async (req, res) => {
@@ -248,69 +248,6 @@ exports.verifyOTP = async (req, res) => {
       .json({ message: "Error verifying OTP", error: error.message });
   }
 };
-
-// exports.userDetails = async (req, res) => {
-//   const { firstName, lastName, phoneNo, email, selectedRegulation } = req.body;
-//   const userDomain = email.split("@")[1]; // Extract domain from email
-//   console.log("User Domain: " + userDomain);
-
-//   try {
-//     // Find the user by email
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     // Check if the user is a student or an admin/uploader
-//     const isStudent = user.role === "student";
-
-//     // Find college by domain
-//     const college = await College.findOne({ domain: userDomain });
-//     if (!college) {
-//       return res
-//         .status(400)
-//         .json({ message: "Domain not matching with any college." });
-//     }
-
-//     // Fetch only regulation names from the college model
-//     const regulations = college.programs.flatMap(
-//       (program) => program.regulations.map((reg) => reg.regulation) // Extract only regulation names
-//     );
-
-//     // Check if the selected regulation is valid
-//     if (!regulations.includes(selectedRegulation)) {
-//       return res
-//         .status(400)
-//         .json({ message: "Selected regulation is not valid." });
-//     }
-
-//     // Update user fields with provided details
-//     user.firstName = firstName;
-//     user.lastName = lastName;
-//     user.phone = phoneNo;
-
-//     // Add the selected regulation to the user's regulations array
-//     user.regulations = selectedRegulation;
-
-//     // Verify the user for admins and uploaders
-//     if (!isStudent) {
-//       user.isVerified = true;
-//     }
-
-//     await user.save(); // Save updated user profile
-
-//     return res.status(200).json({
-//       regulations,
-//       message: "User details updated successfully",
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({
-//       message: "Error fetching regulations",
-//       error: error.message,
-//     });
-//   }
-// };
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;

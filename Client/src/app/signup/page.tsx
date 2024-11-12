@@ -77,7 +77,6 @@ type SignupRequest = {
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false); // Added client-side flag
   const router = useRouter();
 
   const signUpForm = useForm({
@@ -86,7 +85,7 @@ export default function SignupPage() {
       username: "",
       email: "",
       password: "",
-      role: "Student",
+      role: "",
       firstName: "",
       lastName: "",
       phone: "",
@@ -98,18 +97,14 @@ export default function SignupPage() {
 
   const onSignUpSubmit = async (data: SignupRequest) => {
     try {
+      sessionStorage.setItem("signupEmail", data.email);
       const response = await signUpMutation.mutateAsync(data);
-      sessionStorage.setItem('signupEmail', response.email)
+      console.log(response);
       router.push("/otp-verification");
     } catch (error) {
       setError("Signup failed. Please try again.");
     }
   };
-
-  useEffect(() => {
-    // Set the flag to true when the component is mounted
-    setIsClient(true);
-  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -167,74 +162,95 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              {/* Conditionally render only on the client side */}
-              {isClient && signUpForm.watch("role") === "Student" && (
-                <>
-                  <FormField
-                    control={signUpForm.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>First Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Your first name" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signUpForm.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Last Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Your last name" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signUpForm.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="tel"
-                            placeholder="Your phone number"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signUpForm.control}
-                    name="yearOfJoining"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Year of Joining</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            placeholder="Year of joining"
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
+              <FormField
+                control={signUpForm.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="border p-2 rounded w-full"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>
+                          Select your role
+                        </option>
+                        <option value="Admin">Admin</option>
+                        <option value="Uploader">Uploader</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <>
+                <FormField
+                  control={signUpForm.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Your first name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={signUpForm.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Your last name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={signUpForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="tel"
+                          placeholder="Your phone number"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={signUpForm.control}
+                  name="yearOfJoining"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Year of Joining</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="number"
+                          placeholder="Year of joining"
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
               <Button type="submit" className="w-full mt-4">
                 Sign Up
               </Button>

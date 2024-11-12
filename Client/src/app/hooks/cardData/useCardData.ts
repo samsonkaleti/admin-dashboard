@@ -1,42 +1,42 @@
-  import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-  type Card = {
-    id: string;
-    title: string;
-    description: string;
-    imageUrl: string;
-    allowAll: boolean;
-    specificCollege: string | null;
-    excludeCollege: string | null;
-    order: number;
-  };
+type Card = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  allowAll: boolean;
+  specificCollege: string | null;
+  excludeCollege: string | null;
+  order: number;
+};
 
-  type CardInput = Omit<Card, 'id'>;
-  const API_BASE_URL = 'http://172.188.116.118:5001/api';
+type CardInput = Omit<Card, 'id'>;
+const API_BASE_URL = 'http://172.188.116.118:5001/api';
 
-  async function fetchCards() {
-    const response = await fetch(`${API_BASE_URL}/cards`);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
+async function fetchCards() {
+  const response = await fetch(`${API_BASE_URL}/cards`);
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
   }
+  return response.json();
+}
 
-  async function createCard(newCard: CardInput) {
-    const response = await fetch(`${API_BASE_URL}/cards`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newCard),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to create card');
-    }
-    return response.json();
+async function createCard(newCard: CardInput) {
+  const response = await fetch(`${API_BASE_URL}/cards`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(newCard),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to create card');
   }
+  return response.json();
+}
 
-  // API call to update the card
+// API call to update the card
 async function updateCard(id: string, updatedCard: CardInput) {
   const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
     method: 'PUT',
@@ -50,35 +50,35 @@ async function updateCard(id: string, updatedCard: CardInput) {
   }
   return response.json();
 }
-  async function deleteCard(id: string) {
-    const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      throw new Error('Failed to delete card');
-    }
-    return response.json();
+async function deleteCard(id: string) {
+  const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete card');
   }
+  return response.json();
+}
 
-  export function useCards() {
-    return useQuery({
-      queryKey: ['cards'],
-      queryFn: fetchCards,
-    });
-  }
+export function useCards() {
+  return useQuery({
+    queryKey: ['cards'],
+    queryFn: fetchCards,
+  });
+}
 
-  export function useCreateCard() {
-    const queryClient = useQueryClient();
+export function useCreateCard() {
+  const queryClient = useQueryClient();
 
-    return useMutation({
-      mutationFn: createCard,
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['cards'] });
-      },
-    });
-  }
+  return useMutation({
+    mutationFn: createCard,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards'] });
+    },
+  });
+}
 
-  // React Query Mutation Hook
+// React Query Mutation Hook
 export function useUpdateCard() {
   const queryClient = useQueryClient();
 
@@ -91,13 +91,13 @@ export function useUpdateCard() {
   });
 }
 
-  export function useDeleteCard() {
-    const queryClient = useQueryClient();
+export function useDeleteCard() {
+  const queryClient = useQueryClient();
 
-    return useMutation({
-      mutationFn: deleteCard,
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['cards'] });
-      },
-    });
-  }
+  return useMutation({
+    mutationFn: deleteCard,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards'] });
+    },
+  });
+}

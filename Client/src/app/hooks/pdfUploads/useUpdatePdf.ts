@@ -19,7 +19,7 @@ async function updatePdf(pdfData: PDFUpload): Promise<PDFUpload> {
   formData.append('regulation', pdfData.regulation)
   formData.append('course', pdfData.course)
   formData.append('subject', pdfData.subject)
-  
+
   if (pdfData.files && pdfData.files.length > 0) {
     pdfData.files.forEach((file) => {
       formData.append('files', file)

@@ -11,6 +11,7 @@ type SignupRequest = {
 
 type OtpVerificationRequest = {
   otp: string;
+  email: string;
 };
 
 type LoginRequest = {
