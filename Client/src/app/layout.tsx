@@ -8,9 +8,9 @@ import "./globals.css";
 import { AppLayout } from "@/components/layout/app-layout";
 import { AuthLayout } from "@/components/layout/auth-layout";
 
-const authPages = ["/login", "/signup", "/privacy"];
+const authPages = ["/", "/signup", "/privacy","/login",];
 const validRoutes = [
-  "/",
+  "/dashboard",
   "/dashboard/college-data",
   "/dashboard/card-data",
   "/dashboard/pdf-uploads",
