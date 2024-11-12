@@ -136,7 +136,7 @@ router.get(
  */
 router.put(
   "/:id",
-  authMiddleware,
+  
   authorizeRoles("Admin", "Uploader"),
   uploadMiddleware,
   pdfController.updatePdfById
@@ -157,7 +157,7 @@ router.put(
  */
 router.delete(
   "/:id",
-  authMiddleware,
+  
   authorizeRoles("Admin"),
   pdfController.deletePdfById
 );
@@ -190,7 +190,7 @@ router.delete(
  */
 router.get(
   "/download/:id/:fileIndex",
-  authMiddleware,
+  
   authorizeRoles("Admin", "Uploader", "Student"),
   pdfController.downloadPdf
 );
@@ -218,7 +218,7 @@ router.get(
  */
 router.get(
   "/download-all/:id",
-  authMiddleware,
+  
   authorizeRoles("Admin", "Uploader"),
   pdfController.downloadAllPdfs
 );

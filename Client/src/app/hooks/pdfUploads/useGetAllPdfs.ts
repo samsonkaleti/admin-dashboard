@@ -18,7 +18,7 @@ async function fetchPdfs(year?: string, semester?: string): Promise<PDFUpload[]>
   if (year) params.append('year', year)
   if (semester) params.append('semester', semester)
 
-  const response = await fetch(`http://172.188.116.118:5001/api/pdfs?`, {
+  const response = await fetch(`http://localhost:5001/api/pdfs?${params.toString()}`, {
     headers: {
       'Authorization': `Bearer ${sessionStorage.getItem("auth_token")}`,
     },

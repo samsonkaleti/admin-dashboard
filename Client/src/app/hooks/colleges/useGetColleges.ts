@@ -1,8 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
+const API_BASE_URL = "http://localhost:5001/api";
 
 async function fetchColleges() {
-  const response = await fetch('http://172.188.116.118:5001/api/colleges');
-  if (!response.ok) {
+  const response = await fetch(`${API_BASE_URL}/colleges`, {
+    headers: {
+      'Authorization': `Bearer ${sessionStorage.getItem('auth_token')}`,
+    },
+  }) 
+ if (!response.ok) {
     throw new Error('Network response was not ok');
   }
   return response.json();

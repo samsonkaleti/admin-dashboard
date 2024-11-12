@@ -12,7 +12,7 @@ import {
   type Event,
   type EventInput,
   createEventFormData,
-} from "@/app/hooks/events/EvenetManagement";
+} from "@/app/hooks/events/useEvents";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -88,7 +88,7 @@ const EventCard = ({
           src={
             event.thumbnail
               ? `http://172.188.116.118:5001/${event.thumbnail}`
-              : "./logo2.png"
+              : ""
           }
           width={80}
           height={80}

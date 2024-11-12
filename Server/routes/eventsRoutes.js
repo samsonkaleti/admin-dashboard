@@ -106,7 +106,7 @@ const upload = multer({
 router.post(
   "/",
   upload.single("thumbnail"),
-  authMiddleware,
+  
   eventController.createEvent
 );
 
@@ -126,7 +126,7 @@ router.post(
  *               items:
  *                 $ref: '#/components/schemas/Event'
  */
-router.get("/", authMiddleware, eventController.getAllEvents);
+router.get("/",  eventController.getAllEvents);
 
 /**
  * @swagger
@@ -150,7 +150,7 @@ router.get("/", authMiddleware, eventController.getAllEvents);
  *       404:
  *         description: Event not found
  */
-router.get("/:id", authMiddleware, eventController.getEventById);
+router.get("/:id",  eventController.getEventById);
 
 /**
  * @swagger
@@ -210,7 +210,7 @@ router.get("/:id", authMiddleware, eventController.getEventById);
  */
 router.put(
   "/:id",
-  authMiddleware,
+  
   authorizeRoles("Uploader"),
   upload.single("thumbnail"),
   eventController.updateEventById
@@ -234,6 +234,6 @@ router.put(
  *       404:
  *         description: Event not found
  */
-router.delete("/:id", authMiddleware, eventController.deleteEventById);
+router.delete("/:id",  eventController.deleteEventById);
 
 module.exports = router;

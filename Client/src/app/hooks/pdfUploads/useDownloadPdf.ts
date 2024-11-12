@@ -6,7 +6,7 @@ export function useDownloadPdf() {
   const downloadPdf = async (id: number, fileIndex: number) => {
     setIsDownloading(true)
     try {
-      const response = await fetch(`http://172.188.116.118:5001/api/pdfs/download/${id}/${fileIndex}`)
+      const response = await fetch(`http://localhost:5001/api/pdfs/download/${id}/${fileIndex}`)
       if (!response.ok) {
         throw new Error('Failed to download PDF')
       }

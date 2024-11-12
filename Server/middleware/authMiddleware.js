@@ -1,9 +1,8 @@
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers["Authorization"];
-  const token =
-    authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  const authHeader = req.headers["authorization"]; // Changed to lowercase
+  const token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
 
   if (!token) {
     return res.status(401).json({ message: "No token provided" });
@@ -17,10 +16,9 @@ const authMiddleware = (req, res, next) => {
           : "Failed to authenticate token";
       return res.status(403).json({ message });
     }
-    // Attach user ID and role to the request object
     req.userId = decoded.id;
-    req.userRole = decoded.role; // Corrected: use `req.userRole` instead of `req.role`
-    console.log(`User role: ${req.userRole}`); // This should now display the correct role
+    req.userRole = decoded.role;
+    console.log(`User role: ${req.userRole}`);
     next();
   });
 };

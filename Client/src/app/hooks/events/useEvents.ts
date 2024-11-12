@@ -29,8 +29,7 @@ export type Event = {
 
 export type EventInput = Omit<Event, "_id">;
 
-const API_BASE_URL = "http://172.188.116.118:5001/api";
-// const token = sessionStorage.getItem('auth_token')  
+const API_BASE_URL = "http://localhost:5001/api";
 // API Functions
 async function fetchEvents() {
   const response = await fetch(`${API_BASE_URL}/events`, {

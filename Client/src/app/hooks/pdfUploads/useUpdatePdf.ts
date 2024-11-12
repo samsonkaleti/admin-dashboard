@@ -26,7 +26,7 @@ async function updatePdf(pdfData: PDFUpload): Promise<PDFUpload> {
     })
   }
 
-  const response = await fetch(`http://172.188.116.118:5001/api/pdfs/${pdfData.id}`, {
+  const response = await fetch(`http://localhost:5001/api/pdfs/${pdfData.id}`, {
     method: 'PUT',
     body: formData,
   })

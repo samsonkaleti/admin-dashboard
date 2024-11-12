@@ -74,7 +74,7 @@ const router = express.Router();
  *       500:
  *         description: Error creating college
  */
-router.post("/colleges", authMiddleware, collegeController.createCollege);
+router.post("/colleges",  collegeController.createCollege);
 
 /**
  * @swagger
@@ -88,7 +88,7 @@ router.post("/colleges", authMiddleware, collegeController.createCollege);
  *       500:
  *         description: Error fetching colleges
  */
-router.get("/colleges", authMiddleware, collegeController.getAllColleges);
+router.get("/colleges",  collegeController.getAllColleges);
 
 /**
  * @swagger
@@ -109,7 +109,7 @@ router.get("/colleges", authMiddleware, collegeController.getAllColleges);
  *       404:
  *         description: College not found
  */
-router.get("/colleges/:id", authMiddleware, collegeController.getCollegeById);
+router.get("/colleges/:id",  collegeController.getCollegeById);
 
 /**
  * @swagger
@@ -132,7 +132,7 @@ router.get("/colleges/:id", authMiddleware, collegeController.getCollegeById);
  */
 router.get(
   "/colleges/name/:collegeName",
-  authMiddleware,
+  
   collegeController.getCollegeByCollegeName
 );
 
@@ -209,7 +209,7 @@ router.get(
  */
 router.put(
   "/colleges/:id",
-  authMiddleware,
+  
   collegeController.updateCollegeById
 );
 
@@ -253,7 +253,7 @@ router.put(
  */
 router.put(
   "/colleges/name/:collegeName",
-  authMiddleware,
+  
   collegeController.updateCollegeByCollegeName
 );
 
@@ -278,7 +278,7 @@ router.put(
  */
 router.delete(
   "/colleges/:id",
-  authMiddleware,
+  
   collegeController.deleteCollegeById
 );
 
@@ -303,7 +303,7 @@ router.delete(
  */
 router.delete(
   "/colleges/name/:collegeName",
-  authMiddleware,
+  
   collegeController.deleteCollegeByCollegeName
 );
 
@@ -328,7 +328,7 @@ router.delete(
  */
 router.get(
   "/colleges/:id/programs",
-  authMiddleware,
+  
   collegeController.getCollegePrograms
 );
 
@@ -374,7 +374,7 @@ router.get(
  */
 router.post(
   "/colleges/:id/programs",
-  authMiddleware,
+  
   collegeController.addProgram
 );
 
@@ -403,7 +403,7 @@ router.post(
  */
 router.get(
   "/colleges/search",
-  authMiddleware,
+  
   collegeController.searchColleges
 );
 
@@ -446,7 +446,7 @@ router.get(
  */
 router.post(
   "/colleges/:id/regulations",
-  authMiddleware,
+  
   collegeController.addRegulation
 );
 

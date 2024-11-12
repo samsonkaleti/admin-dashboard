@@ -23,6 +23,6 @@ const router = express.Router();
  *       500:
  *         description: Error fetching students
  */
-router.get("/students", authMiddleware, studentController.getAllStudents);
+router.get("/students",  studentController.getAllStudents);
 
 module.exports = router;

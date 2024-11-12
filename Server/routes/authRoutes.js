@@ -113,7 +113,7 @@ const resetPasswordController = require("../controllers/resetPasswordController"
  *                   type: string
  *                   example: Detailed error message
  */
-router.post("/signup", authMiddleware, authController.signup);
+router.post("/signup", authController.signup);
 
 /**
  * @swagger
@@ -188,7 +188,7 @@ router.post("/signup", authMiddleware, authController.signup);
  *                   type: string
  *                   example: "Detailed error message"
  */
-router.post("/login", authMiddleware, authController.login);
+router.post("/login", authController.login);
 
 /**
  * @swagger
@@ -250,7 +250,7 @@ router.post("/login", authMiddleware, authController.login);
  *                   type: string
  *                   example: "Detailed error message"
  */
-router.post("/verify-otp", authMiddleware, authController.verifyOTP);
+router.post("/verify-otp", authController.verifyOTP);
 
 /**
  * @swagger
@@ -310,7 +310,7 @@ router.post("/verify-otp", authMiddleware, authController.verifyOTP);
 
 router.post(
   "/reset-password",
-  authMiddleware,
+  
   resetPasswordController.resetPassword
 );
 
@@ -377,7 +377,7 @@ router.post(
 // Route to confirm password reset
 router.post(
   "/confirm-reset-password",
-  authMiddleware,
+  
   resetPasswordController.confirmResetPassword
 );
 

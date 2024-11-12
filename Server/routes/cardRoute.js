@@ -15,7 +15,7 @@ const router = express.Router();
  *       500:
  *         description: Error fetching cards
  */
-router.get("/cards", authMiddleware, cardController.getAllCards);
+router.get("/cards",  cardController.getAllCards);
 
 /**
  * @swagger
@@ -29,7 +29,7 @@ router.get("/cards", authMiddleware, cardController.getAllCards);
  *       500:
  *         description: Error fetching card
  */
-router.get("/cards/:id", authMiddleware, cardController.getCardById);
+router.get("/cards/:id",  cardController.getCardById);
 
 /**
  * @swagger
@@ -53,7 +53,7 @@ router.get("/cards/:id", authMiddleware, cardController.getCardById);
  *       500:
  *         description: Some server error
  */
-router.post("/cards", authMiddleware, cardController.createCard);
+router.post("/cards",  cardController.createCard);
 
 /**
  * @swagger
@@ -86,7 +86,7 @@ router.post("/cards", authMiddleware, cardController.createCard);
  *       500:
  *         description: Some error happened
  */
-router.put("/cards/:id", authMiddleware, cardController.updateCardById);
+router.put("/cards/:id",  cardController.updateCardById);
 
 /**
  * @swagger
@@ -107,6 +107,6 @@ router.put("/cards/:id", authMiddleware, cardController.updateCardById);
  *       404:
  *         description: The card was not found
  */
-router.delete("/cards/:id", authMiddleware, cardController.deleteCardById);
+router.delete("/cards/:id",  cardController.deleteCardById);
 
 module.exports = router;
