@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const eventController = require("../controllers/eventcontroller");
-// const {authMiddleware} = require('../middleware/authMiddleware')
+const { authMiddleware } = require("../middleware/authMiddleware");
 
 // Configure multer storage for handling image uploads
 const storage = multer.diskStorage({
@@ -102,7 +102,12 @@ const upload = multer({
  *       400:
  *         description: Invalid input
  */
-router.post("/", upload.single("thumbnail"), eventController.createEvent);
+router.post(
+  "/",
+  upload.single("thumbnail"),
+  authMiddleware,
+  eventController.createEvent
+);
 
 /**
  * @swagger
@@ -120,7 +125,7 @@ router.post("/", upload.single("thumbnail"), eventController.createEvent);
  *               items:
  *                 $ref: '#/components/schemas/Event'
  */
-router.get("/", eventController.getAllEvents);
+router.get("/", authMiddleware, eventController.getAllEvents);
 
 /**
  * @swagger
@@ -144,7 +149,7 @@ router.get("/", eventController.getAllEvents);
  *       404:
  *         description: Event not found
  */
-router.get("/:id", eventController.getEventById);
+router.get("/:id", authMiddleware, eventController.getEventById);
 
 /**
  * @swagger
@@ -202,7 +207,12 @@ router.get("/:id", eventController.getEventById);
  *       404:
  *         description: Event not found
  */
-router.put("/:id", upload.single("thumbnail"), eventController.updateEventById);
+router.put(
+  "/:id",
+  authMiddleware,
+  upload.single("thumbnail"),
+  eventController.updateEventById
+);
 
 /**
  * @swagger
@@ -222,6 +232,6 @@ router.put("/:id", upload.single("thumbnail"), eventController.updateEventById);
  *       404:
  *         description: Event not found
  */
-router.delete("/:id", eventController.deleteEventById);
+router.delete("/:id", authMiddleware, eventController.deleteEventById);
 
 module.exports = router;

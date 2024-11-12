@@ -1,5 +1,6 @@
-const express = require('express');
-const cardController = require('../controllers/cardController'); // Adjust the path as necessary
+const express = require("express");
+const cardController = require("../controllers/cardController");
+const { authMiddleware } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 /**
@@ -14,8 +15,7 @@ const router = express.Router();
  *       500:
  *         description: Error fetching cards
  */
-router.get('/cards', cardController.getAllCards);
-
+router.get("/cards", authMiddleware, cardController.getAllCards);
 
 /**
  * @swagger
@@ -29,8 +29,7 @@ router.get('/cards', cardController.getAllCards);
  *       500:
  *         description: Error fetching card
  */
-router.get('/cards/:id', cardController.getCardById);
-
+router.get("/cards/:id", authMiddleware, cardController.getCardById);
 
 /**
  * @swagger
@@ -54,7 +53,7 @@ router.get('/cards/:id', cardController.getCardById);
  *       500:
  *         description: Some server error
  */
-router.post('/cards', cardController.createCard);
+router.post("/cards", authMiddleware, cardController.createCard);
 
 /**
  * @swagger
@@ -87,7 +86,7 @@ router.post('/cards', cardController.createCard);
  *       500:
  *         description: Some error happened
  */
-router.put('/cards/:id', cardController.updateCardById);
+router.put("/cards/:id", authMiddleware, cardController.updateCardById);
 
 /**
  * @swagger
@@ -108,36 +107,6 @@ router.put('/cards/:id', cardController.updateCardById);
  *       404:
  *         description: The card was not found
  */
-router.delete('/cards/:id', cardController.deleteCardById);
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Card:
- *       type: object
- *       required:
- *         - title
- *         - description
- *       properties:
- *         id:
- *           type: string
- *           description: The auto-generated id of the card
- *         title:
- *           type: string
- *           description: The card title
- *         description:
- *           type: string
- *           description: The card description
- *         createdAt:
- *           type: string
- *           format: date
- *           description: The date the card was added
- *       example:
- *         id: d5fE_asz
- *         title: New Task
- *         description: Implement new feature
- *         createdAt: 2023-06-20T03:24:00
- */
+router.delete("/cards/:id", authMiddleware, cardController.deleteCardById);
 
 module.exports = router;

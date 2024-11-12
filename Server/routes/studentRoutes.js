@@ -1,5 +1,7 @@
 const express = require("express");
 const studentController = require("../controllers/studentController");
+const { authMiddleware } = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
 /**
@@ -21,6 +23,6 @@ const router = express.Router();
  *       500:
  *         description: Error fetching students
  */
-router.get("/students", studentController.getAllStudents);
+router.get("/students", authMiddleware, studentController.getAllStudents);
 
 module.exports = router;
