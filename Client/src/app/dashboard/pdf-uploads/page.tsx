@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Pencil, Trash2, FileUp, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -54,7 +54,7 @@ type PDFUpload = {
   uploadDate: string
 }
 
-export default function PDFUploadPage() {
+const PDFUploadPage = () => {
   const [newUpload, setNewUpload] = useState<Omit<PDFUpload, "id" | "files" | "uploadDate">>({
     academicYear: { year: "", semester: "" },
     regulation: "",
@@ -66,6 +66,7 @@ export default function PDFUploadPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [isClient, setIsClient] = useState(false)
 
   const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"]
   const semesters = ["1st Semester", "2nd Semester"]
@@ -88,8 +89,11 @@ export default function PDFUploadPage() {
     setEditingId(null)
     setIsDialogOpen(true)
   }
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
-  const handleAdd = async () => {
+   const handleAdd = async () => {
     try {
       if (selectedFiles.length === 0) {
         throw new Error("Please upload at least one PDF file")
@@ -113,9 +117,10 @@ export default function PDFUploadPage() {
         subject: "",
       })
       setSelectedFiles([])
+
+      
     } catch (error) {
       console.error("Error uploading PDF:", error)
-      // Handle error (e.g., show error message to user)
     }
   }
 
@@ -157,10 +162,8 @@ export default function PDFUploadPage() {
       setSelectedFiles([])
     } catch (error) {
       console.error("Error updating PDF:", error)
-      // Handle error (e.g., show error message to user)
     }
   }
-
   const handleDeleteConfirmation = (id: number) => {
     setDeletingId(id)
     setIsDeleteDialogOpen(true)
@@ -467,3 +470,5 @@ export default function PDFUploadPage() {
     </Card>
   )
 }
+
+export default PDFUploadPage;

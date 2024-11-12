@@ -283,8 +283,6 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    sessionStorage.setItem("auth_token", token);
-
     return res.status(200).json({ message: "Login successful", token });
   } catch (error) {
     return res

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Search, FileText, Briefcase } from "lucide-react";
+import { Search, FileText, Briefcase, Users, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,6 +34,8 @@ import {
   SelectContent,
 } from "@/components/ui/select";
 import { useGetStudents } from "../../hooks/students/useGetStudents";
+import { useRouter } from "next/navigation";
+import LoadingSpinner from "../components/loader";
 
 type Student = {
   _id: number;
@@ -48,7 +50,7 @@ export default function StudentDetailsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [selectedCollege, setSelectedCollege] = useState<string | null>(null);
-
+  const router = useRouter();
   const collegeList = [
     "College of Engineering",
     "Business School",
@@ -56,12 +58,48 @@ export default function StudentDetailsPage() {
     "Medical School",
   ];
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
+ 
+
+if (isLoading) {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <LoadingSpinner />
+    </div>
+  );
+}
 
   if (error) {
-    return <p>Error: {error.message}</p>;
+    return (
+      <Card className="w-full max-w-4xl mx-auto mt-10">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold text-primary">
+            No Student Data Available
+          </CardTitle>
+          <CardDescription className="text-xl mt-2">
+            This section is visible only to administrators
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center">
+          <div className="bg-secondary/10 rounded-full p-6 mb-6">
+            <Users className="h-24 w-24 text-secondary" />
+          </div>
+          <p className="text-center text-muted-foreground mb-6 max-w-md">
+            It looks like there are no student records in the system yet. As an
+            administrator, you have the ability to add new students or import
+            existing data.
+          </p>
+          <div className="flex gap-4">
+            <Button
+              className="flex items-center gap-2"
+              onClick={() => router.push("/login")}
+            >
+              <ShieldAlert className="h-4 w-4" />
+              Sign In as Administrator
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

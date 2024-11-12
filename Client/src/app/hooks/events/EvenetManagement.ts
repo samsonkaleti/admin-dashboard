@@ -1,3 +1,4 @@
+'use client'
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Types based on your Mongoose schema
@@ -29,15 +30,12 @@ export type Event = {
 export type EventInput = Omit<Event, "_id">;
 
 const API_BASE_URL = "http://172.188.116.118:5001/api";
-// const token = process.env.SECRET_TOKEN
-const token = sessionStorage.getItem("auth_token")
-
-
+// const token = sessionStorage.getItem('auth_token')  
 // API Functions
 async function fetchEvents() {
   const response = await fetch(`${API_BASE_URL}/events`, {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Bearer ${sessionStorage.getItem('auth_token')}`,
     },
   })
   if (!response.ok) {
