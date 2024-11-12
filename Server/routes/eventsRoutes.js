@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const eventController = require("../controllers/eventcontroller");
 const { authMiddleware } = require("../middleware/authMiddleware");
+const { authorizeRoles } = require("../middleware/authorizeRoles");
 
 // Configure multer storage for handling image uploads
 const storage = multer.diskStorage({
@@ -210,6 +211,7 @@ router.get("/:id", authMiddleware, eventController.getEventById);
 router.put(
   "/:id",
   authMiddleware,
+  authorizeRoles("Uploader"),
   upload.single("thumbnail"),
   eventController.updateEventById
 );

@@ -3,7 +3,7 @@ const router = express.Router();
 const pdfController = require("../controllers/pdfController");
 const uploadMiddleware = require("../middleware/uploadMiddleware");
 const { authMiddleware } = require("../middleware/authMiddleware");
-// const { authorizeRoles } = require("../middleware/authorizeRoles");
+const { authorizeRoles } = require("../middleware/authorizeRoles");
 
 /**
  * @swagger
@@ -60,7 +60,7 @@ const { authMiddleware } = require("../middleware/authMiddleware");
 router.post(
   "/",
   authMiddleware,
-  // authorizeRoles("Admin", "faculty"),
+  authorizeRoles("Admin", "faculty"),
   uploadMiddleware,
   pdfController.createPdfs
 );
@@ -95,7 +95,7 @@ router.post(
 router.get(
   "/", // Ensure this is the correct route path
   authMiddleware,
-  // authorizeRoles("Admin", "Uploader", "Student"), // Use strings directly, not an array
+  authorizeRoles("Admin", "Uploader", "Student"),
   pdfController.getAllPdfs
 );
 
@@ -137,7 +137,7 @@ router.get(
 router.put(
   "/:id",
   authMiddleware,
-  // authorizeRoles("Admin", "Uploader"),
+  authorizeRoles("Admin", "Uploader"),
   uploadMiddleware,
   pdfController.updatePdfById
 );
@@ -158,7 +158,7 @@ router.put(
 router.delete(
   "/:id",
   authMiddleware,
-  // authorizeRoles("Admin"),
+  authorizeRoles("Admin"),
   pdfController.deletePdfById
 );
 
@@ -191,7 +191,7 @@ router.delete(
 router.get(
   "/download/:id/:fileIndex",
   authMiddleware,
-  // authorizeRoles("Admin", "Uploader", "Student"),
+  authorizeRoles("Admin", "Uploader", "Student"),
   pdfController.downloadPdf
 );
 
@@ -219,7 +219,7 @@ router.get(
 router.get(
   "/download-all/:id",
   authMiddleware,
-  // authorizeRoles("Admin", "Uploader"),
+  authorizeRoles("Admin", "Uploader"),
   pdfController.downloadAllPdfs
 );
 
