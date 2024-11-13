@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { Pencil, Trash2, FileUp, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -401,7 +400,7 @@ const PDFUploadPage = () => {
                 onClick={handleDelete}
                 disabled={deletePdfMutation.isPending}
               >
-                {deletePdfMutation.isPending ? "Deleting..." : "Delete"}
+                {deletePdfMutation.isPending ? "Deleting..." : "Delete PDF"}
               </Button>
             </DialogFooter>
           </DialogContent>

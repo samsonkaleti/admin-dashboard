@@ -4,14 +4,12 @@ const pdfController = {
   // Create multiple PDFs
   createPdfs: async (req, res) => {
     try {
-      // Check if files exist
       if (!req.files || req.files.length === 0) {
         return res
           .status(400)
           .json({ error: "Please upload at least one PDF file" });
       }
 
-      // Extract data from request
       const {
         "academicYear.year": year,
         "academicYear.semester": semester,
@@ -20,7 +18,6 @@ const pdfController = {
         subject,
       } = req.body;
 
-      // Validate required fields
       if (!year || !semester || !regulation || !course || !subject) {
         return res.status(400).json({
           error:
@@ -28,7 +25,6 @@ const pdfController = {
         });
       }
 
-      // Validate all files are PDFs
       const invalidFiles = req.files.filter(
         (file) => file.mimetype !== "application/pdf"
       );
@@ -39,22 +35,16 @@ const pdfController = {
         });
       }
 
-      // Generate unique ID
       const id = Date.now();
 
-      // Prepare files array
       const files = req.files.map((file) => ({
         fileName: file.originalname,
         fileData: file.buffer,
       }));
 
-      // Create new PDF document with multiple files
       const newPdf = new PdfUpload({
         id,
-        academicYear: {
-          year,
-          semester,
-        },
+        academicYear: { year, semester },
         regulation,
         course,
         subject,
@@ -72,12 +62,13 @@ const pdfController = {
           course: newPdf.course,
           subject: newPdf.subject,
           fileNames: newPdf.files.map((f) => f.fileName),
-          uploadDate: newPdf.uploadDate,
         },
       });
     } catch (err) {
       console.error("Error uploading PDFs:", err);
-      res.status(500).json({ error: "Failed to upload PDFs" });
+      res
+        .status(500)
+        .json({ error: "Failed to upload PDFs", details: err.message });
     }
   },
 
@@ -184,6 +175,7 @@ const pdfController = {
     }
   },
 
+  // Download specific PDF file
   // Download specific PDF file
   downloadPdf: async (req, res) => {
     try {
