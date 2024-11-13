@@ -5,6 +5,50 @@ const uploadMiddleware = require("../middleware/uploadMiddleware");
 const { authMiddleware } = require("../middleware/authMiddleware");
 // const { authorizeRoles } = require("../middleware/authorizeRoles");
 
+
+
+
+/**
+ * @swagger
+ * /api/pdfs:
+ *   get:
+ *     summary: Get all PDF documents
+ *     tags: [PDFs]
+ *     parameters:
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: semester
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PdfDocument'
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+router.get(
+  "/",
+  authMiddleware,
+  // authorizeRoles("Admin", "Viewer"),
+  pdfController.getAllPdfs
+);
+
 /**
  * @swagger
  * /api/pdfs:
@@ -67,40 +111,6 @@ router.post(
 
 /**
  * @swagger
- * /api/pdfs:
- *   get:
- *     summary: Get all PDF documents
- *     tags: [PDFs]
- *     parameters:
- *       - in: query
- *         name: year
- *         schema:
- *           type: string
- *         description: Filter by academic year
- *       - in: query
- *         name: semester
- *         schema:
- *           type: string
- *         description: Filter by semester
- *     responses:
- *       200:
- *         description: List of PDF documents
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/PDF'
- */
-router.get(
-  "/", // Ensure this is the correct route path
-  authMiddleware,
-  // authorizeRoles("Admin", "Uploader", "Student"), // Use strings directly, not an array
-  pdfController.getAllPdfs
-);
-
-/**
- * @swagger
  * /api/pdfs/{id}:
  *   put:
  *     summary: Update a PDF document
@@ -122,9 +132,9 @@ router.get(
  *                 items:
  *                   type: string
  *                   format: binary
- *               academicYear.year:
+ *               "academicYear.year":
  *                 type: string
- *               academicYear.semester:
+ *               "academicYear.semester":
  *                 type: string
  *               regulation:
  *                 type: string
@@ -132,7 +142,76 @@ router.get(
  *                 type: string
  *               subject:
  *                 type: string
- *
+ *     responses:
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:    
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 pdf:
+ *                   $ref: '#/components/schemas/PdfDocument'
+ *       '400':
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       '404':
+ *         description: PDF document not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ * 
+ * components:
+ *   schemas:
+ *     PdfDocument:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: number
+ *         academicYear:
+ *           type: object
+ *           properties:
+ *             year:
+ *               type: string
+ *             semester:
+ *               type: string
+ *         regulation:
+ *           type: string
+ *         course:
+ *           type: string
+ *         subject:
+ *           type: string
+ *         files:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               fileName:
+ *                 type: string
+ *         uploadDate:
+ *           type: string
+ *           format: date-time
  */
 router.put(
   "/:id",

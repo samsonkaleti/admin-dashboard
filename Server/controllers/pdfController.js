@@ -105,34 +105,31 @@ const pdfController = {
   // Update PDF document and its files
   updatePdfById: async (req, res) => {
     try {
-      const { id } = req.params;
-      const {
-        "academicYear.year": year,
-        "academicYear.semester": semester,
-        regulation,
-        course,
-        subject,
-      } = req.body;
+      const { _id } = req.params;
+      const { "academicYear.year": year, "academicYear.semester": semester, regulation, course, subject } = req.body;
 
-      const updateData = {
-        "academicYear.year": year,
-        "academicYear.semester": semester,
-        regulation,
-        course,
-        subject,
-      };
+      const updateData = {};
 
-      // Remove undefined fields
-      Object.keys(updateData).forEach(
-        (key) => updateData[key] === undefined && delete updateData[key]
-      );
+      if (year !== undefined) {
+        updateData["academicYear.year"] = year;
+      }
+      if (semester !== undefined) {
+        updateData["academicYear.semester"] = semester;
+      }
+      if (regulation !== undefined) {
+        updateData.regulation = regulation;
+      }
+      if (course !== undefined) {
+        updateData.course = course;
+      }
+      if (subject !== undefined) {
+        updateData.subject = subject;
+      }
 
       // Handle file updates if files are provided
       if (req.files && req.files.length > 0) {
         // Validate all files are PDFs
-        const invalidFiles = req.files.filter(
-          (file) => file.mimetype !== "application/pdf"
-        );
+        const invalidFiles = req.files.filter((file) => file.mimetype !== "application/pdf");
         if (invalidFiles.length > 0) {
           return res.status(400).json({
             error: "Only PDF files are allowed",
@@ -147,11 +144,7 @@ const pdfController = {
         }));
       }
 
-      const updatedPdf = await PdfUpload.findOneAndUpdate(
-        { id: parseInt(id) },
-        updateData,
-        { new: true }
-      ).select("-files.fileData");
+      const updatedPdf = await PdfUpload.findOneAndUpdate({ _id }, updateData, { new: true }).select("-files.fileData");
 
       if (!updatedPdf) {
         return res.status(404).json({ error: "PDF document not found" });
@@ -166,6 +159,7 @@ const pdfController = {
       res.status(500).json({ error: "Failed to update PDF document" });
     }
   },
+
 
   // Delete PDF document
   deletePdfById: async (req, res) => {
