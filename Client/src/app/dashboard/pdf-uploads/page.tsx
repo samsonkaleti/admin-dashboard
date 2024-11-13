@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Pencil, Trash2, FileUp, Download } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useEffect, useState } from "react";
+import { Pencil, Trash2, FileUp, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -19,64 +19,66 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { useCreatePdf } from "@/app/hooks/pdfUploads/useCreatePdfUpload"
-import { useGetAllPdfs } from "@/app/hooks/pdfUploads/useGetAllPdfs"
-import { useUpdatePdf } from "@/app/hooks/pdfUploads/useUpdatePdf"
-import { useDeletePdf } from "@/app/hooks/pdfUploads/useDeletePdf"
-import { useDownloadPdf } from "@/app/hooks/pdfUploads/useDownloadPdf"
+} from "@/components/ui/card";
+import { useCreatePdf } from "@/app/hooks/pdfUploads/useCreatePdfUpload";
+import { useGetAllPdfs } from "@/app/hooks/pdfUploads/useGetAllPdfs";
+import { useUpdatePdf } from "@/app/hooks/pdfUploads/useUpdatePdf";
+import { useDeletePdf } from "@/app/hooks/pdfUploads/useDeletePdf";
+import { useDownloadPdf } from "@/app/hooks/pdfUploads/useDownloadPdf";
 
 type PDFUpload = {
-  id: number
+  id: number;
   academicYear: {
-    year: string
-    semester: string
-  }
-  regulation: string
-  course: string
-  subject: string
-  files: File[]
-  uploadDate: string
-}
+    year: string;
+    semester: string;
+  };
+  regulation: string;
+  course: string;
+  subject: string;
+  files: File[];
+  uploadDate: string;
+};
 
 const PDFUploadPage = () => {
-  const [newUpload, setNewUpload] = useState<Omit<PDFUpload, "id" | "files" | "uploadDate">>({
+  const [newUpload, setNewUpload] = useState<
+    Omit<PDFUpload, "id" | "files" | "uploadDate">
+  >({
     academicYear: { year: "", semester: "" },
     regulation: "",
     course: "",
     subject: "",
-  })
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [deletingId, setDeletingId] = useState<number | null>(null)
-  const [isClient, setIsClient] = useState(false)
+  });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
-  const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"]
-  const semesters = ["1st Semester", "2nd Semester"]
-  const regulations = ["R24", "R20", "R19", "R16", "R13"]
-  
-  const { data: pdfUploads, isLoading, isError, error } = useGetAllPdfs()
-  const createPdfMutation = useCreatePdf()
-  const updatePdfMutation = useUpdatePdf()
-  const deletePdfMutation = useDeletePdf()
-  const { downloadPdf, isDownloading } = useDownloadPdf()
+  const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+  const semesters = ["1st Semester", "2nd Semester"];
+  const regulations = ["R24", "R20", "R19", "R16", "R13"];
+
+  const { data: pdfUploads, isLoading, isError, error } = useGetAllPdfs();
+  const createPdfMutation = useCreatePdf();
+  const updatePdfMutation = useUpdatePdf();
+  const deletePdfMutation = useDeletePdf();
+  const { downloadPdf, isDownloading } = useDownloadPdf();
 
   const handleNew = () => {
     setNewUpload({
@@ -84,62 +86,60 @@ const PDFUploadPage = () => {
       regulation: "",
       course: "",
       subject: "",
-    })
-    setSelectedFiles([])
-    setEditingId(null)
-    setIsDialogOpen(true)
-  }
+    });
+    setSelectedFiles([]);
+    setEditingId(null);
+    setIsDialogOpen(true);
+  };
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
-   const handleAdd = async () => {
+  const handleAdd = async () => {
     try {
       if (selectedFiles.length === 0) {
-        throw new Error("Please upload at least one PDF file")
+        throw new Error("Please upload at least one PDF file");
       }
 
-      const formData = new FormData()
-      formData.append("academicYear.year", newUpload.academicYear.year)
-      formData.append("academicYear.semester", newUpload.academicYear.semester)
-      formData.append("regulation", newUpload.regulation)
-      formData.append("course", newUpload.course)
-      formData.append("subject", newUpload.subject)
-      selectedFiles.forEach((file) => formData.append("files", file))
+      const formData = new FormData();
+      formData.append("academicYear.year", newUpload.academicYear.year);
+      formData.append("academicYear.semester", newUpload.academicYear.semester);
+      formData.append("regulation", newUpload.regulation);
+      formData.append("course", newUpload.course);
+      formData.append("subject", newUpload.subject);
+      selectedFiles.forEach((file) => formData.append("files", file));
 
-      await createPdfMutation.mutateAsync(formData)
+      await createPdfMutation.mutateAsync(formData);
 
-      setIsDialogOpen(false)
+      setIsDialogOpen(false);
       setNewUpload({
         academicYear: { year: "", semester: "" },
         regulation: "",
         course: "",
         subject: "",
-      })
-      setSelectedFiles([])
-
-      
+      });
+      setSelectedFiles([]);
     } catch (error) {
-      console.error("Error uploading PDF:", error)
+      console.error("Error uploading PDF:", error);
     }
-  }
+  };
 
   const handleEdit = (id: number) => {
-    const pdfToEdit = pdfUploads?.find(pdf => pdf.id === id)
+    const pdfToEdit = pdfUploads?.find((pdf) => pdf.id === id);
     if (pdfToEdit) {
       setNewUpload({
         academicYear: pdfToEdit.academicYear,
         regulation: pdfToEdit.regulation,
         course: pdfToEdit.course,
         subject: pdfToEdit.subject,
-      })
-      setEditingId(id)
-      setIsDialogOpen(true)
+      });
+      setEditingId(id);
+      setIsDialogOpen(true);
     }
-  }
+  };
 
   const handleUpdate = async () => {
-    if (editingId === null) return
+    if (editingId === null) return;
 
     try {
       const updatedPdf: PDFUpload = {
@@ -147,53 +147,51 @@ const PDFUploadPage = () => {
         ...newUpload,
         files: selectedFiles,
         uploadDate: new Date().toISOString(),
-      }
+      };
 
-      await updatePdfMutation.mutateAsync(updatedPdf)
+      await updatePdfMutation.mutateAsync(updatedPdf);
 
-      setIsDialogOpen(false)
-      setEditingId(null)
+      setIsDialogOpen(false);
+      setEditingId(null);
       setNewUpload({
         academicYear: { year: "", semester: "" },
         regulation: "",
         course: "",
         subject: "",
-      })
-      setSelectedFiles([])
+      });
+      setSelectedFiles([]);
     } catch (error) {
-      console.error("Error updating PDF:", error)
+      console.error("Error updating PDF:", error);
     }
-  }
+  };
   const handleDeleteConfirmation = (id: number) => {
-    setDeletingId(id)
-    setIsDeleteDialogOpen(true)
-  }
+    setDeletingId(id);
+    setIsDeleteDialogOpen(true);
+  };
 
   const handleDelete = async () => {
-    if (deletingId === null) return
+    if (deletingId === null) return;
 
     try {
-      await deletePdfMutation.mutateAsync(deletingId)
-      setIsDeleteDialogOpen(false)
-      setDeletingId(null)
+      await deletePdfMutation.mutateAsync(deletingId);
+      setIsDeleteDialogOpen(false);
+      setDeletingId(null);
     } catch (error) {
-      console.error("Error deleting PDF:", error)
-     }
-  }
-
-   
+      console.error("Error deleting PDF:", error);
+    }
+  };
 
   const handleDownload = async (id: number, fileIndex: number) => {
     try {
-      await downloadPdf(id, fileIndex)
+      await downloadPdf(id, fileIndex);
     } catch (error) {
-      console.error("Error downloading PDF:", error)
+      console.error("Error downloading PDF:", error);
       // Handle error (e.g., show error message to user)
     }
-  }
+  };
 
-  if (isLoading) return <div>Loading...</div>
-  if (isError) return <div>Error: {error.message}</div>
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error: {error.message}</div>;
 
   return (
     <Card className="w-full max-w-[95vw] mx-auto">
@@ -271,7 +269,10 @@ const PDFUploadPage = () => {
                   onValueChange={(value) =>
                     setNewUpload({
                       ...newUpload,
-                      academicYear: { ...newUpload.academicYear, semester: value },
+                      academicYear: {
+                        ...newUpload.academicYear,
+                        semester: value,
+                      },
                     })
                   }
                 >
@@ -366,7 +367,9 @@ const PDFUploadPage = () => {
             <Button
               onClick={editingId ? handleUpdate : handleAdd}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-              disabled={createPdfMutation.isPending || updatePdfMutation.isPending}
+              disabled={
+                createPdfMutation.isPending || updatePdfMutation.isPending
+              }
             >
               {createPdfMutation.isPending || updatePdfMutation.isPending
                 ? "Processing..."
@@ -382,14 +385,22 @@ const PDFUploadPage = () => {
             <DialogHeader>
               <DialogTitle>Confirm Deletion</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this PDF? This action cannot be undone.
+                Are you sure you want to delete this PDF? This action cannot be
+                undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleDelete} disabled={deletePdfMutation.isPending}>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={deletePdfMutation.isPending}
+              >
                 {deletePdfMutation.isPending ? "Deleting..." : "Delete"}
               </Button>
             </DialogFooter>
@@ -468,7 +479,7 @@ const PDFUploadPage = () => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
 export default PDFUploadPage;
