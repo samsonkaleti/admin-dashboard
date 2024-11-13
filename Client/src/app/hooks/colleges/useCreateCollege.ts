@@ -2,7 +2,7 @@ import { CollegeData } from '@/app/@types/college';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 async function createCollege(newCollege: CollegeData) {
-  const response = await fetch('http://172.188.116.118:5001/api/colleges', {
+  const response = await fetch('http://localhost:5001/api/colleges', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

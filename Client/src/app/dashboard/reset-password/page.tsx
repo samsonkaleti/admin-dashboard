@@ -16,7 +16,7 @@ export default function ResetPassword() {
     setLoading(true);
     try {
       console.log("Requesting reset password with email:", email); // Debugging
-      const response = await fetch("http://172.188.116.118:5001/api/auth/reset-password", {
+      const response = await fetch("http://localhost:5001/api/auth/reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,7 +46,7 @@ export default function ResetPassword() {
     setLoading(true);
     try {
       console.log("Reset token and new password:", { resetToken, newPassword }); // Debugging
-      const response = await fetch("http://172.188.116.118:5001/api/auth/confirm-reset-password", {
+      const response = await fetch("http://localhost:5001/api/auth/confirm-reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
