@@ -25,6 +25,7 @@ app.use(
   })
 );
 // Middleware to parse JSON
+app.options("*", cors());
 app.use(express.json());
 connectDB();
 
