@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Pencil, Trash2, FileUp, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
 import {
   Table,
   TableBody,
@@ -61,7 +62,7 @@ export default function PDFUploadPage() {
     course: "",
     subject: "",
   })
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -91,33 +92,57 @@ export default function PDFUploadPage() {
 
   const handleAdd = async () => {
     try {
-      if (selectedFiles.length === 0) {
-        throw new Error("Please upload at least one PDF file")
+      // Validate form fields
+      if (!newUpload.academicYear.year || 
+          !newUpload.academicYear.semester || 
+          !newUpload.regulation || 
+          !newUpload.course || 
+          !newUpload.subject) {
+        toast.error("All fields are required");
+        return;
       }
-
-      const formData = new FormData()
-      formData.append("academicYear.year", newUpload.academicYear.year)
-      formData.append("academicYear.semester", newUpload.academicYear.semester)
-      formData.append("regulation", newUpload.regulation)
-      formData.append("course", newUpload.course)
-      formData.append("subject", newUpload.subject)
-      selectedFiles.forEach((file) => formData.append("files", file))
-
-      await createPdfMutation.mutateAsync(formData)
-
-      setIsDialogOpen(false)
+  
+      // Validate files
+      if (selectedFiles.length === 0) {
+        toast.error("Please select at least one PDF file");
+        return;
+      }
+  
+      const formData = new FormData();
+      
+      // Append metadata as JSON string
+      formData.append("metadata", JSON.stringify({
+        academicYear: newUpload.academicYear,
+        regulation: newUpload.regulation,
+        course: newUpload.course,
+        subject: newUpload.subject,
+      }));
+  
+      // Append all files with the same field name 'files'
+      selectedFiles.forEach((file) => {
+        formData.append('files', file);
+      });
+  
+      // Submit the form
+      await createPdfMutation.mutateAsync(formData);
+  
+      // Show success message
+      toast.success("PDFs uploaded successfully");
+  
+      // Reset form after successful upload
+      setIsDialogOpen(false);
       setNewUpload({
         academicYear: { year: "", semester: "" },
         regulation: "",
         course: "",
         subject: "",
-      })
-      setSelectedFiles([])
-    } catch (error) {
-      console.error("Error uploading PDF:", error)
-      // Handle error (e.g., show error message to user)
+      });
+      setSelectedFiles([]);
+    } catch (error: any) {
+      console.error("Error uploading PDFs:", error);
+      toast.error(error.message || "Failed to upload PDFs");
     }
-  }
+  };
 
   const handleEdit = (id: number) => {
     const pdfToEdit = pdfUploads?.find(pdf => pdf.id === id)
@@ -145,6 +170,7 @@ export default function PDFUploadPage() {
       }
 
       await updatePdfMutation.mutateAsync(updatedPdf)
+      toast.success("PDF updated successfully");
 
       setIsDialogOpen(false)
       setEditingId(null)
@@ -155,9 +181,9 @@ export default function PDFUploadPage() {
         subject: "",
       })
       setSelectedFiles([])
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating PDF:", error)
-      // Handle error (e.g., show error message to user)
+      toast.error(error.message || "Failed to update PDF");
     }
   }
 
@@ -171,21 +197,22 @@ export default function PDFUploadPage() {
 
     try {
       await deletePdfMutation.mutateAsync(deletingId)
+      toast.success("PDF deleted successfully");
       setIsDeleteDialogOpen(false)
       setDeletingId(null)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting PDF:", error)
-     }
+      toast.error(error.message || "Failed to delete PDF");
+    }
   }
-
-   
 
   const handleDownload = async (id: number, fileIndex: number) => {
     try {
       await downloadPdf(id, fileIndex)
-    } catch (error) {
+      toast.success("PDF downloaded successfully");
+    } catch (error: any) {
       console.error("Error downloading PDF:", error)
-      // Handle error (e.g., show error message to user)
+      toast.error(error.message || "Failed to download PDF");
     }
   }
 
@@ -224,15 +251,13 @@ export default function PDFUploadPage() {
               <DialogDescription className="text-muted-foreground">
                 {editingId
                   ? "Modify the existing PDF details"
-                  : "Add a new PDF to the collection"}
+                  : "Add new PDFs to the collection"}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-6 py-4">
+              {/* Academic Year */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="year"
-                  className="text-right text-sm font-medium"
-                >
+                <Label htmlFor="year" className="text-right text-sm font-medium">
                   Year
                 </Label>
                 <Select
@@ -256,11 +281,10 @@ export default function PDFUploadPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Semester */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="semester"
-                  className="text-right text-sm font-medium"
-                >
+                <Label htmlFor="semester" className="text-right text-sm font-medium">
                   Semester
                 </Label>
                 <Select
@@ -284,11 +308,10 @@ export default function PDFUploadPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Regulation */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="regulation"
-                  className="text-right text-sm font-medium"
-                >
+                <Label htmlFor="regulation" className="text-right text-sm font-medium">
                   Regulation
                 </Label>
                 <Select
@@ -309,11 +332,10 @@ export default function PDFUploadPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Course */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="course"
-                  className="text-right text-sm font-medium"
-                >
+                <Label htmlFor="course" className="text-right text-sm font-medium">
                   Course
                 </Label>
                 <Input
@@ -325,11 +347,10 @@ export default function PDFUploadPage() {
                   className="col-span-3"
                 />
               </div>
+
+              {/* Subject */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="subject"
-                  className="text-right text-sm font-medium"
-                >
+                <Label htmlFor="subject" className="text-right text-sm font-medium">
                   Subject
                 </Label>
                 <Input
@@ -341,36 +362,101 @@ export default function PDFUploadPage() {
                   className="col-span-3"
                 />
               </div>
+
+              {/* Multiple PDF Files Upload */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="file"
-                  className="text-right text-sm font-medium"
-                >
-                  File(s)
+                <Label htmlFor="files" className="text-right text-sm font-medium">
+                  PDF Files
                 </Label>
-                <Input
-                  id="file"
-                  type="file"
-                  accept=".pdf"
-                  multiple
-                  onChange={(e) =>
-                    setSelectedFiles(Array.from(e.target.files || []))
-                  }
-                  className="col-span-3"
-                />
+                <div className="col-span-3 space-y-4">
+                  <Input
+                    id="files"
+                    type="file"
+                    accept=".pdf"
+                    multiple
+                    onChange={(e) => {
+                      const newFiles = Array.from(e.target.files || []);
+                      // Validate new PDF files
+                      const invalidFiles = newFiles.filter(
+                        file => file.type !== 'application/pdf'
+                      );
+                      if (invalidFiles.length > 0) {
+                        toast.error('Only PDF files are allowed');
+                        e.target.value = ''; // Reset input
+                        return;
+                      }
+                      // Add new files to existing files
+                      setSelectedFiles(prevFiles => [...prevFiles, ...newFiles]);
+                      // Reset input value so same file can be selected again
+                      e.target.value = '';
+                    }}
+                    className="col-span-3"
+                  />
+                  
+                  {/* Display selected files with remove option */}
+                  {selectedFiles.length > 0 && (
+                    <div className="text-sm text-muted-foreground">
+                      <p>Selected files ({selectedFiles.length}):</p>
+                      <ul className="list-disc pl-5 mt-2 space-y-2">
+                        {selectedFiles.map((file, index) => (
+                          <li key={index} className="flex items-center justify-between">
+                            <span>{file.name}</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-red-500"
+                              onClick={() => {
+                                setSelectedFiles(prevFiles => 
+                                  prevFiles.filter((_, i) => i !== index)
+                                );
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                      {selectedFiles.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="mt-2 text-red-500"
+                          onClick={() => setSelectedFiles([])}
+                        >
+                          Clear All
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Submit Button */}
+              <DialogFooter>
+                <Button
+                  onClick={editingId ? handleUpdate : handleAdd}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  disabled={
+                    createPdfMutation.isPending || 
+                    updatePdfMutation.isPending || 
+                    selectedFiles.length === 0
+                  }
+                >
+                  {createPdfMutation.isPending || updatePdfMutation.isPending ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Processing...
+                    </div>
+                  ) : editingId ? (
+                    "Update PDF"
+                  ) : (
+                    `Upload ${selectedFiles.length} PDF${selectedFiles.length !== 1 ? 's' : ''}`
+                  )}
+                </Button>
+              </DialogFooter>
             </div>
-            <Button
-              onClick={editingId ? handleUpdate : handleAdd}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-              disabled={createPdfMutation.isPending || updatePdfMutation.isPending}
-            >
-              {createPdfMutation.isPending || updatePdfMutation.isPending
-                ? "Processing..."
-                : editingId
-                ? "Update PDF"
-                : "Upload PDF"}
-            </Button>
           </DialogContent>
         </Dialog>
 

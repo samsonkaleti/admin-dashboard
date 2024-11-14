@@ -11,15 +11,14 @@ const pdfController = {
           .json({ error: "Please upload at least one PDF file" });
       }
 
-      // Extract data from request
+      const metadata = JSON.parse(req.body.metadata);
+
       const {
-        "academicYear.year": year,
-        "academicYear.semester": semester,
+        academicYear: { year, semester },
         regulation,
         course,
         subject,
-      } = req.body;
-
+      } = metadata;
       // Validate required fields
       if (!year || !semester || !regulation || !course || !subject) {
         return res.status(400).json({
@@ -106,7 +105,13 @@ const pdfController = {
   updatePdfById: async (req, res) => {
     try {
       const { _id } = req.params;
-      const { "academicYear.year": year, "academicYear.semester": semester, regulation, course, subject } = req.body;
+      const {
+        "academicYear.year": year,
+        "academicYear.semester": semester,
+        regulation,
+        course,
+        subject,
+      } = req.body;
 
       const updateData = {};
 
@@ -129,7 +134,9 @@ const pdfController = {
       // Handle file updates if files are provided
       if (req.files && req.files.length > 0) {
         // Validate all files are PDFs
-        const invalidFiles = req.files.filter((file) => file.mimetype !== "application/pdf");
+        const invalidFiles = req.files.filter(
+          (file) => file.mimetype !== "application/pdf"
+        );
         if (invalidFiles.length > 0) {
           return res.status(400).json({
             error: "Only PDF files are allowed",
@@ -144,7 +151,9 @@ const pdfController = {
         }));
       }
 
-      const updatedPdf = await PdfUpload.findOneAndUpdate({ _id }, updateData, { new: true }).select("-files.fileData");
+      const updatedPdf = await PdfUpload.findOneAndUpdate({ _id }, updateData, {
+        new: true,
+      }).select("-files.fileData");
 
       if (!updatedPdf) {
         return res.status(404).json({ error: "PDF document not found" });
@@ -159,7 +168,6 @@ const pdfController = {
       res.status(500).json({ error: "Failed to update PDF document" });
     }
   },
-
 
   // Delete PDF document
   deletePdfById: async (req, res) => {
