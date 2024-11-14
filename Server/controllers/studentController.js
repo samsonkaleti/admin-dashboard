@@ -14,6 +14,42 @@ exports.getAllStudents = async (req, res) => {
   }
 };
 
+// Get a single student by ID
+exports.getStudentById = async (req, res) => {
+  try {
+    const student = await User.findById(req.params.id);
+    if (!student || student.role !== "Student") {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    return res.status(200).json(student);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error fetching student",
+      error: error.message,
+    });
+  }
+};
+
+// Get multiple students by IDs
+exports.getStudentsByIds = async (req, res) => {
+  const { ids } = req.body; // Expecting an array of IDs in the request body
+
+  if (!Array.isArray(ids)) {
+    return res.status(400).json({ message: "IDs should be an array" });
+  }
+
+  try {
+    const students = await User.find({ _id: { $in: ids }, role: "Student" });
+    return res.status(200).json(students);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error fetching students by IDs",
+      error: error.message,
+    });
+  }
+};
+
+
 // Register student for an event
 exports.registerStudentForEvent = async (req, res) => {
   const { userId, eventId } = req.body;

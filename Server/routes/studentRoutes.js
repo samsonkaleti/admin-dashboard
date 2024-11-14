@@ -1,6 +1,7 @@
 const express = require("express");
 const studentController = require("../controllers/studentController");
 const router = express.Router();
+const { authMiddleware } = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -21,7 +22,58 @@ const router = express.Router();
  *       500:
  *         description: Error fetching students
  */
-router.get("/students", studentController.getAllStudents);
+router.get("/students", authMiddleware, studentController.getAllStudents);
+
+/**
+ * @swagger
+ * /api/students/{id}:
+ *   get:
+ *     summary: Get a single student by ID
+ *     tags: [Students]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The student ID
+ *     responses:
+ *       200:
+ *         description: Student data
+ *       404:
+ *         description: Student not found
+ *       500:
+ *         description: Error fetching student
+ */
+router.get("/students/:id", authMiddleware, studentController.getStudentById);
+
+/**
+ * @swagger
+ * /api/students/multiple:
+ *   post:
+ *     summary: Get multiple students by their IDs
+ *     tags: [Students]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of student IDs
+ *     responses:
+ *       200:
+ *         description: List of students
+ *       400:
+ *         description: IDs should be an array
+ *       500:
+ *         description: Error fetching students
+ */
+router.post("/students/multiple", authMiddleware, studentController.getStudentsByIds);
 
 /**
  * @swagger
@@ -48,6 +100,6 @@ router.get("/students", studentController.getAllStudents);
  *       500:
  *         description: Error registering student for event
  */
-router.post("/events/register", studentController.registerStudentForEvent);
+router.post("/events/register",authMiddleware, studentController.registerStudentForEvent);
 
 module.exports = router;

@@ -15,7 +15,7 @@ import { BASE_URL } from '@/app/utils/constants';
   const API_BASE_URL = `${BASE_URL}/api`;
 
   async function fetchCards() {
-    const response = await fetch(`${BASE_URL}/cards`, {
+    const response = await fetch(`${API_BASE_URL}/cards`, {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
       },
