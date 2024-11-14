@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 async function fetchStudents() {
-  const response = await fetch("http://localhost:5001/api/students");
+  const response = await fetch("https://osaw.in/v1/api/students");
   if (!response.ok) {
     throw new Error("Failed to fetch students");
   }

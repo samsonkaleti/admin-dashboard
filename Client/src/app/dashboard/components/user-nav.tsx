@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import { useTheme } from "next-themes";
@@ -131,7 +131,8 @@ export function Navbar() {
 
   const handleLogout = () => {
     // Add any logout logic here (e.g., clearing tokens, etc.)
-    router.push('/login');
+    router.push("/");
+    sessionStorage.removeItem("auth_token");
   };
 
   return (
@@ -206,7 +207,10 @@ export function Navbar() {
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="text-red-600 dark:text-red-400"
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
                     </DropdownMenuItem>
@@ -269,7 +273,10 @@ export function Navbar() {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-600 dark:text-red-400"
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>

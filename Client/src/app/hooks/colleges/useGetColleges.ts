@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 async function fetchColleges() {
-  const response = await fetch('http://localhost:5001/api/colleges');
+  const response = await fetch("https://osaw.in/v1/api/colleges");
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }

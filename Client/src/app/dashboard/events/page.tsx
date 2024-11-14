@@ -87,7 +87,7 @@ const EventCard = ({
         <Image
           src={
             event.thumbnail
-              ? `http://172.188.116.118:5001/${event.thumbnail}`
+              ? `https://osaw.in/v1/${event.thumbnail}`
               : "./logo2.png"
           }
           width={80}

@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 async function createPdf(formData: FormData) {
-  const response = await fetch('http://localhost:5001/api/pdfs', {
+  const response = await fetch("https://osaw.in/v1/api/pdfs", {
     headers: {
-      'Authorization': `Bearer ${sessionStorage.getItem("auth_token")}`,
+      Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
     },
-    method: 'POST',
+    method: "POST",
     body: formData,
   });
 

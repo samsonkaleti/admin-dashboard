@@ -70,7 +70,7 @@ function LoginPageContent() {
       // Store the token in localStorage or a secure cookie
       sessionStorage.setItem("auth_token", response.token)
       // Redirect to dashboard or home page
-      router.push("/")
+      router.push("/dashboard")
     } catch (error) {
       console.error("Login error:", error)
       setError("Invalid credentials. Please try again.")

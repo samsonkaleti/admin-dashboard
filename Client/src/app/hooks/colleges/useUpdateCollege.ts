@@ -2,10 +2,10 @@ import { CollegeData } from '@/app/@types/college';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 async function updateCollege({ id, ...updateData }: { id: string } & Partial<CollegeData>) {
-  const response = await fetch(`http://localhost:5001/api/colleges/${id}`, {
-    method: 'PUT',
+  const response = await fetch(`https://osaw.in/v1/api/colleges/${id}`, {
+    method: "PUT",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(updateData),
   });

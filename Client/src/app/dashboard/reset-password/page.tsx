@@ -16,13 +16,16 @@ export default function ResetPassword() {
     setLoading(true);
     try {
       console.log("Requesting reset password with email:", email); // Debugging
-      const response = await fetch("http://localhost:5001/api/auth/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        "https://osaw.in/v1/api/auth/reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -46,16 +49,19 @@ export default function ResetPassword() {
     setLoading(true);
     try {
       console.log("Reset token and new password:", { resetToken, newPassword }); // Debugging
-      const response = await fetch("http://localhost:5001/api/auth/confirm-reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resetToken,
-          newPassword,
-        }),
-      });
+      const response = await fetch(
+        "https://osaw.in/v1/api/auth/confirm-reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            resetToken,
+            newPassword,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();

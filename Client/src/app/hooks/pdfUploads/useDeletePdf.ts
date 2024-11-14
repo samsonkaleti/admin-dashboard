@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 async function deletePdf(id: number): Promise<void> {
-  const response = await fetch(`http://localhost:5001/api/pdfs/${id}`, {
+  const response = await fetch(`https://osaw.in/v1/api/pdfs/${id}`, {
     headers: {
-      'Authorization': `Bearer ${sessionStorage.getItem("auth_token")}`,
+      Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
     },
-    method: 'DELETE',
-  }) 
+    method: "DELETE",
+  }); 
 
   if (!response.ok) {
     const errorData = await response.json()

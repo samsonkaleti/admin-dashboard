@@ -17,11 +17,11 @@ async function fetchPdfs(year?: string, semester?: string): Promise<PDFUpload[]>
   if (year) params.append('year', year)
   if (semester) params.append('semester', semester)
 
-  const response = await fetch(`http://localhost:5001/api/pdfs?`, {
-      headers: {
-        'Authorization': `Bearer ${sessionStorage.getItem("auth_token")}`,
-      },
-    })  
+  const response = await fetch(`https://osaw.in/v1/api/pdfs?`, {
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+    },
+  });  
     if (!response.ok) {
     throw new Error('Network response was not ok')
   }

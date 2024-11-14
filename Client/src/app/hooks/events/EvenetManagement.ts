@@ -28,11 +28,11 @@ export type Event = {
 
 export type EventInput = Omit<Event, "_id">;
 
-const API_BASE_URL = "http://localhost:5001/api";
+const API_BASE_URL = "https://osaw.in/v1/api";
 
 // API Functions
 async function fetchEvents() {
-  const response = await fetch("http://localhost:5001/api/events");
+  const response = await fetch("https://osaw.in/v1/api/events");
   if (!response.ok) {
     throw new Error("Failed to fetch events");
   }

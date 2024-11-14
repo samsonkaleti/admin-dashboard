@@ -6,11 +6,14 @@ export function useDownloadPdf() {
   const downloadPdf = async (id: number, fileIndex: number) => {
     setIsDownloading(true)
     try {
-      const response = await fetch(`http://localhost:5001/api/pdfs/download/${id}/${fileIndex}`, {
-        headers: {
-          'Authorization': `Bearer ${sessionStorage.getItem("auth_token")}`,
-        },
-      }) 
+      const response = await fetch(
+        `https://osaw.in/v1/api/pdfs/download/${id}/${fileIndex}`,
+        {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+          },
+        }
+      ); 
       if (!response.ok) {
         throw new Error('Failed to download PDF')
       }

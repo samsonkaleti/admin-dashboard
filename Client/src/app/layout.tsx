@@ -1,16 +1,17 @@
+// app/layout.tsx
 "use client";
 
 import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import "./globals.css";
 import { AppLayout } from "@/components/layout/app-layout";
 import { AuthLayout } from "@/components/layout/auth-layout";
 
-const authPages = ["/login", "/signup", "/privacy"];
+const authPages = ["/login", "/signup", "/privacy", "/"];
 const validRoutes = [
-  "/",
+  "/dashboard",
   "/dashboard/college-data",
   "/dashboard/card-data",
   "/dashboard/pdf-uploads",
@@ -21,6 +22,39 @@ const validRoutes = [
   "/dashboard/events",
   "/dashboard/notifications",
 ];
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      try {
+        const token = sessionStorage.getItem("auth_token");
+
+        if (!token && validRoutes.includes(pathname)) {
+          router.replace("/");
+          return;
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        router.replace("/");
+      }
+    };
+
+    checkAuth();
+  }, [pathname, router]);
+
+  // Your loading.tsx will handle the loading state
+  if (isLoading) {
+    return null;
+  }
+
+  return <>{children}</>;
+};
 
 export default function RootLayout({
   children,
@@ -42,12 +76,13 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryClientProvider client={queryClient}>
-            {/* Show AuthLayout if it's an auth page or if the route is invalid */}
-            {isAuthPage || !isValidRoute ? (
-              <AuthLayout>{children}</AuthLayout>
-            ) : (
-              <AppLayout>{children}</AppLayout>
-            )}
+            <ProtectedRoute>
+              {isAuthPage || !isValidRoute ? (
+                <AuthLayout>{children}</AuthLayout>
+              ) : (
+                <AppLayout>{children}</AppLayout>
+              )}
+            </ProtectedRoute>
           </QueryClientProvider>
         </ThemeProvider>
       </body>

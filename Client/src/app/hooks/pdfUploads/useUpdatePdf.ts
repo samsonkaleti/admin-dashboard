@@ -26,13 +26,13 @@ async function updatePdf(pdfData: PDFUpload): Promise<PDFUpload> {
     })
   }
 
-  const response = await fetch(`http://localhost:5001/api/pdfs/${pdfData.id}`, {
-    method: 'PUT',
+  const response = await fetch(`https://osaw.in/v1/api/pdfs/${pdfData.id}`, {
+    method: "PUT",
     headers: {
-      'Authorization': `Bearer ${sessionStorage.getItem("auth_token")}`,
+      Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
     },
     body: formData,
-  })
+  });
 
   if (!response.ok) {
     const errorData = await response.json()
