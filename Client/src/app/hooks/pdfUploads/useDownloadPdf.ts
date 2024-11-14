@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { BASE_URL } from '@/app/utils/constants'
 
 export function useDownloadPdf() {
   const [isDownloading, setIsDownloading] = useState(false)
@@ -7,7 +8,7 @@ export function useDownloadPdf() {
     setIsDownloading(true)
     try {
       const response = await fetch(
-        `https://osaw.in/v1/api/pdfs/download/${id}/${fileIndex}`,
+        `${BASE_URL}/api/pdfs/download/${id}/${fileIndex}`,
         {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,

@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-const API_URL = "https://osaw.in/v1/api";
+import { BASE_URL } from "@/app/utils/constants";
+const API_URL = `${BASE_URL}/api`;
 
 type SignupRequest = {
     username: string;

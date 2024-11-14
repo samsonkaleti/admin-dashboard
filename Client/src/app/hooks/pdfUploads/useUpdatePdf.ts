@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { BASE_URL } from '@/app/utils/constants'
 
 type PDFUpload = {
   id: number
@@ -26,7 +27,7 @@ async function updatePdf(pdfData: PDFUpload): Promise<PDFUpload> {
     })
   }
 
-  const response = await fetch(`https://osaw.in/v1/api/pdfs/${pdfData.id}`, {
+  const response = await fetch(`${BASE_URL}/api/pdfs/${pdfData.id}`, {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,

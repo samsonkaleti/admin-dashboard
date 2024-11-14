@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { BASE_URL } from "@/app/utils/constants";
 
 // Types based on your Mongoose schema
 export type EventTime = {
@@ -28,11 +29,11 @@ export type Event = {
 
 export type EventInput = Omit<Event, "_id">;
 
-const API_BASE_URL = "https://osaw.in/v1/api";
+const API_BASE_URL = `${BASE_URL}/api`;
 
 // API Functions
 async function fetchEvents() {
-  const response = await fetch("https://osaw.in/v1/api/events");
+  const response = await fetch(`${BASE_URL}/api/events`);
   if (!response.ok) {
     throw new Error("Failed to fetch events");
   }

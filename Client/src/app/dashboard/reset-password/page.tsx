@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { BASE_URL } from "@/app/utils/constants";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ export default function ResetPassword() {
     try {
       console.log("Requesting reset password with email:", email); // Debugging
       const response = await fetch(
-        "https://osaw.in/v1/api/auth/reset-password",
+        `${BASE_URL}/api/auth/reset-password`,
         {
           method: "POST",
           headers: {
@@ -50,7 +51,7 @@ export default function ResetPassword() {
     try {
       console.log("Reset token and new password:", { resetToken, newPassword }); // Debugging
       const response = await fetch(
-        "https://osaw.in/v1/api/auth/confirm-reset-password",
+        `${BASE_URL}/api/auth/confirm-reset-password`,
         {
           method: "POST",
           headers: {

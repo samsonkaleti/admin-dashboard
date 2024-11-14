@@ -1,5 +1,5 @@
   import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
+import { BASE_URL } from '@/app/utils/constants';
   type Card = {
     id: string;
     title: string;
@@ -12,7 +12,7 @@
   };
 
   type CardInput = Omit<Card, 'id'>;
-  const API_BASE_URL = "https://osaw.in/v1/api";
+  const API_BASE_URL = `${BASE_URL}/api`;
 
   async function fetchCards() {
     const response = await fetch(`${API_BASE_URL}/cards`);

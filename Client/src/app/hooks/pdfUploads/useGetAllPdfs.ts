@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { BASE_URL } from "@/app/utils/constants";
 type PDFUpload = {
   id: number
   academicYear: {
@@ -17,7 +18,7 @@ async function fetchPdfs(year?: string, semester?: string): Promise<PDFUpload[]>
   if (year) params.append('year', year)
   if (semester) params.append('semester', semester)
 
-  const response = await fetch(`https://osaw.in/v1/api/pdfs?`, {
+  const response = await fetch(`${BASE_URL}/api/pdfs?`, {
     headers: {
       Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
     },

@@ -13,7 +13,7 @@ import {
   type EventInput,
   createEventFormData,
 } from "@/app/hooks/events/EvenetManagement";
-
+import { BASE_URL } from "@/app/utils/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +68,7 @@ const EventCard = ({
   onDelete: (id: string) => void;
 }) => {
   const deleteEvent = useDeleteEvent();
+  console.log("base url", BASE_URL);
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
@@ -86,7 +87,7 @@ const EventCard = ({
       .replace(/^uploads\/|^v1\/uploads\//, "");
 
     // Construct the full URL
-    return `https://osaw.in/v1/uploads/${cleanPath}`;
+    return `${BASE_URL}/uploads/${cleanPath}`;
   };
 
   return (

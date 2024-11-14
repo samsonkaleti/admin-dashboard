@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { BASE_URL } from '@/app/utils/constants';
 
 async function deletePdf(id: number): Promise<void> {
-  const response = await fetch(`https://osaw.in/v1/api/pdfs/${id}`, {
+  const response = await fetch(`${BASE_URL}/api/pdfs/${id}`, {
     headers: {
       Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
     },
