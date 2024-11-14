@@ -15,7 +15,11 @@ import { BASE_URL } from '@/app/utils/constants';
   const API_BASE_URL = `${BASE_URL}/api`;
 
   async function fetchCards() {
-    const response = await fetch(`${API_BASE_URL}/cards`);
+    const response = await fetch(`${BASE_URL}/cards`, {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+      },
+    }); 
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -27,6 +31,7 @@ import { BASE_URL } from '@/app/utils/constants';
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem("auth_token")}`,
       },
       body: JSON.stringify(newCard),
     });
@@ -42,6 +47,7 @@ async function updateCard(id: string, updatedCard: CardInput) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${sessionStorage.getItem("auth_token")}`,
     },
     body: JSON.stringify({ cardDetails: updatedCard }), // Wrap in `cardDetails`
   });
@@ -53,7 +59,11 @@ async function updateCard(id: string, updatedCard: CardInput) {
   async function deleteCard(id: string) {
     const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
       method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+      },
     });
+    
     if (!response.ok) {
       throw new Error('Failed to delete card');
     }

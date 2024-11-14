@@ -4,6 +4,9 @@ import { BASE_URL } from "@/app/utils/constants";
 async function deleteCollege(id: string) {
   const response = await fetch(`${BASE_URL}/api/colleges/${id}`, {
     method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+    },
   });
   if (!response.ok) {
     throw new Error("Failed to delete college");

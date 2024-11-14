@@ -7,6 +7,7 @@ async function createCollege(newCollege: CollegeData) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "Authorization": `Bearer ${sessionStorage.getItem("auth_token")}`,
     },
     body: JSON.stringify(newCollege),
   });

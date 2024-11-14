@@ -1,6 +1,7 @@
+'use client'
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import Overview from "./components/overview";
 import RecentUploads from "./components/recent-uploads";
 import {
@@ -10,14 +11,9 @@ import {
   BriefcaseIcon,
   PrinterIcon,
 } from "lucide-react";
+import { useGetAllPdfs } from "../hooks/pdfUploads/useGetAllPdfs";
 
-const statsData = [
-  {
-    title: "Total Uploads",
-    value: "1,234",
-    change: "+20.1%",
-    icon: UploadIcon,
-  },
+const staticStatsData = [
   {
     title: "Total Students",
     value: "856",
@@ -39,6 +35,25 @@ const statsData = [
 ];
 
 export default function Home() {
+  const { data: pdfs, isLoading, error } = useGetAllPdfs();
+
+  // Calculate total uploads
+  const totalUploads = pdfs ? pdfs.length : 0;
+
+  // Calculate change percentage (assuming 5% increase for this example)
+  // In a real scenario, you'd compare with historical data
+  const changePercentage = "+5.0%";
+
+  const dynamicStatsData = [
+    {
+      title: "Total Uploads",
+      value: totalUploads.toString(),
+      change: changePercentage,
+      icon: UploadIcon,
+    },
+    ...staticStatsData
+  ];
+
   return (
     <Card className="w-full">
       <CardHeader className="space-y-1">
@@ -54,7 +69,7 @@ export default function Home() {
       <CardContent className="space-y-6">
         {/* Stats Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {statsData.map((stat, index) => (
+          {dynamicStatsData.map((stat, index) => (
             <Card key={index} className="overflow-hidden">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between space-x-2">
@@ -68,7 +83,7 @@ export default function Home() {
                     {stat.title}
                   </p>
                   <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
-                    {stat.value}
+                    {isLoading && stat.title === "Total Uploads" ? "Loading..." : stat.value}
                   </h2>
                 </div>
               </CardContent>

@@ -33,7 +33,11 @@ const API_BASE_URL = `${BASE_URL}/api`;
 
 // API Functions
 async function fetchEvents() {
-  const response = await fetch(`${BASE_URL}/api/events`);
+  const response = await fetch(`${BASE_URL}/api/events`, {
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+    },
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch events");
   }
@@ -42,7 +46,11 @@ async function fetchEvents() {
 }
 
 async function fetchEventById(id: string) {
-  const response = await fetch(`${API_BASE_URL}/events/${id}`);
+  const response = await fetch(`${BASE_URL}/api/events/${id}`, {
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+    },
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch event");
   }
@@ -54,6 +62,9 @@ async function createEvent(eventData: FormData) {
   const response = await fetch(`${API_BASE_URL}/events`, {
     method: "POST",
     body: eventData, // Using FormData for file upload
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+    },
   });
   if (!response.ok) {
     throw new Error("Failed to create event");
@@ -66,6 +77,9 @@ async function updateEvent(id: string, eventData: FormData) {
   const response = await fetch(`${API_BASE_URL}/events/${id}`, {
     method: "PUT",
     body: eventData, // Using FormData for file upload
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+    },
   });
   if (!response.ok) {
     throw new Error("Failed to update event");
@@ -77,6 +91,9 @@ async function updateEvent(id: string, eventData: FormData) {
 async function deleteEvent(id: string) {
   const response = await fetch(`${API_BASE_URL}/events/${id}`, {
     method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+    },
   });
   if (!response.ok) {
     throw new Error("Failed to delete event");
