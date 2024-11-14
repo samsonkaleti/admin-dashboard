@@ -12,14 +12,9 @@ import {
   PrinterIcon,
 } from "lucide-react";
 import { useGetAllPdfs } from "../hooks/pdfUploads/useGetAllPdfs";
+import { useGetStudents } from "../hooks/students/useGetStudents";
 
 const staticStatsData = [
-  {
-    title: "Total Students",
-    value: "856",
-    change: "+12.5%",
-    icon: UserIcon,
-  },
   {
     title: "Active Internships",
     value: "342",
@@ -36,10 +31,11 @@ const staticStatsData = [
 
 export default function Home() {
   const { data: pdfs, isLoading, error } = useGetAllPdfs();
+  const { data: students } = useGetStudents()
 
   // Calculate total uploads
   const totalUploads = pdfs ? pdfs.length : 0;
-
+  const totalStudents = students ? students.length : 0;
   // Calculate change percentage (assuming 5% increase for this example)
   // In a real scenario, you'd compare with historical data
   const changePercentage = "+5.0%";
@@ -50,6 +46,12 @@ export default function Home() {
       value: totalUploads.toString(),
       change: changePercentage,
       icon: UploadIcon,
+    },
+    {
+      title: "Total Students",
+      value: totalStudents.toString(),
+      change: changePercentage,
+      icon: UserIcon,
     },
     ...staticStatsData
   ];

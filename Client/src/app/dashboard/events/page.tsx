@@ -2,17 +2,9 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { format } from "date-fns";
-import { Upload, Plus, Loader2, Share2 } from "lucide-react";
+import { Upload, Plus, Loader2, Share2 } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  useEvents,
-  useCreateEvent,
-  useUpdateEvent,
-  useDeleteEvent,
-  type Event,
-  type EventInput,
-  createEventFormData,
-} from "@/app/hooks/events/EvenetManagement";
+import { useGetStudents, useRegisterStudentForEvent } from "@/app/hooks/students/useGetStudents";
 import { BASE_URL } from "@/app/utils/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,8 +33,9 @@ import {
 } from "@/components/ui/dialog";
 import { Clock, MapPin, Trash2, Edit } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useDeleteEvent, useEvents, useCreateEvent, useUpdateEvent, createEventFormData, EventTime, Event, EventAddress } from "@/app/hooks/events/EvenetManagement";
 
-// Define form type
 interface EventFormValues {
   title: string;
   collegeName: string;
@@ -62,15 +55,19 @@ const EventCard = ({
   event,
   onEdit,
   onDelete,
+  onRegister,
+  onClick,
 }: {
   event: Event;
   onEdit: (event: Event) => void;
   onDelete: (id: string) => void;
+  onRegister: (eventId: string) => void;
+  onClick: () => void;
 }) => {
   const deleteEvent = useDeleteEvent();
-  console.log("base url", BASE_URL);
 
-  const handleDelete = async () => {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this event?")) {
       try {
         await deleteEvent.mutateAsync(event._id);
@@ -80,19 +77,17 @@ const EventCard = ({
       }
     }
   };
+
   const getImageUrl = (thumbnail: string | undefined) => {
     if (!thumbnail) return "/logo2.png";
     const cleanPath = thumbnail
       .replace(/\\/g, "/")
       .replace(/^uploads\/|^v1\/uploads\//, "");
-
-    // Construct the full URL
     return `${BASE_URL}/uploads/${cleanPath}`;
   };
 
   return (
-    <Card className="w-full max-w-[400px] mx-auto bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      {/* Image Section */}
+    <Card className="w-full max-w-[400px] mx-auto bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer" onClick={onClick}>
       <div className="relative aspect-[3/2] overflow-hidden bg-purple-50">
         <Image
           src={getImageUrl(event.thumbnail)}
@@ -108,7 +103,6 @@ const EventCard = ({
       </div>
 
       <CardContent className="p-4 bg-orange-50">
-        {/* Title and Actions */}
         <div className="flex justify-between items-start mb-3">
           <div>
             <h3 className="text-base font-semibold text-gray-900 mb-0.5">
@@ -121,7 +115,10 @@ const EventCard = ({
               variant="ghost"
               size="sm"
               className="h-7 w-7 p-0 hover:bg-gray-100"
-              onClick={() => onEdit(event)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(event);
+              }}
             >
               <Edit className="h-3.5 w-3.5 text-gray-500" />
             </Button>
@@ -136,7 +133,6 @@ const EventCard = ({
           </div>
         </div>
 
-        {/* Event Details */}
         <div className="space-y-2 mb-3">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-gray-400" />
@@ -160,7 +156,6 @@ const EventCard = ({
           </div>
         </div>
 
-        {/* Mode Badge */}
         <div className="flex justify-between items-center">
           <div className="flex gap-2">
             <span
@@ -176,7 +171,10 @@ const EventCard = ({
                 event.modeOfEvent.slice(1)}
             </span>
           </div>
-          <Button className="btn">Register Now</Button>
+          <Button className="btn" onClick={(e) => {
+            e.stopPropagation();
+            onRegister(event._id);
+          }}>Register Now</Button>
         </div>
       </CardContent>
     </Card>
@@ -185,15 +183,19 @@ const EventCard = ({
 
 const EventManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isStudentDialogOpen, setIsStudentDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const { data: events, isLoading, error } = useEvents();
+  const { data: students = [], isLoading: isLoadingStudents } = useGetStudents();
   const createEvent = useCreateEvent();
   const updateEvent = useUpdateEvent();
+  const registerStudentMutation = useRegisterStudentForEvent();
+  const router = useRouter();
 
-  // Initialize form
   const form = useForm<EventFormValues>({
     defaultValues: {
       title: selectedEvent?.title || "",
@@ -292,8 +294,30 @@ const EventManagement = () => {
     });
     setIsDialogOpen(true);
   };
-  console.log("events", events);
-  if (isLoading) {
+
+  const handleRegisterClick = (eventId: string) => {
+    setSelectedEventId(eventId);
+    setIsStudentDialogOpen(true);
+  };
+
+  const handleStudentSelect = async (studentId: string) => {
+    if (selectedEventId) {
+      try {
+        await registerStudentMutation.mutateAsync({ userId: studentId, eventId: selectedEventId });
+        setIsStudentDialogOpen(false);
+        // Optionally, show a success message or update the UI
+      } catch (error) {
+        console.error("Error registering student for event:", error);
+        // Optionally, show an error message
+      }
+    }
+  };
+
+  const handleEventClick = (eventId: string) => {
+    router.push(`/dashboard/events/${eventId}`);
+  };
+
+  if (isLoading || isLoadingStudents) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="w-8 h-8 animate-spin" />
@@ -611,9 +635,34 @@ const EventManagement = () => {
             event={event}
             onEdit={handleEditEvent}
             onDelete={(id) => console.log("Delete event:", id)}
+            onRegister={handleRegisterClick}
+            onClick={() => handleEventClick(event._id)}
           />
         ))}
       </div>
+
+      {/* Student Selection Dialog */}
+      <Dialog open={isStudentDialogOpen} onOpenChange={setIsStudentDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Select a Student to Register</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <ScrollArea className="h-[300px] w-full rounded-md border p-4">
+              {students.map((student) => (
+                <Button
+                  key={student._id}
+                  variant="ghost"
+                  className="w-full justify-start text-left mb-2"
+                  onClick={() => handleStudentSelect(student._id)}
+                >
+                  {student.username}
+                </Button>
+              ))}
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
