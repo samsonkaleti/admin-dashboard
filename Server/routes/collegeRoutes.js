@@ -1,8 +1,7 @@
 const express = require("express");
 const collegeController = require("../controllers/collegeController");
 const router = express.Router();
-const { authMiddleware } = require("../middleware/authMiddleware"); 
-
+const { authMiddleware } = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -75,7 +74,7 @@ const { authMiddleware } = require("../middleware/authMiddleware");
  *       500:
  *         description: Error creating college
  */
-router.post("/colleges",authMiddleware, collegeController.createCollege);
+router.post("/colleges", authMiddleware, collegeController.createCollege);
 
 /**
  * @swagger
@@ -89,7 +88,7 @@ router.post("/colleges",authMiddleware, collegeController.createCollege);
  *       500:
  *         description: Error fetching colleges
  */
-router.get("/colleges", authMiddleware,collegeController.getAllColleges);
+router.get("/colleges", authMiddleware, collegeController.getAllColleges);
 
 /**
  * @swagger
@@ -110,7 +109,7 @@ router.get("/colleges", authMiddleware,collegeController.getAllColleges);
  *       404:
  *         description: College not found
  */
-router.get("/colleges/:id",authMiddleware, collegeController.getCollegeById);
+router.get("/colleges/:id", authMiddleware, collegeController.getCollegeById);
 
 /**
  * @swagger
@@ -132,7 +131,8 @@ router.get("/colleges/:id",authMiddleware, collegeController.getCollegeById);
  *         description: College not found
  */
 router.get(
-  "/colleges/name/:collegeName",authMiddleware,
+  "/colleges/name/:collegeName",
+  authMiddleware,
   collegeController.getCollegeByCollegeName
 );
 
@@ -207,7 +207,11 @@ router.get(
  *       404:
  *         description: College not found
  */
-router.put("/colleges/:id",authMiddleware, collegeController.updateCollegeById);
+router.put(
+  "/colleges/:id",
+  authMiddleware,
+  collegeController.updateCollegeById
+);
 
 /**
  * @swagger
@@ -248,7 +252,8 @@ router.put("/colleges/:id",authMiddleware, collegeController.updateCollegeById);
  *         description: College not found
  */
 router.put(
-  "/colleges/name/:collegeName",authMiddleware,
+  "/colleges/name/:collegeName",
+  authMiddleware,
   collegeController.updateCollegeByCollegeName
 );
 
@@ -271,7 +276,11 @@ router.put(
  *       404:
  *         description: College not found
  */
-router.delete("/colleges/:id",authMiddleware, collegeController.deleteCollegeById);
+router.delete(
+  "/colleges/:id",
+  authMiddleware,
+  collegeController.deleteCollegeById
+);
 
 /**
  * @swagger
@@ -293,7 +302,8 @@ router.delete("/colleges/:id",authMiddleware, collegeController.deleteCollegeByI
  *         description: College not found
  */
 router.delete(
-  "/colleges/name/:collegeName",authMiddleware,
+  "/colleges/name/:collegeName",
+  authMiddleware,
   collegeController.deleteCollegeByCollegeName
 );
 
@@ -316,7 +326,11 @@ router.delete(
  *       404:
  *         description: College not found
  */
-router.get("/colleges/:id/programs",authMiddleware, collegeController.getCollegePrograms);
+router.get(
+  "/colleges/:id/programs",
+  authMiddleware,
+  collegeController.getCollegePrograms
+);
 
 /**
  * @swagger
@@ -358,7 +372,11 @@ router.get("/colleges/:id/programs",authMiddleware, collegeController.getCollege
  *       404:
  *         description: College not found
  */
-router.post("/colleges/:id/programs",authMiddleware, collegeController.addProgram);
+router.post(
+  "/colleges/:id/programs",
+  authMiddleware,
+  collegeController.addProgram
+);
 
 /**
  * @swagger
@@ -383,7 +401,11 @@ router.post("/colleges/:id/programs",authMiddleware, collegeController.addProgra
  *       200:
  *         description: List of matching colleges
  */
-router.get("/colleges/search",authMiddleware, collegeController.searchColleges);
+router.get(
+  "/colleges/search",
+  authMiddleware,
+  collegeController.searchColleges
+);
 
 /**
  * @swagger
@@ -422,6 +444,10 @@ router.get("/colleges/search",authMiddleware, collegeController.searchColleges);
  *       404:
  *         description: College or program not found
  */
-router.post("/colleges/:id/regulations", authMiddleware,collegeController.addRegulation);
+router.post(
+  "/colleges/:id/regulations",
+  authMiddleware,
+  collegeController.addRegulation
+);
 
 module.exports = router;

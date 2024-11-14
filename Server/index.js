@@ -2,7 +2,7 @@
 const collegeRoutes = require("./routes/collegeRoutes");
 const eventsRoutes = require("./routes/eventsRoutes");
 const pdfRoutes = require("./routes/pdfRoutes");
-const cardRoutes = require("./routes/cardRoute"); // Import the card routes file
+const cardRoutes = require("./routes/cardRoute");
 const authRoutes = require("./routes/authRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const express = require("express");

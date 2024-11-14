@@ -1,8 +1,9 @@
 import { CollegeData } from '@/app/@types/college';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { BASE_URL } from '@/app/utils/constants';
 
 async function createCollege(newCollege: CollegeData) {
-  const response = await fetch("https://osaw.in/v1/api/colleges", {
+  const response = await fetch(`${BASE_URL}/api/colleges`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

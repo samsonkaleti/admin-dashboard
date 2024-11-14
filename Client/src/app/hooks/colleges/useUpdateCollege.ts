@@ -1,8 +1,9 @@
 import { CollegeData } from '@/app/@types/college';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { BASE_URL } from '@/app/utils/constants';
 
 async function updateCollege({ id, ...updateData }: { id: string } & Partial<CollegeData>) {
-  const response = await fetch(`https://osaw.in/v1/api/colleges/${id}`, {
+  const response = await fetch(`${BASE_URL}/api/colleges/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

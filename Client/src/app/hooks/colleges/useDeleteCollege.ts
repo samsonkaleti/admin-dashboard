@@ -1,11 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { BASE_URL } from "@/app/utils/constants";
 
 async function deleteCollege(id: string) {
-  const response = await fetch(`https://osaw.in/v1/api/colleges/${id}`, {
+  const response = await fetch(`${BASE_URL}/api/colleges/${id}`, {
     method: "DELETE",
   });
   if (!response.ok) {
-    throw new Error('Failed to delete college');
+    throw new Error("Failed to delete college");
   }
   return response.json();
 }
@@ -16,7 +17,7 @@ export function useDeleteCollege() {
   return useMutation({
     mutationFn: deleteCollege,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['colleges'] });
+      queryClient.invalidateQueries({ queryKey: ["colleges"] });
     },
   });
 }

@@ -13,7 +13,7 @@ import {
   type EventInput,
   createEventFormData,
 } from "@/app/hooks/events/EvenetManagement";
-
+import { BASE_URL } from "@/app/utils/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +68,7 @@ const EventCard = ({
   onDelete: (id: string) => void;
 }) => {
   const deleteEvent = useDeleteEvent();
+  console.log("base url", BASE_URL);
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
@@ -86,7 +87,7 @@ const EventCard = ({
       .replace(/^uploads\/|^v1\/uploads\//, "");
 
     // Construct the full URL
-    return `https://osaw.in/v1/uploads/${cleanPath}`;
+    return `${BASE_URL}/uploads/${cleanPath}`;
   };
 
   return (
@@ -160,19 +161,22 @@ const EventCard = ({
         </div>
 
         {/* Mode Badge */}
-        <div className="flex gap-2">
-          <span
-            className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${
-              event.modeOfEvent === "offline"
-                ? "bg-blue-50 text-blue-600"
-                : event.modeOfEvent === "online"
-                ? "bg-green-50 text-green-600"
-                : "bg-purple-50 text-purple-600"
-            }`}
-          >
-            {event.modeOfEvent.charAt(0).toUpperCase() +
-              event.modeOfEvent.slice(1)}
-          </span>
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2">
+            <span
+              className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${
+                event.modeOfEvent === "offline"
+                  ? "bg-blue-50 text-blue-600"
+                  : event.modeOfEvent === "online"
+                  ? "bg-green-50 text-green-600"
+                  : "bg-purple-50 text-purple-600"
+              }`}
+            >
+              {event.modeOfEvent.charAt(0).toUpperCase() +
+                event.modeOfEvent.slice(1)}
+            </span>
+          </div>
+          <Button className="btn">Register Now</Button>
         </div>
       </CardContent>
     </Card>

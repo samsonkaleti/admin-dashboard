@@ -5,9 +5,6 @@ const uploadMiddleware = require("../middleware/uploadMiddleware");
 const { authMiddleware } = require("../middleware/authMiddleware");
 // const { authorizeRoles } = require("../middleware/authorizeRoles");
 
-
-
-
 /**
  * @swagger
  * /api/pdfs:
@@ -146,7 +143,7 @@ router.post(
  *       '200':
  *         description: Successful response
  *         content:
- *           application/json:    
+ *           application/json:
  *             schema:
  *               type: object
  *               properties:
@@ -181,7 +178,7 @@ router.post(
  *               properties:
  *                 error:
  *                   type: string
- * 
+ *
  * components:
  *   schemas:
  *     PdfDocument:
