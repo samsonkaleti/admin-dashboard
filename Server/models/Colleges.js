@@ -31,7 +31,7 @@ const programSchema = new mongoose.Schema({
     type: [Number],
     required: true, // Array of years, e.g., [1, 2, 3, 4]
   },
-  regulations: {
+  regulation: {
     type: [regulationSchema],
   },
 });

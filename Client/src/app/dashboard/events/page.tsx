@@ -161,19 +161,22 @@ const EventCard = ({
         </div>
 
         {/* Mode Badge */}
-        <div className="flex gap-2">
-          <span
-            className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${
-              event.modeOfEvent === "offline"
-                ? "bg-blue-50 text-blue-600"
-                : event.modeOfEvent === "online"
-                ? "bg-green-50 text-green-600"
-                : "bg-purple-50 text-purple-600"
-            }`}
-          >
-            {event.modeOfEvent.charAt(0).toUpperCase() +
-              event.modeOfEvent.slice(1)}
-          </span>
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2">
+            <span
+              className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${
+                event.modeOfEvent === "offline"
+                  ? "bg-blue-50 text-blue-600"
+                  : event.modeOfEvent === "online"
+                  ? "bg-green-50 text-green-600"
+                  : "bg-purple-50 text-purple-600"
+              }`}
+            >
+              {event.modeOfEvent.charAt(0).toUpperCase() +
+                event.modeOfEvent.slice(1)}
+            </span>
+          </div>
+          <Button className="btn">Register Now</Button>
         </div>
       </CardContent>
     </Card>

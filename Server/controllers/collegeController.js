@@ -70,7 +70,6 @@ exports.searchColleges = async (req, res) => {
 };
 
 // Add a new regulation to a program
-// Add a new regulation to a program
 exports.addRegulation = async (req, res) => {
   const { id } = req.params;
   const { programName, regulation, jntuselectedregulation } = req.body; // Extract jntuselectedregulation
