@@ -79,21 +79,27 @@ const EventCard = ({
       }
     }
   };
+  const getImageUrl = (thumbnail: string | undefined) => {
+    if (!thumbnail) return "/logo2.png";
+    const cleanPath = thumbnail
+      .replace(/\\/g, "/")
+      .replace(/^uploads\/|^v1\/uploads\//, "");
+
+    // Construct the full URL
+    return `https://osaw.in/v1/uploads/${cleanPath}`;
+  };
 
   return (
     <Card className="w-full max-w-[400px] mx-auto bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
       {/* Image Section */}
       <div className="relative aspect-[3/2] overflow-hidden bg-purple-50">
         <Image
-          src={
-            event.thumbnail
-              ? `https://osaw.in/v1/${event.thumbnail}`
-              : "./logo2.png"
-          }
-          width={80}
-          height={80}
+          src={getImageUrl(event.thumbnail)}
           alt={event.title}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
+          sizes="(max-width: 400px) 100vw, 400px"
+          priority
         />
         <div className="absolute top-2 right-2">
           <Share2 className="text-gray-600 h-4 w-4 cursor-pointer hover:text-gray-800" />
