@@ -35,7 +35,7 @@ import logo from "../../../utils/logo.png";
 const sidebarNavItems = [
   {
     title: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
@@ -116,6 +116,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false);
   const isMobile =
     typeof window !== "undefined" ? window.innerWidth < 1024 : false;
+  const authToken = typeof window !== "undefined" ? sessionStorage.getItem("auth_token") : null;
   const [windowWidth, setWindowWidth] = React.useState(isMobile);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
@@ -133,6 +134,11 @@ export function Navbar() {
     // Add any logout logic here (e.g., clearing tokens, etc.)
     router.push("/");
     sessionStorage.removeItem("auth_token");
+  };
+  const getLogoutText = () => {
+    // Check if the auth_token is present in session storage
+    var authToken = sessionStorage.getItem("auth_token");
+    return authToken ? "Logout" : "Login";
   };
 
   return (
@@ -179,7 +185,6 @@ export function Navbar() {
                       className="relative h-8 w-8 rounded-full"
                     >
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src="/avatars/01.png" alt="@johndoe" />
                         <AvatarFallback>JD</AvatarFallback>
                       </Avatar>
                     </Button>
@@ -209,10 +214,12 @@ export function Navbar() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className="text-red-600 dark:text-red-400"
+                      className={`${
+                        authToken ? "text-red-600 dark:text-red-400" : ""
+                      }`}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                      <span>{getLogoutText()}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
