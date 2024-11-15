@@ -1,5 +1,4 @@
 "use client"
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { BASE_URL } from '@/app/utils/constants';
 import { toast } from 'sonner';
@@ -46,9 +45,9 @@ export function useCreatePdf() {
     },
     onError: (error: UploadError) => {
       console.error('Upload error:', error);
-      
+
       let errorMessage = 'Failed to upload PDFs';
-      
+
       if (error.message.includes('Authentication')) {
         errorMessage = 'Please login again to upload files';
       } else if (error.code === 'LIMIT_FILE_SIZE') {
@@ -56,7 +55,7 @@ export function useCreatePdf() {
       } else if (error.code === 'INVALID_FILE_TYPE') {
         errorMessage = 'Only PDF files are allowed';
       }
-      
+
       toast.error(errorMessage);
     },
   });

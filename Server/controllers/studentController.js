@@ -18,13 +18,19 @@ exports.getAllStudents = async (req, res) => {
 exports.getStudentById = async (req, res) => {
   try {
     const student = await User.findById(req.params.id);
-    if (!student || student.role !== "Student") {
+
+    // Check if student exists and if the role is "Student"
+    if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
+    if (student.role !== "Student") {
+      return res.status(403).json({ message: "User is not a student" });
+    }
+
     return res.status(200).json(student);
   } catch (error) {
     return res.status(500).json({
-      message: "Error fetching student",
+      message: "Error fetching student by ID",
       error: error.message,
     });
   }
@@ -49,6 +55,27 @@ exports.getStudentsByIds = async (req, res) => {
   }
 };
 
+// Get a single student by ID
+exports.getStudentById = async (req, res) => {
+  try {
+    const student = await User.findById(req.params.id);
+
+    // Check if student exists and if the role is "Student"
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    if (student.role !== "Student") {
+      return res.status(403).json({ message: "User is not a student" });
+    }
+
+    return res.status(200).json(student);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error fetching student by ID",
+      error: error.message,
+    });
+  }
+};
 
 // Register student for an event
 exports.registerStudentForEvent = async (req, res) => {

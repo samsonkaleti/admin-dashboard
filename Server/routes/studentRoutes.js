@@ -73,7 +73,11 @@ router.get("/students/:id", authMiddleware, studentController.getStudentById);
  *       500:
  *         description: Error fetching students
  */
-router.post("/students/multiple", authMiddleware, studentController.getStudentsByIds);
+router.post(
+  "/students/multiple",
+  authMiddleware,
+  studentController.getStudentsByIds
+);
 
 /**
  * @swagger
@@ -100,6 +104,10 @@ router.post("/students/multiple", authMiddleware, studentController.getStudentsB
  *       500:
  *         description: Error registering student for event
  */
-router.post("/events/register",authMiddleware, studentController.registerStudentForEvent);
+router.post(
+  "/events/register",
+  authMiddleware,
+  studentController.registerStudentForEvent
+);
 
 module.exports = router;

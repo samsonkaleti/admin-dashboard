@@ -5,6 +5,7 @@ const pdfRoutes = require("./routes/pdfRoutes");
 const cardRoutes = require("./routes/cardRoute");
 const authRoutes = require("./routes/authRoutes");
 const studentRoutes = require("./routes/studentRoutes");
+const regulationRoutes = require("./routes/regulationRoutes");
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
@@ -41,6 +42,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", collegeRoutes);
 app.use("/api", cardRoutes);
 app.use("/api", studentRoutes);
+app.use("/api/regulations", regulationRoutes);
 app.use("/api/pdfs", pdfRoutes);
 app.use("/api/events", eventsRoutes);
 // Start the server
