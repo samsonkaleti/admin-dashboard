@@ -1,10 +1,9 @@
-"use client"
-
-import { useState } from "react"
-import { Pencil, Trash2, FileUp, Download } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { toast } from "sonner"
+"use client";
+import { useState } from "react";
+import { Pencil, Trash2, FileUp, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -12,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -20,63 +19,65 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { useCreatePdf } from "@/app/hooks/pdfUploads/useCreatePdfUpload"
-import { useGetAllPdfs } from "@/app/hooks/pdfUploads/useGetAllPdfs"
-import { useUpdatePdf } from "@/app/hooks/pdfUploads/useUpdatePdf"
-import { useDeletePdf } from "@/app/hooks/pdfUploads/useDeletePdf"
-import { useDownloadPdf } from "@/app/hooks/pdfUploads/useDownloadPdf"
+} from "@/components/ui/card";
+import { useCreatePdf } from "@/app/hooks/pdfUploads/useCreatePdfUpload";
+import { useGetAllPdfs } from "@/app/hooks/pdfUploads/useGetAllPdfs";
+import { useUpdatePdf } from "@/app/hooks/pdfUploads/useUpdatePdf";
+import { useDeletePdf } from "@/app/hooks/pdfUploads/useDeletePdf";
+import { useDownloadPdf } from "@/app/hooks/pdfUploads/useDownloadPdf";
 
 type PDFUpload = {
-  id: number
+  id: number;
   academicYear: {
-    year: string
-    semester: string
-  }
-  regulation: string
-  course: string
-  subject: string
-  files: File[]
-  uploadDate: string
-}
+    year: string;
+    semester: string;
+  };
+  regulation: string;
+  course: string;
+  subject: string;
+  files: File[];
+  uploadDate: string;
+};
 
 export default function PDFUploadPage() {
-  const [newUpload, setNewUpload] = useState<Omit<PDFUpload, "id" | "files" | "uploadDate">>({
+  const [newUpload, setNewUpload] = useState<
+    Omit<PDFUpload, "id" | "files" | "uploadDate">
+  >({
     academicYear: { year: "", semester: "" },
     regulation: "",
     course: "",
     subject: "",
-  })
+  });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"]
-  const semesters = ["1st Semester", "2nd Semester"]
-  const regulations = ["R24", "R20", "R19", "R16", "R13"]
-  
-  const { data: pdfUploads, isLoading, isError, error } = useGetAllPdfs()
-  const createPdfMutation = useCreatePdf()
-  const updatePdfMutation = useUpdatePdf()
-  const deletePdfMutation = useDeletePdf()
-  const { downloadPdf, isDownloading } = useDownloadPdf()
+  const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+  const semesters = ["1st Semester", "2nd Semester"];
+  const regulations = ["R24", "R20", "R19", "R16", "R13"];
+
+  const { data: pdfUploads, isLoading, isError, error } = useGetAllPdfs();
+  const createPdfMutation = useCreatePdf();
+  const updatePdfMutation = useUpdatePdf();
+  const deletePdfMutation = useDeletePdf();
+  const { downloadPdf, isDownloading } = useDownloadPdf();
 
   const handleNew = () => {
     setNewUpload({
@@ -84,51 +85,56 @@ export default function PDFUploadPage() {
       regulation: "",
       course: "",
       subject: "",
-    })
-    setSelectedFiles([])
-    setEditingId(null)
-    setIsDialogOpen(true)
-  }
+    });
+    setSelectedFiles([]);
+    setEditingId(null);
+    setIsDialogOpen(true);
+  };
 
   const handleAdd = async () => {
     try {
       // Validate form fields
-      if (!newUpload.academicYear.year || 
-          !newUpload.academicYear.semester || 
-          !newUpload.regulation || 
-          !newUpload.course || 
-          !newUpload.subject) {
+      if (
+        !newUpload.academicYear.year ||
+        !newUpload.academicYear.semester ||
+        !newUpload.regulation ||
+        !newUpload.course ||
+        !newUpload.subject
+      ) {
         toast.error("All fields are required");
         return;
       }
-  
+
       // Validate files
       if (selectedFiles.length === 0) {
         toast.error("Please select at least one PDF file");
         return;
       }
-  
+
       const formData = new FormData();
-      
+
       // Append metadata as JSON string
-      formData.append("metadata", JSON.stringify({
-        academicYear: newUpload.academicYear,
-        regulation: newUpload.regulation,
-        course: newUpload.course,
-        subject: newUpload.subject,
-      }));
-  
+      formData.append(
+        "metadata",
+        JSON.stringify({
+          academicYear: newUpload.academicYear,
+          regulation: newUpload.regulation,
+          course: newUpload.course,
+          subject: newUpload.subject,
+        })
+      );
+
       // Append all files with the same field name 'files'
       selectedFiles.forEach((file) => {
-        formData.append('files', file);
+        formData.append("files", file);
       });
-  
+
       // Submit the form
       await createPdfMutation.mutateAsync(formData);
-  
+
       // Show success message
       toast.success("PDFs uploaded successfully");
-  
+
       // Reset form after successful upload
       setIsDialogOpen(false);
       setNewUpload({
@@ -145,21 +151,21 @@ export default function PDFUploadPage() {
   };
 
   const handleEdit = (id: number) => {
-    const pdfToEdit = pdfUploads?.find(pdf => pdf.id === id)
+    const pdfToEdit = pdfUploads?.find((pdf) => pdf.id === id);
     if (pdfToEdit) {
       setNewUpload({
         academicYear: pdfToEdit.academicYear,
         regulation: pdfToEdit.regulation,
         course: pdfToEdit.course,
         subject: pdfToEdit.subject,
-      })
-      setEditingId(id)
-      setIsDialogOpen(true)
+      });
+      setEditingId(id);
+      setIsDialogOpen(true);
     }
-  }
+  };
 
   const handleUpdate = async () => {
-    if (editingId === null) return
+    if (editingId === null) return;
 
     try {
       const updatedPdf: PDFUpload = {
@@ -167,57 +173,57 @@ export default function PDFUploadPage() {
         ...newUpload,
         files: selectedFiles,
         uploadDate: new Date().toISOString(),
-      }
+      };
 
-      await updatePdfMutation.mutateAsync(updatedPdf)
+      await updatePdfMutation.mutateAsync(updatedPdf);
       toast.success("PDF updated successfully");
 
-      setIsDialogOpen(false)
-      setEditingId(null)
+      setIsDialogOpen(false);
+      setEditingId(null);
       setNewUpload({
         academicYear: { year: "", semester: "" },
         regulation: "",
         course: "",
         subject: "",
-      })
-      setSelectedFiles([])
+      });
+      setSelectedFiles([]);
     } catch (error: any) {
-      console.error("Error updating PDF:", error)
+      console.error("Error updating PDF:", error);
       toast.error(error.message || "Failed to update PDF");
     }
-  }
+  };
 
   const handleDeleteConfirmation = (id: number) => {
-    setDeletingId(id)
-    setIsDeleteDialogOpen(true)
-  }
+    setDeletingId(id);
+    setIsDeleteDialogOpen(true);
+  };
 
   const handleDelete = async () => {
-    if (deletingId === null) return
+    if (deletingId === null) return;
 
     try {
-      await deletePdfMutation.mutateAsync(deletingId)
+      await deletePdfMutation.mutateAsync(deletingId);
       toast.success("PDF deleted successfully");
-      setIsDeleteDialogOpen(false)
-      setDeletingId(null)
+      setIsDeleteDialogOpen(false);
+      setDeletingId(null);
     } catch (error: any) {
-      console.error("Error deleting PDF:", error)
+      console.error("Error deleting PDF:", error);
       toast.error(error.message || "Failed to delete PDF");
     }
-  }
+  };
 
   const handleDownload = async (id: number, fileIndex: number) => {
     try {
-      await downloadPdf(id, fileIndex)
+      await downloadPdf(id, fileIndex);
       toast.success("PDF downloaded successfully");
     } catch (error: any) {
-      console.error("Error downloading PDF:", error)
+      console.error("Error downloading PDF:", error);
       toast.error(error.message || "Failed to download PDF");
     }
-  }
+  };
 
-  if (isLoading) return <div>Loading...</div>
-  if (isError) return <div>Error: {error.message}</div>
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error: {error.message}</div>;
 
   return (
     <Card className="w-full max-w-[95vw] mx-auto">
@@ -257,7 +263,10 @@ export default function PDFUploadPage() {
             <div className="grid gap-6 py-4">
               {/* Academic Year */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="year" className="text-right text-sm font-medium">
+                <Label
+                  htmlFor="year"
+                  className="text-right text-sm font-medium"
+                >
                   Year
                 </Label>
                 <Select
@@ -284,7 +293,10 @@ export default function PDFUploadPage() {
 
               {/* Semester */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="semester" className="text-right text-sm font-medium">
+                <Label
+                  htmlFor="semester"
+                  className="text-right text-sm font-medium"
+                >
                   Semester
                 </Label>
                 <Select
@@ -292,7 +304,10 @@ export default function PDFUploadPage() {
                   onValueChange={(value) =>
                     setNewUpload({
                       ...newUpload,
-                      academicYear: { ...newUpload.academicYear, semester: value },
+                      academicYear: {
+                        ...newUpload.academicYear,
+                        semester: value,
+                      },
                     })
                   }
                 >
@@ -311,7 +326,10 @@ export default function PDFUploadPage() {
 
               {/* Regulation */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="regulation" className="text-right text-sm font-medium">
+                <Label
+                  htmlFor="regulation"
+                  className="text-right text-sm font-medium"
+                >
                   Regulation
                 </Label>
                 <Select
@@ -335,7 +353,10 @@ export default function PDFUploadPage() {
 
               {/* Course */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="course" className="text-right text-sm font-medium">
+                <Label
+                  htmlFor="course"
+                  className="text-right text-sm font-medium"
+                >
                   Course
                 </Label>
                 <Input
@@ -350,7 +371,10 @@ export default function PDFUploadPage() {
 
               {/* Subject */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="subject" className="text-right text-sm font-medium">
+                <Label
+                  htmlFor="subject"
+                  className="text-right text-sm font-medium"
+                >
                   Subject
                 </Label>
                 <Input
@@ -365,7 +389,10 @@ export default function PDFUploadPage() {
 
               {/* Multiple PDF Files Upload */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="files" className="text-right text-sm font-medium">
+                <Label
+                  htmlFor="files"
+                  className="text-right text-sm font-medium"
+                >
                   PDF Files
                 </Label>
                 <div className="col-span-3 space-y-4">
@@ -378,28 +405,34 @@ export default function PDFUploadPage() {
                       const newFiles = Array.from(e.target.files || []);
                       // Validate new PDF files
                       const invalidFiles = newFiles.filter(
-                        file => file.type !== 'application/pdf'
+                        (file) => file.type !== "application/pdf"
                       );
                       if (invalidFiles.length > 0) {
-                        toast.error('Only PDF files are allowed');
-                        e.target.value = ''; // Reset input
+                        toast.error("Only PDF files are allowed");
+                        e.target.value = ""; // Reset input
                         return;
                       }
                       // Add new files to existing files
-                      setSelectedFiles(prevFiles => [...prevFiles, ...newFiles]);
+                      setSelectedFiles((prevFiles) => [
+                        ...prevFiles,
+                        ...newFiles,
+                      ]);
                       // Reset input value so same file can be selected again
-                      e.target.value = '';
+                      e.target.value = "";
                     }}
                     className="col-span-3"
                   />
-                  
+
                   {/* Display selected files with remove option */}
                   {selectedFiles.length > 0 && (
                     <div className="text-sm text-muted-foreground">
                       <p>Selected files ({selectedFiles.length}):</p>
                       <ul className="list-disc pl-5 mt-2 space-y-2">
                         {selectedFiles.map((file, index) => (
-                          <li key={index} className="flex items-center justify-between">
+                          <li
+                            key={index}
+                            className="flex items-center justify-between"
+                          >
                             <span>{file.name}</span>
                             <Button
                               type="button"
@@ -407,7 +440,7 @@ export default function PDFUploadPage() {
                               size="sm"
                               className="h-8 w-8 p-0 text-red-500"
                               onClick={() => {
-                                setSelectedFiles(prevFiles => 
+                                setSelectedFiles((prevFiles) =>
                                   prevFiles.filter((_, i) => i !== index)
                                 );
                               }}
@@ -439,12 +472,13 @@ export default function PDFUploadPage() {
                   onClick={editingId ? handleUpdate : handleAdd}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                   disabled={
-                    createPdfMutation.isPending || 
-                    updatePdfMutation.isPending || 
+                    createPdfMutation.isPending ||
+                    updatePdfMutation.isPending ||
                     selectedFiles.length === 0
                   }
                 >
-                  {createPdfMutation.isPending || updatePdfMutation.isPending ? (
+                  {createPdfMutation.isPending ||
+                  updatePdfMutation.isPending ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Processing...
@@ -452,7 +486,9 @@ export default function PDFUploadPage() {
                   ) : editingId ? (
                     "Update PDF"
                   ) : (
-                    `Upload ${selectedFiles.length} PDF${selectedFiles.length !== 1 ? 's' : ''}`
+                    `Upload ${selectedFiles.length} PDF${
+                      selectedFiles.length !== 1 ? "s" : ""
+                    }`
                   )}
                 </Button>
               </DialogFooter>
@@ -465,14 +501,22 @@ export default function PDFUploadPage() {
             <DialogHeader>
               <DialogTitle>Confirm Deletion</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this PDF? This action cannot be undone.
+                Are you sure you want to delete this PDF? This action cannot be
+                undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleDelete} disabled={deletePdfMutation.isPending}>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={deletePdfMutation.isPending}
+              >
                 {deletePdfMutation.isPending ? "Deleting..." : "Delete"}
               </Button>
             </DialogFooter>
@@ -551,5 +595,5 @@ export default function PDFUploadPage() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
