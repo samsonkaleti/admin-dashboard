@@ -27,8 +27,7 @@ import { useCreateCollege } from "@/app/hooks/colleges/useCreateCollege";
 import { useDeleteCollege } from "@/app/hooks/colleges/useDeleteCollege";
 import { useGetColleges } from "@/app/hooks/colleges/useGetColleges";
 import { useUpdateCollege } from "@/app/hooks/colleges/useUpdateCollege";
-
-// Types
+import { useFetchRegulations } from "@/app/hooks/regulations/useGetRegulations";
 interface Regulation {
   type: string;
   regulation: string;
@@ -63,7 +62,6 @@ interface CollegeExportData {
   domain: string;
 }
 
-// Program options configuration
 const programOptions = [
   {
     name: "B.Tech",
@@ -126,10 +124,11 @@ export default function CollegeDataPage() {
 
   // Hooks
   const { data: collegeData, isLoading, error } = useGetColleges();
+  const { data: regulationsData, isError } = useFetchRegulations();
   const createCollegeMutation = useCreateCollege();
   const updateCollegeMutation = useUpdateCollege();
   const deleteCollegeMutation = useDeleteCollege();
-
+  console.log(regulationsData);
   // Helper functions
   const handleAddSpecialization = () => {
     if (
@@ -566,30 +565,52 @@ export default function CollegeDataPage() {
 
                                 {/* JNTU Regulations Dropdown */}
                                 {showJNTUDropdown && (
-                                  <div className="mt-4 space-y-2">
-                                    <Label htmlFor="jntuRegulation">
-                                      JNTU Regulation
-                                    </Label>
-                                    <select
-                                      title="JNTU Regulation"
-                                      id="jntuRegulation"
-                                      value={selectedJNTURegulation}
-                                      onChange={(e) =>
-                                        setSelectedJNTURegulation(
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full p-2 border rounded-md bg-background text-foreground"
-                                    >
-                                      <option value="">
-                                        Select Regulation
+                                  // <div className="mt-4 space-y-2">
+                                  //   <Label htmlFor="jntuRegulation">
+                                  //     JNTU Regulation
+                                  //   </Label>
+                                  //   <select
+                                  //     title="JNTU Regulation"
+                                  //     id="jntuRegulation"
+                                  //     value={selectedJNTURegulation}
+                                  //     onChange={(e) =>
+                                  //       setSelectedJNTURegulation(
+                                  //         e.target.value
+                                  //       )
+                                  //     }
+                                  //     className="w-full p-2 border rounded-md bg-background text-foreground"
+                                  //   >
+                                  //     <option value="">
+                                  //       Select Regulation
+                                  //     </option>
+                                  //     <option value={regulationsData}>
+                                  //       {regulationsData}
+                                  //     </option>
+                                  //     <option value="R20">R20</option>
+                                  //     <option value="R19">R19</option>
+                                  //     <option value="R18">R18</option>
+                                  //     <option value="R17">R17</option>
+                                  //   </select>
+                                  // </div>
+                                  <select
+                                    title="JNTU Regulation"
+                                    id="jntuRegulation"
+                                    value={selectedJNTURegulation}
+                                    onChange={(e) =>
+                                      setSelectedJNTURegulation(e.target.value)
+                                    }
+                                    className="w-full p-2 border rounded-md bg-background text-foreground"
+                                  >
+                                    <option value="">Select Regulation</option>
+                                    {regulationsData?.map((regulation: any) => (
+                                      <option
+                                        key={regulation.id}
+                                        value={regulation.id}
+                                      >
+                                        {regulation.regulation_category}
                                       </option>
-                                      <option value="R20">R20</option>
-                                      <option value="R19">R19</option>
-                                      <option value="R18">R18</option>
-                                      <option value="R17">R17</option>
-                                    </select>
-                                  </div>
+                                    ))}
+                                  </select>
                                 )}
                               </div>
 
