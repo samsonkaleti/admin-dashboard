@@ -129,7 +129,35 @@ export default function CollegeDataPage() {
   const updateCollegeMutation = useUpdateCollege();
   const deleteCollegeMutation = useDeleteCollege();
   console.log(regulationsData);
-  // Helper functions
+  const [selectedCategory, setSelectedCategory] = useState("");
+
+  // Group regulations by category
+  const groupedRegulations = regulationsData?.reduce(
+    (acc: any, regulation: any) => {
+      const category = regulation.regulation_category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(regulation);
+      return acc;
+    },
+    {}
+  );
+
+  const handleCategoryChange = (e: any) => {
+    setSelectedCategory(e.target.value);
+    setSelectedRegulations([]); // Reset selected regulation types when category changes
+  };
+
+  const handleRegulationChange = (e: any) => {
+    const regulationType = e.target.value;
+    setSelectedRegulations((prev) =>
+      e.target.checked
+        ? [...prev, regulationType]
+        : prev.filter((item) => item !== regulationType)
+    );
+  };
+
   const handleAddSpecialization = () => {
     if (
       newSpecialization &&
@@ -565,53 +593,63 @@ export default function CollegeDataPage() {
 
                                 {/* JNTU Regulations Dropdown */}
                                 {showJNTUDropdown && (
-                                  // <div className="mt-4 space-y-2">
-                                  //   <Label htmlFor="jntuRegulation">
-                                  //     JNTU Regulation
-                                  //   </Label>
-                                  //   <select
-                                  //     title="JNTU Regulation"
-                                  //     id="jntuRegulation"
-                                  //     value={selectedJNTURegulation}
-                                  //     onChange={(e) =>
-                                  //       setSelectedJNTURegulation(
-                                  //         e.target.value
-                                  //       )
-                                  //     }
-                                  //     className="w-full p-2 border rounded-md bg-background text-foreground"
-                                  //   >
-                                  //     <option value="">
-                                  //       Select Regulation
-                                  //     </option>
-                                  //     <option value={regulationsData}>
-                                  //       {regulationsData}
-                                  //     </option>
-                                  //     <option value="R20">R20</option>
-                                  //     <option value="R19">R19</option>
-                                  //     <option value="R18">R18</option>
-                                  //     <option value="R17">R17</option>
-                                  //   </select>
-                                  // </div>
-                                  <select
-                                    title="JNTU Regulation"
-                                    id="jntuRegulation"
-                                    value={selectedJNTURegulation}
-                                    onChange={(e) =>
-                                      setSelectedJNTURegulation(e.target.value)
-                                    }
-                                    className="w-full p-2 border rounded-md bg-background text-foreground"
-                                  >
-                                    <option value="">Select Regulation</option>
-                                    {regulationsData?.map((regulation: any) => (
-                                      <option
-                                        key={regulation.id}
-                                        value={regulation.id}
-                                      >
-                                        {regulation.regulation_category}
-                                      </option>
-                                    ))}
-                                  </select>
+                                  <div className="mt-4 space-y-2">
+                                    <Label htmlFor="jntuRegulation">
+                                      JNTU Regulation
+                                    </Label>
+                                    <select
+                                      title="JNTU Regulation"
+                                      id="jntuRegulation"
+                                      value={selectedCategory}
+                                      onChange={handleCategoryChange}
+                                      className="w-full p-2 border rounded-md bg-background text-foreground"
+                                    >
+                                      <option value="">Select Category</option>
+                                      {groupedRegulations &&
+                                        Object.keys(groupedRegulations).map(
+                                          (category) => (
+                                            <option
+                                              key={category}
+                                              value={category}
+                                            >
+                                              {category}
+                                            </option>
+                                          )
+                                        )}
+                                    </select>
+                                  </div>
                                 )}
+
+                                {/* Show checkboxes for regulation types */}
+                                {selectedCategory &&
+                                  groupedRegulations[selectedCategory] && (
+                                    <div className="mt-4 space-y-2">
+                                      <Label>Regulation Types</Label>
+                                      {groupedRegulations[selectedCategory].map(
+                                        (regulation: any) => (
+                                          <div key={regulation._id}>
+                                            <input
+                                              type="checkbox"
+                                              id={regulation._id}
+                                              value={regulation.regulation_type}
+                                              checked={selectedRegulations.includes(
+                                                regulation.regulation_type
+                                              )}
+                                              onChange={handleRegulationChange}
+                                            />
+                                            <label
+                                              htmlFor={regulation._id}
+                                              className="ml-2"
+                                            >
+                                              {regulation.regulation_type}{" "}
+                                              (Year:{" "}
+                                              {regulation.year_validation})
+                                            </label>
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
+                                  )}
                               </div>
 
                               {/* Years Section */}
