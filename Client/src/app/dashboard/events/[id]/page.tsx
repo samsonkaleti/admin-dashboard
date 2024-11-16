@@ -3,8 +3,14 @@
 import React from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, User, Mail, BookOpen } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -13,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { BASE_URL } from "@/app/utils/constants";
 
 interface Student {
@@ -26,7 +33,7 @@ interface Event {
   _id: string;
   title: string;
   collegeName: string;
-  registeredStudents: string; // Now this will just be an array of user IDs
+  registeredStudents: string[];
 }
 
 interface User {
@@ -64,7 +71,6 @@ const EventDetails = () => {
   const params = useParams();
   const eventId = params.id as string;
 
-  // Query for event details
   const {
     data: event,
     isLoading: isEventLoading,
@@ -74,19 +80,24 @@ const EventDetails = () => {
     queryFn: () => fetchEventDetails(eventId),
   });
 
-  // Query for user details, dependent on event query
   const {
-    data: user,
-    isLoading: isUserLoading,
-    error: userError,
-  } = useQuery<User, Error>({
-    queryKey: ["user", event?.registeredStudents],
-    queryFn: () => fetchUserDetails(event?.registeredStudents._id),
-    enabled: !!event?.registeredStudents, // Only run if we have a registered student ID
+    data: users,
+    isLoading: isUsersLoading,
+    error: usersError,
+  } = useQuery<User[], Error>({
+    queryKey: ["users", event?.registeredStudents],
+    queryFn: async () => {
+      if (!event?.registeredStudents?.length) return [];
+      const userPromises = event.registeredStudents.map((studentId) =>
+        fetchUserDetails(studentId)
+      );
+      return Promise.all(userPromises);
+    },
+    enabled: !!event?.registeredStudents?.length,
   });
 
-  const isLoading = isEventLoading 
-  const error = eventError
+  const isLoading = isEventLoading || isUsersLoading;
+  const error = eventError || usersError;
 
   if (isLoading) {
     return (
@@ -106,39 +117,71 @@ const EventDetails = () => {
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="space-y-1">
         <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
           {event?.title}
         </CardTitle>
-        <p className="text-sm text-muted-foreground">{event?.collegeName}</p>
+        <CardDescription className="text-sm md:text-base text-gray-500">
+          {event?.collegeName}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Registered Students</h2>
-          <p className="text-sm text-muted-foreground">
-            Total Students: 1
-          </p>
+          <Badge variant="secondary">
+            Total Students: {users?.length || 0}
+          </Badge>
         </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Course</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-              <TableRow key={user?._id}>
-                <TableCell>{user?.username}</TableCell>
-                <TableCell>{user?.email}</TableCell>
-                <TableCell>{user?.course}</TableCell>
+        <div className="rounded-md border overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Name
+                  </div>
+                </TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email
+                  </div>
+                </TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    Course
+                  </div>
+                </TableHead>
               </TableRow>
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {users?.map((user) => (
+                <TableRow key={user._id}>
+                  <TableCell className="font-medium">{user.username}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{user.course}</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {(!users || users.length === 0) && (
+                <TableRow>
+                  <TableCell
+                    colSpan={3}
+                    className="text-center text-muted-foreground py-8"
+                  >
+                    No students registered yet
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
 };
-
 
 export default EventDetails;

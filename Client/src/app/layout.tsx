@@ -1,4 +1,3 @@
-// app/layout.tsx
 "use client";
 
 import { ThemeProvider } from "next-themes";
@@ -10,7 +9,7 @@ import { AppLayout } from "@/components/layout/app-layout";
 import { AuthLayout } from "@/components/layout/auth-layout";
 
 const authPages = ["/login", "/signup", "/privacy", "/"];
-const validRoutes = [
+const validRoutesPrefixes = [
   "/dashboard",
   "/dashboard/college-data",
   "/dashboard/card-data",
@@ -23,6 +22,10 @@ const validRoutes = [
   "/dashboard/notifications",
 ];
 
+const isValidRoute = (pathname: string) => {
+  return validRoutesPrefixes.some((prefix) => pathname.startsWith(prefix));
+};
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -33,7 +36,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       try {
         const token = sessionStorage.getItem("auth_token");
 
-        if (!token && validRoutes.includes(pathname)) {
+        if (!token && isValidRoute(pathname)) {
           router.replace("/");
           return;
         }
@@ -64,7 +67,6 @@ export default function RootLayout({
   const [queryClient] = useState(() => new QueryClient());
   const pathname = usePathname();
   const isAuthPage = authPages.includes(pathname);
-  const isValidRoute = validRoutes.includes(pathname);
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -77,7 +79,7 @@ export default function RootLayout({
         >
           <QueryClientProvider client={queryClient}>
             <ProtectedRoute>
-              {isAuthPage || !isValidRoute ? (
+              {isAuthPage || !isValidRoute(pathname) ? (
                 <AuthLayout>{children}</AuthLayout>
               ) : (
                 <AppLayout>{children}</AppLayout>
