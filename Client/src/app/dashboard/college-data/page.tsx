@@ -119,12 +119,6 @@ export default function CollegeDataPage() {
   const [customSpecializations, setCustomSpecializations] = useState<string[]>(
     []
   );
-  // const [newRegulation, setNewRegulation] = useState<Regulation>({
-  //   type: "",
-  //   regulation: "",
-  //   validYears: [],
-  // });
-  // const [customRegulations, setCustomRegulations] = useState<Regulation[]>([]);
   const [showOtherSpecialization, setShowOtherSpecialization] = useState(false);
   const [selectedJNTURegulation, setSelectedJNTURegulation] =
     useState<string>("");
@@ -157,18 +151,6 @@ export default function CollegeDataPage() {
       selectedSpecializations.filter((s) => s !== spec)
     );
   };
-
-  // const handleAddRegulation = () => {
-  //   if (newRegulation.type && newRegulation.regulation) {
-  //     const regulation = {
-  //       ...newRegulation,
-  //       validYears: [new Date().getFullYear()],
-  //     };
-  //     setCustomRegulations([...customRegulations, regulation]);
-  //     setSelectedRegulations([...selectedRegulations, regulation]);
-  //     setNewRegulation({ type: "", regulation: "", validYears: [] });
-  //   }
-  // };
 
   const getAllSpecializations = () => {
     const defaultSpecs =
@@ -589,7 +571,7 @@ export default function CollegeDataPage() {
                                       JNTU Regulation
                                     </Label>
                                     <select
-                                    title="JNTU Regulation"
+                                      title="JNTU Regulation"
                                       id="jntuRegulation"
                                       value={selectedJNTURegulation}
                                       onChange={(e) =>
