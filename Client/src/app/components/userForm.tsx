@@ -9,6 +9,7 @@ interface User {
   id: string;
   username: string;
   email: string;
+  password?: string;
   role: "Admin" | "Uploader";
   active: boolean;
 }
@@ -46,6 +47,7 @@ export function UserForm({
           required
         />
       </div>
+
       <div className="space-y-1.5">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -56,6 +58,20 @@ export function UserForm({
           required
         />
       </div>
+
+      {!isEditMode && ( // Only show password field when creating a new user
+        <div className="space-y-1.5">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={formData.password || ""}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            required={!isEditMode}
+          />
+        </div>
+      )}
+
       <div className="space-y-1.5">
         <Label htmlFor="role">Role</Label>
         <Select
@@ -73,22 +89,22 @@ export function UserForm({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex items-center space-x-2">
+
+      <div className="space-y-1.5">
+        <Label htmlFor="status">Status</Label>
         <Switch
-          id="active"
+          id="status"
           checked={formData.active}
-          onCheckedChange={(checked) =>
-            setFormData({ ...formData, active: checked })
-          }
+          onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
         />
-        <Label htmlFor="active">Active Status</Label>
       </div>
+
       <div className="flex justify-end space-x-2">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : (isEditMode ? "Update User" : "Add User")}
+          {isEditMode ? "Update User" : "Create User"}
         </Button>
       </div>
     </form>

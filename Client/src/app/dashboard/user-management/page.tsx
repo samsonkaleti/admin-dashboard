@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useGetUsers } from "@/app/hooks/userMangementData/useGetUsers";
 import { useUpdateUser } from "@/app/hooks/userMangementData/useUpdateUser";
 import { useDeleteUser } from "@/app/hooks/userMangementData/useDeleteUser";
+import { useCreateUser } from "@/app/hooks/userMangementData/useCreateUser"; // Import create user hook
 import {
   Table,
   TableBody,
@@ -21,6 +22,7 @@ import { toast } from "sonner";
 interface User {
   id: any;
   username: string;
+  password : any;
   email: string;
   role: "Admin" | "Uploader";
   active: boolean;
@@ -37,6 +39,7 @@ const defaultUser: User = {
 export default function UserManagementPage() {
   const { data: fetchedUsers, isLoading: isLoadingUsers } = useGetUsers();
   const updateUserMutation = useUpdateUser();
+  const createUserMutation = useCreateUser(); // Initialize create user hook
   const { mutate: deleteUser } = useDeleteUser();
 
   const users = fetchedUsers?.users || [];
@@ -55,34 +58,38 @@ export default function UserManagementPage() {
 
   const handleUpdate = async (userData: User) => {
     try {
-      // Ensure we have a valid user ID
-      if (!selectedUser.id) {
-        throw new Error('User ID is missing');
-      }
-
-      console.log('Updating user:', {
-        userId: selectedUser.id,
-        userData: userData
-      });
-
+      if (!selectedUser.id) throw new Error('User ID is missing');
       await updateUserMutation.mutateAsync({
         userId: selectedUser.id,
-        userData: {
-          username: userData.username,
-          email: userData.email,
-          role: userData.role,
-          active: userData.active
-        }
+        userData,
       });
-
       toast.success("User updated successfully");
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Update error:', error);
       toast.error(error instanceof Error ? error.message : "Failed to update user");
     }
   };
+
+  const handleCreate = async (userData: User) => {
+    try {
+      const newUser = {
+        username: userData.username,
+        email: userData.email,
+        password: userData.password, // Include password field
+        role: userData.role,
+        active: userData.active,
+      };
+      
+      await createUserMutation.mutateAsync(newUser);
+      toast.success("User created successfully");
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to create user");
+    }
+  };
+  
 
   const handleDelete = (userId: string) => {
     if (!userId) return;
@@ -105,10 +112,13 @@ export default function UserManagementPage() {
           <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
             User Management
           </CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) resetForm();
-          }}>
+          <Dialog
+            open={isDialogOpen}
+            onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) resetForm();
+            }}
+          >
             <DialogTrigger asChild>
               <Button className="w-full sm:w-auto" onClick={resetForm}>
                 <Plus className="mr-2 h-4 w-4" /> Add New User
@@ -123,8 +133,8 @@ export default function UserManagementPage() {
               <UserForm
                 user={selectedUser}
                 isEditMode={isEditMode}
-                isLoading={updateUserMutation.isPending}
-                onSubmit={handleUpdate}
+                isLoading={createUserMutation.isLoading || updateUserMutation.isLoading}
+                onSubmit={isEditMode ? handleUpdate : handleCreate}
                 onCancel={() => {
                   setIsDialogOpen(false);
                   resetForm();
