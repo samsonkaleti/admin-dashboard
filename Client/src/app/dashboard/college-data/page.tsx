@@ -27,8 +27,7 @@ import { useCreateCollege } from "@/app/hooks/colleges/useCreateCollege";
 import { useDeleteCollege } from "@/app/hooks/colleges/useDeleteCollege";
 import { useGetColleges } from "@/app/hooks/colleges/useGetColleges";
 import { useUpdateCollege } from "@/app/hooks/colleges/useUpdateCollege";
-
-// Types
+import { useFetchRegulations } from "@/app/hooks/regulations/useGetRegulations";
 interface Regulation {
   type: string;
   regulation: string;
@@ -63,7 +62,6 @@ interface CollegeExportData {
   domain: string;
 }
 
-// Program options configuration
 const programOptions = [
   {
     name: "B.Tech",
@@ -119,12 +117,6 @@ export default function CollegeDataPage() {
   const [customSpecializations, setCustomSpecializations] = useState<string[]>(
     []
   );
-  // const [newRegulation, setNewRegulation] = useState<Regulation>({
-  //   type: "",
-  //   regulation: "",
-  //   validYears: [],
-  // });
-  // const [customRegulations, setCustomRegulations] = useState<Regulation[]>([]);
   const [showOtherSpecialization, setShowOtherSpecialization] = useState(false);
   const [selectedJNTURegulation, setSelectedJNTURegulation] =
     useState<string>("");
@@ -132,11 +124,40 @@ export default function CollegeDataPage() {
 
   // Hooks
   const { data: collegeData, isLoading, error } = useGetColleges();
+  const { data: regulationsData, isError } = useFetchRegulations();
   const createCollegeMutation = useCreateCollege();
   const updateCollegeMutation = useUpdateCollege();
   const deleteCollegeMutation = useDeleteCollege();
+  console.log(regulationsData);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
-  // Helper functions
+  // Group regulations by category
+  const groupedRegulations = regulationsData?.reduce(
+    (acc: any, regulation: any) => {
+      const category = regulation.regulation_category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(regulation);
+      return acc;
+    },
+    {}
+  );
+
+  const handleCategoryChange = (e: any) => {
+    setSelectedCategory(e.target.value);
+    setSelectedRegulations([]); // Reset selected regulation types when category changes
+  };
+
+  const handleRegulationChange = (e: any) => {
+    const regulationType = e.target.value;
+    setSelectedRegulations((prev) =>
+      e.target.checked
+        ? [...prev, regulationType]
+        : prev.filter((item) => item !== regulationType)
+    );
+  };
+
   const handleAddSpecialization = () => {
     if (
       newSpecialization &&
@@ -157,18 +178,6 @@ export default function CollegeDataPage() {
       selectedSpecializations.filter((s) => s !== spec)
     );
   };
-
-  // const handleAddRegulation = () => {
-  //   if (newRegulation.type && newRegulation.regulation) {
-  //     const regulation = {
-  //       ...newRegulation,
-  //       validYears: [new Date().getFullYear()],
-  //     };
-  //     setCustomRegulations([...customRegulations, regulation]);
-  //     setSelectedRegulations([...selectedRegulations, regulation]);
-  //     setNewRegulation({ type: "", regulation: "", validYears: [] });
-  //   }
-  // };
 
   const getAllSpecializations = () => {
     const defaultSpecs =
@@ -589,26 +598,58 @@ export default function CollegeDataPage() {
                                       JNTU Regulation
                                     </Label>
                                     <select
-                                    title="JNTU Regulation"
+                                      title="JNTU Regulation"
                                       id="jntuRegulation"
-                                      value={selectedJNTURegulation}
-                                      onChange={(e) =>
-                                        setSelectedJNTURegulation(
-                                          e.target.value
-                                        )
-                                      }
+                                      value={selectedCategory}
+                                      onChange={handleCategoryChange}
                                       className="w-full p-2 border rounded-md bg-background text-foreground"
                                     >
-                                      <option value="">
-                                        Select Regulation
-                                      </option>
-                                      <option value="R20">R20</option>
-                                      <option value="R19">R19</option>
-                                      <option value="R18">R18</option>
-                                      <option value="R17">R17</option>
+                                      <option value="">Select Category</option>
+                                      {groupedRegulations &&
+                                        Object.keys(groupedRegulations).map(
+                                          (category) => (
+                                            <option
+                                              key={category}
+                                              value={category}
+                                            >
+                                              {category}
+                                            </option>
+                                          )
+                                        )}
                                     </select>
                                   </div>
                                 )}
+
+                                {/* Show checkboxes for regulation types */}
+                                {selectedCategory &&
+                                  groupedRegulations[selectedCategory] && (
+                                    <div className="mt-4 space-y-2">
+                                      <Label>Regulation Types</Label>
+                                      {groupedRegulations[selectedCategory].map(
+                                        (regulation: any) => (
+                                          <div key={regulation._id}>
+                                            <input
+                                              type="checkbox"
+                                              id={regulation._id}
+                                              value={regulation.regulation_type}
+                                              checked={selectedRegulations.includes(
+                                                regulation.regulation_type
+                                              )}
+                                              onChange={handleRegulationChange}
+                                            />
+                                            <label
+                                              htmlFor={regulation._id}
+                                              className="ml-2"
+                                            >
+                                              {regulation.regulation_type}{" "}
+                                              (Year:{" "}
+                                              {regulation.year_validation})
+                                            </label>
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
+                                  )}
                               </div>
 
                               {/* Years Section */}
