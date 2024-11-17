@@ -1,8 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-
-
-
 // Function to update user details
 async function updateUser(variables: { userId: string; userData: Partial<User> }): Promise<User> {
   const { userId, userData } = variables;
