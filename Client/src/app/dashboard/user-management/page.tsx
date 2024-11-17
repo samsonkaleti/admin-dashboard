@@ -2,7 +2,9 @@
 import { useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useGetUsers } from "@/app/hooks/userMangementData/useGetUsers";
+import { useUpdateUser } from "@/app/hooks/userMangementData/useUpdateUser";
+import { useDeleteUser } from "@/app/hooks/userMangementData/useDeleteUser";
 import {
   Table,
   TableBody,
@@ -11,113 +13,90 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { UserForm } from "@/app/components/userForm";
+import { toast } from "sonner";
 
-type User = {
-  id: number;
-  name: string;
+interface User {
+  id: any;
+  username: string;
   email: string;
-  role: "admin" | "uploader";
+  role: "Admin" | "Uploader";
   active: boolean;
+}
+
+const defaultUser: User = {
+  id: "",
+  username: "",
+  email: "",
+  role: "Uploader",
+  active: true,
 };
 
 export default function UserManagementPage() {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      role: "admin",
-      active: true,
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      role: "uploader",
-      active: true,
-    },
-  ]);
+  const { data: fetchedUsers, isLoading: isLoadingUsers } = useGetUsers();
+  const updateUserMutation = useUpdateUser();
+  const { mutate: deleteUser } = useDeleteUser();
 
-  const [newUser, setNewUser] = useState<Omit<User, "id">>({
-    name: "",
-    email: "",
-    role: "uploader",
-    active: true,
-  });
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const users = fetchedUsers?.users || [];
+  const [selectedUser, setSelectedUser] = useState<User>(defaultUser);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const resetForm = () => {
-    setNewUser({ name: "", email: "", role: "uploader", active: true });
-    setEditingId(null);
-    setIsEditMode(false);
-    setIsDialogOpen(false);
-  };
-
-  const handleAdd = () => {
-    setUsers([...users, { ...newUser, id: Date.now() }]);
-    resetForm();
-  };
-
-  const handleEdit = (id: number) => {
-    const userToEdit = users.find((user) => user.id === id);
+  const handleEdit = (userId: string) => {
+    const userToEdit = users.find((user) => user.id === userId);
     if (userToEdit) {
-      setNewUser({
-        name: userToEdit.name,
-        email: userToEdit.email,
-        role: userToEdit.role,
-        active: userToEdit.active,
-      });
-      setEditingId(id);
+      setSelectedUser(userToEdit);
       setIsEditMode(true);
       setIsDialogOpen(true);
     }
   };
 
-  const handleUpdate = () => {
-    setUsers(
-      users.map((user) =>
-        user.id === editingId ? { ...user, ...newUser } : user
-      )
-    );
-    resetForm();
+  const handleUpdate = async (userData: User) => {
+    try {
+      // Ensure we have a valid user ID
+      if (!selectedUser.id) {
+        throw new Error('User ID is missing');
+      }
+
+      console.log('Updating user:', {
+        userId: selectedUser.id,
+        userData: userData
+      });
+
+      await updateUserMutation.mutateAsync({
+        userId: selectedUser.id,
+        userData: {
+          username: userData.username,
+          email: userData.email,
+          role: userData.role,
+          active: userData.active
+        }
+      });
+
+      toast.success("User updated successfully");
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error('Update error:', error);
+      toast.error(error instanceof Error ? error.message : "Failed to update user");
+    }
   };
 
-  const handleDelete = (id: number) => {
-    setUsers(users.filter((user) => user.id !== id));
+  const handleDelete = (userId: string) => {
+    if (!userId) return;
+    deleteUser(userId);
   };
 
-  const handleToggleActive = (id: number) => {
-    setUsers(
-      users.map((user) =>
-        user.id === id ? { ...user, active: !user.active } : user
-      )
-    );
+  const resetForm = () => {
+    setSelectedUser(defaultUser);
+    setIsEditMode(false);
   };
+
+  if (isLoadingUsers) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Card className="w-full">
@@ -126,7 +105,10 @@ export default function UserManagementPage() {
           <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
             User Management
           </CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) resetForm();
+          }}>
             <DialogTrigger asChild>
               <Button className="w-full sm:w-auto" onClick={resetForm}>
                 <Plus className="mr-2 h-4 w-4" /> Add New User
@@ -138,82 +120,16 @@ export default function UserManagementPage() {
                   {isEditMode ? "Edit User" : "Add New User"}
                 </DialogTitle>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-1.5">
-                  <Label
-                    htmlFor="name"
-                    className="text-sm font-medium "
-                  >
-                    Name
-                  </Label>
-                  <Input
-                    id="name"
-                    value={newUser.name}
-                    onChange={(e) =>
-                      setNewUser({ ...newUser, name: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label
-                    htmlFor="email"
-                    className="text-sm font-medium "
-                  >
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={newUser.email}
-                    onChange={(e) =>
-                      setNewUser({ ...newUser, email: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label
-                    htmlFor="role"
-                    className="text-sm font-medium"
-                  >
-                    Role
-                  </Label>
-                  <Select
-                    value={newUser.role}
-                    onValueChange={(value: "admin" | "uploader") =>
-                      setNewUser({ ...newUser, role: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="uploader">Uploader</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="active"
-                    checked={newUser.active}
-                    onCheckedChange={(checked) =>
-                      setNewUser({ ...newUser, active: checked })
-                    }
-                  />
-                  <Label
-                    htmlFor="active"
-                    className="text-sm font-medium "
-                  >
-                    Active Status
-                  </Label>
-                </div>
-              </div>
-              <Button
-                onClick={isEditMode ? handleUpdate : handleAdd}
-                className="w-full"
-              >
-                {isEditMode ? "Update User" : "Add User"}
-              </Button>
+              <UserForm
+                user={selectedUser}
+                isEditMode={isEditMode}
+                isLoading={updateUserMutation.isPending}
+                onSubmit={handleUpdate}
+                onCancel={() => {
+                  setIsDialogOpen(false);
+                  resetForm();
+                }}
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -226,7 +142,7 @@ export default function UserManagementPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Username</TableHead>
                 <TableHead className="hidden sm:table-cell">Email</TableHead>
                 <TableHead className="hidden md:table-cell">Role</TableHead>
                 <TableHead>Status</TableHead>
@@ -236,47 +152,26 @@ export default function UserManagementPage() {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">
-                    <div>{user.name}</div>
-                    <div className="text-sm text-muted-foreground sm:hidden">
-                      {user.email}
-                    </div>
-                    <div className="text-sm text-muted-foreground md:hidden sm:block">
-                      {user.role}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    {user.email}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {user.role}
-                  </TableCell>
-                  <TableCell>
-                    <Switch
-                      checked={user.active}
-                      onCheckedChange={() => handleToggleActive(user.id)}
-                      className="h-5 w-9"
-                    />
-                  </TableCell>
+                  <TableCell>{user.username}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{user.email}</TableCell>
+                  <TableCell className="hidden md:table-cell">{user.role}</TableCell>
+                  <TableCell>{user.active ? "Active" : "Inactive"}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEdit(user.id)}
-                        className="h-8 w-8"
-                      >
-                        <Pencil className="h-4 w-4 text-secondary" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleDelete(user.id)}
-                        className="h-8 w-8"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleEdit(user.id)}
+                      className="mr-2"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleDelete(user.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

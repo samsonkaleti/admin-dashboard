@@ -5,7 +5,8 @@ const pdfRoutes = require("./routes/pdfRoutes");
 const cardRoutes = require("./routes/cardRoute");
 const authRoutes = require("./routes/authRoutes");
 const studentRoutes = require("./routes/studentRoutes");
-const regulationRoutes = require("./routes/regulationRoutes");
+const regulationRoutes = require("./routes/regulationRoutes"); 
+const userRoutes = require("./routes/usersRoutes")
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
@@ -45,6 +46,7 @@ app.use("/api", studentRoutes);
 app.use("/api/regulations", regulationRoutes);
 app.use("/api/pdfs", pdfRoutes);
 app.use("/api/events", eventsRoutes);
+app.use("/api" , userRoutes);
 // Start the server
 app.listen(PORT, () => {
   logger.info(`Server is running on http://localhost:${PORT}`);
