@@ -21,7 +21,7 @@ router.get("/", regulationController.getAllRegulations);
  * /api/regulations/{id}:
  *   get:
  *     summary: Get Regulation by ID
- *     tags: [Regulation]
+ *     tags: [Regulations]
  *     responses:
  *       200:
  *         description: A regulation is returned
