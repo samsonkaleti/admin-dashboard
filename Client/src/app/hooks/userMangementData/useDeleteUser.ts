@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Function to delete user by ID
 async function deleteUser(userId: string): Promise<void> {
@@ -17,9 +17,12 @@ async function deleteUser(userId: string): Promise<void> {
 
 // Custom hook to delete a user
 export function useDeleteUser() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: deleteUser,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       console.log('User deleted successfully');
     },
     onError: (error) => {

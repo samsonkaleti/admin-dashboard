@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';   
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 
 
@@ -25,9 +25,12 @@ async function updateUser(variables: { userId: string; userData: Partial<User> }
 
 // Custom hook to update a user
 export function useUpdateUser() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: updateUser,
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       console.log('User updated successfully:', data);
     },
     onError: (error) => {
