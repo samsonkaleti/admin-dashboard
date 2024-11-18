@@ -20,8 +20,7 @@ const regulationSchema = new mongoose.Schema({
 const programSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
-    // e.g., "B.Tech" or "M.Tech"
+    required: true, // e.g., "B.Tech" or "M.Tech"
   },
   specializations: {
     type: [String], // Array for specializations like CSE, ECE, EEE, CSM
@@ -31,8 +30,9 @@ const programSchema = new mongoose.Schema({
     type: [Number],
     required: true, // Array of years, e.g., [1, 2, 3, 4]
   },
-  regulation: {
-    type: [regulationSchema],
+  regulations: {
+    type: [regulationSchema], // Array of regulations for the program
+    required: true,
   },
 });
 
@@ -68,10 +68,12 @@ const collegeSchema = new mongoose.Schema({
     required: true, // e.g., "techuniversity.edu"
   },
   details: {
-    type: [collegeDetailsSchema], // Array of college details
+    type: collegeDetailsSchema, // Single set of college details
+    required: true,
   },
   programs: {
     type: [programSchema], // Array of programs offered
+    required: true,
   },
   createdAt: {
     type: Date,
@@ -81,6 +83,12 @@ const collegeSchema = new mongoose.Schema({
     type: Date,
     default: Date.now, // Timestamp for last update
   },
+});
+
+// Pre-save middleware to update `updatedAt` timestamp
+collegeSchema.pre("save", function (next) {
+  this.updatedAt = Date.now();
+  next();
 });
 
 // Create the College model
