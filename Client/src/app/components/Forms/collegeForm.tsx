@@ -39,7 +39,7 @@ interface CollegeData {
   collegeName: string;
   regulatoryBody: string;
   domain: string;
-  details: CollegeDetails[];
+  details: CollegeDetails;
   programs: Program[];
 }
 
@@ -95,7 +95,7 @@ export default function CollegeDataForm({
       collegeName: "",
       regulatoryBody: "",
       domain: "",
-      details: [{ address: "", contactNumber: "", email: "" }],
+      details: { address: "", contactNumber: "", email: "" },
       programs: [],
     }
   );
@@ -139,8 +139,15 @@ export default function CollegeDataForm({
     const regulationType = e.target.value;
     setSelectedRegulations((prev) =>
       e.target.checked
-        ? [...prev, { type: regulationType, regulation: "", validYears: [] }]
-        : prev.filter((item) => item.type !== regulationType)
+        ? [
+            ...prev,
+            {
+              type: selectedCategory,
+              regulation: regulationType,
+              validYears: [],
+            },
+          ]
+        : prev.filter((item) => item.regulation !== regulationType)
     );
   };
 
@@ -204,7 +211,7 @@ export default function CollegeDataForm({
       collegeName: "",
       regulatoryBody: "",
       domain: "",
-      details: [{ address: "", contactNumber: "", email: "" }],
+      details: { address: "", contactNumber: "", email: "" },
       programs: [],
     });
     setSelectedProgram("");
@@ -284,16 +291,14 @@ export default function CollegeDataForm({
                   <Label htmlFor="address">Address</Label>
                   <Input
                     id="address"
-                    value={newData.details[0].address}
+                    value={newData.details.address}
                     onChange={(e) =>
                       setNewData({
                         ...newData,
-                        details: [
-                          {
-                            ...newData.details[0],
-                            address: e.target.value,
-                          },
-                        ],
+                        details: {
+                          ...newData.details,
+                          address: e.target.value,
+                        },
                       })
                     }
                   />
@@ -302,16 +307,14 @@ export default function CollegeDataForm({
                   <Label htmlFor="contactNumber">Contact Number</Label>
                   <Input
                     id="contactNumber"
-                    value={newData.details[0].contactNumber}
+                    value={newData.details.contactNumber}
                     onChange={(e) =>
                       setNewData({
                         ...newData,
-                        details: [
-                          {
-                            ...newData.details[0],
-                            contactNumber: e.target.value,
-                          },
-                        ],
+                        details: {
+                          ...newData.details,
+                          contactNumber: e.target.value,
+                        },
                       })
                     }
                   />
@@ -320,16 +323,14 @@ export default function CollegeDataForm({
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
-                    value={newData.details[0].email}
+                    value={newData.details.email}
                     onChange={(e) =>
                       setNewData({
                         ...newData,
-                        details: [
-                          {
-                            ...newData.details[0],
-                            email: e.target.value,
-                          },
-                        ],
+                        details: {
+                          ...newData.details,
+                          email: e.target.value,
+                        },
                       })
                     }
                   />
@@ -525,7 +526,8 @@ export default function CollegeDataForm({
                                     value={regulation.regulation_type}
                                     checked={selectedRegulations.some(
                                       (r) =>
-                                        r.type === regulation.regulation_type
+                                        r.regulation ===
+                                        regulation.regulation_type
                                     )}
                                     onChange={handleRegulationChange}
                                   />
