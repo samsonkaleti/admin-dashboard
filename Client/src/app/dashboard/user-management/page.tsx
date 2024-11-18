@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useGetUsers } from "@/app/hooks/userMangementData/useGetUsers";
 import { useUpdateUser } from "@/app/hooks/userMangementData/useUpdateUser";
 import { useDeleteUser } from "@/app/hooks/userMangementData/useDeleteUser";
-import { useCreateUser } from "@/app/hooks/userMangementData/useCreateUser"; // Import create user hook
+import { useCreateUser } from "@/app/hooks/userMangementData/useCreateUser";
 import {
   Table,
   TableBody,
@@ -44,6 +44,7 @@ const defaultUser: User = {
   id: "",
   username: "",
   email: "",
+  password: "",
   role: "Uploader",
   active: true,
 };
@@ -51,7 +52,7 @@ const defaultUser: User = {
 export default function UserManagementPage() {
   const { data: fetchedUsers, isLoading: isLoadingUsers } = useGetUsers();
   const updateUserMutation = useUpdateUser();
-  const createUserMutation = useCreateUser(); // Initialize create user hook
+  const createUserMutation = useCreateUser();
   const { mutate: deleteUser } = useDeleteUser();
 
   const users = fetchedUsers?.users || [];

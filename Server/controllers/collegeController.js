@@ -104,9 +104,16 @@ exports.addRegulation = async (req, res) => {
 
 // Create a new college
 exports.createCollege = async (req, res) => {
+  // Destructure the required fields from the request body
   const { collegeName, regulatoryBody, domain, details, programs } = req.body;
 
+  // Check if required fields are missing
+  if (!collegeName || !regulatoryBody || !domain || !details || !programs) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
   try {
+    // Create the new College document
     const newCollege = await College.create({
       collegeName,
       regulatoryBody,
@@ -114,13 +121,21 @@ exports.createCollege = async (req, res) => {
       details,
       programs,
     });
-    return res
-      .status(201)
-      .json({ message: "College created successfully", college: newCollege });
+
+    // Return the response with the newly created college
+    return res.status(201).json({
+      message: "College created successfully",
+      college: newCollege,
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error creating college", error: error.message });
+    // Log the error for debugging
+    console.error("Error creating college:", error);
+
+    // Return a 500 error with the message
+    return res.status(500).json({
+      message: "Error creating college",
+      error: error.message,
+    });
   }
 };
 
