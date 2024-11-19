@@ -29,10 +29,7 @@ app.use(
 );
 
 // Middleware to parse URL-encoded form data
-// app.use(express.urlencoded({ extended: false }));
-// app.use(upload.any());
-app.use(bodyParser.json());
-// Middleware to parse JSON
+app.use(express.urlencoded({ extended: false }));
 app.options("*", cors());
 app.use(express.json());
 connectDB();

@@ -32,7 +32,7 @@ const PdfUploadSchema = mongoose.Schema({
   regulation: {
     type: String,
     required: true,
-    enum: ["R20", "R21"], // Add more as needed
+    enum: ["R20", "R19", "R21", "R18", "R17"], // Add more as needed
   },
   course: {
     type: String,

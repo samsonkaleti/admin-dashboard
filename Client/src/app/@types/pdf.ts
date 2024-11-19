@@ -14,7 +14,7 @@ export interface AcademicYear {
 export interface PdfUpload {
     id: number;
     academicYear: AcademicYear;
-    regulation: 'R20' | 'R21'; // Extend as needed
+    regulation: ''
     course: string;
     subject: string;
     files: File[];
