@@ -22,15 +22,14 @@ export type CollegeData = {
   collegeName: string;
   regulatoryBody: string;
   domain: string;
-  details: CollegeDetails[];
+  details: CollegeDetails;
   programs: Program[];
   createdAt?: string;
   updatedAt?: string;
 };
 
 export type CollegeExportData = {
-    collegeName: string;
-    regulatoryBody: string;
-    domain: string;
-  }
-  
+  collegeName: string;
+  regulatoryBody: string;
+  domain: string;
+}

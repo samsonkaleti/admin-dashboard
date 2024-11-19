@@ -129,10 +129,9 @@ export default function PDFUploadPage() {
         formData.append("files", file);
       });
 
-      // Submit the form
+      // Submit the form using a mutation or API call
       await createPdfMutation.mutateAsync(formData);
 
-      // Show success message
       toast.success("PDFs uploaded successfully");
 
       // Reset form after successful upload

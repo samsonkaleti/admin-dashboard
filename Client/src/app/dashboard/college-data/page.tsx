@@ -44,7 +44,7 @@ interface CollegeData {
   collegeName: string;
   regulatoryBody: string;
   domain: string;
-  details: CollegeDetails[];
+  details: CollegeDetails;
   programs: Program[];
 }
 
