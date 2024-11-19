@@ -1,4 +1,5 @@
 const PdfUpload = require("../models/PdfUpload");
+const multer = require("multer");
 
 const pdfController = {
   // Create multiple PDFs
@@ -112,6 +113,7 @@ const pdfController = {
         course,
         subject,
       } = req.body;
+      // console.log("pdf upload req.body", req);
 
       const updateData = {};
 
@@ -150,8 +152,8 @@ const pdfController = {
           fileData: file.buffer,
         }));
       }
-
-      const updatedPdf = await PdfUpload.findOneAndUpdate({ _id }, updateData, {
+      console.log("pdf upload id: ", id, JSON.stringify(updateData));
+      const updatedPdf = await PdfUpload.findOneAndUpdate({ id }, updateData, {
         new: true,
       }).select("-files.fileData");
 

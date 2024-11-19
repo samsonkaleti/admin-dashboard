@@ -54,10 +54,9 @@ export function useCreatePdf() {
         errorMessage = 'File size exceeds the limit (10MB)';
       } else if (error.code === 'INVALID_FILE_TYPE') {
         errorMessage = 'Only PDF files are allowed';
+      } else if (error.details) {
+        errorMessage = error.details;  // Show detailed error if available
       }
-      // } else if (error.details) {
-      //   errorMessage = error.details;  // Show detailed error if available
-      // }
 
       toast.error(errorMessage);
     },
