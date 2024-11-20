@@ -40,6 +40,7 @@ import { useGetAllPdfs } from "@/app/hooks/pdfUploads/useGetAllPdfs";
 import { useUpdatePdf } from "@/app/hooks/pdfUploads/useUpdatePdf";
 import { useDeletePdf } from "@/app/hooks/pdfUploads/useDeletePdf";
 import { useDownloadPdf } from "@/app/hooks/pdfUploads/useDownloadPdf";
+import { useGetRegulations } from "@/app/hooks/regulations/useGetRegulations";
 
 type PDFUpload = {
   id: number;
@@ -71,13 +72,14 @@ export default function PDFUploadPage() {
 
   const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
   const semesters = ["1st Semester", "2nd Semester"];
-  const regulations = ["R24", "R20", "R19", "R16", "R13"];
+  // const regulations = ["R24", "R20", "R19", "R16", "R13"];
 
   const { data: pdfUploads, isLoading, isError, error } = useGetAllPdfs();
   const createPdfMutation = useCreatePdf();
   const updatePdfMutation = useUpdatePdf();
   const deletePdfMutation = useDeletePdf();
   const { downloadPdf, isDownloading } = useDownloadPdf();
+  const { data: regulations } = useGetRegulations()
 
   const handleNew = () => {
     setNewUpload({
@@ -341,9 +343,9 @@ export default function PDFUploadPage() {
                     <SelectValue placeholder="Select regulation" />
                   </SelectTrigger>
                   <SelectContent>
-                    {regulations.map((regulation) => (
-                      <SelectItem key={regulation} value={regulation}>
-                        {regulation}
+                    {regulations.map((regulation: any) => (
+                      <SelectItem key={regulation._id} value={regulation.regulation_type}>
+                        {regulation.regulation_type}
                       </SelectItem>
                     ))}
                   </SelectContent>

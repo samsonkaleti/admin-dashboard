@@ -31,7 +31,8 @@ import {
 import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { Bell, LogOut, Settings, User, Sun, Moon, Menu } from "lucide-react";
 import logo from "../../../utils/logo.png";
-
+import { useNotifications } from "@/app/context/notifcation";
+import { Badge } from "@/components/ui/badge"
 const sidebarNavItems = [
   {
     title: "Dashboard",
@@ -122,6 +123,8 @@ export function Navbar() {
   const router = useRouter();
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
+  const [isAnimating, setIsAnimating] = useState(false)
+  const { notifications } = useNotifications()
   React.useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth < 1024);
@@ -130,6 +133,12 @@ export function Navbar() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    setIsAnimating(true)
+    const timer = setTimeout(() => setIsAnimating(false), 1000)
+    return () => clearTimeout(timer)
+  }, [notifications.length])
 
   useEffect(() => {
     // Retrieve user details from session storage
@@ -242,7 +251,17 @@ export function Navbar() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <NotificationBell />
+<Button variant="ghost" size="icon" className="relative">
+      <Bell className={`h-5 w-5 ${isAnimating ? 'animate-ring' : ''}`} />
+      {notifications.length > 0 && (
+        <Badge
+          variant="destructive"
+          className="absolute -top-1 -right-1 px-1 min-w-[1.25rem] h-5 flex items-center justify-center text-xs"
+        >
+          {notifications.length}
+        </Badge>
+      )}
+    </Button>
               </>
             )}
 

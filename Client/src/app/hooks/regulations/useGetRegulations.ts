@@ -13,7 +13,7 @@ async function fetchAllRegulations() {
   return response.json();
 }
 
-export function useFetchRegulations() {
+export function useGetRegulations() {
   return useQuery({
     queryKey: ['regulations'],
     queryFn: fetchAllRegulations,

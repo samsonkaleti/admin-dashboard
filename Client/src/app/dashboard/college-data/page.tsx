@@ -16,7 +16,7 @@ import { useCreateCollege } from "@/app/hooks/colleges/useCreateCollege";
 import { useDeleteCollege } from "@/app/hooks/colleges/useDeleteCollege";
 import { useGetColleges } from "@/app/hooks/colleges/useGetColleges";
 import { useUpdateCollege } from "@/app/hooks/colleges/useUpdateCollege";
-import { useFetchRegulations } from "@/app/hooks/regulations/useGetRegulations";
+import { useGetRegulations } from "@/app/hooks/regulations/useGetRegulations";
 import CollegeDataForm from "@/app/components/Forms/collegeForm";
 
 // Interfaces (you may want to move these to a separate types file)
@@ -57,7 +57,7 @@ interface CollegeExportData {
 export default function CollegeDataPage() {
   // Hooks
   const { data: collegeData, isLoading, error } = useGetColleges();
-  const { data: regulationsData, isError } = useFetchRegulations();
+  const { data: regulationsData, isError } = useGetRegulations();
   const createCollegeMutation = useCreateCollege();
   const updateCollegeMutation = useUpdateCollege();
   const deleteCollegeMutation = useDeleteCollege();

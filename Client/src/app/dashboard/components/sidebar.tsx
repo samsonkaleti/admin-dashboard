@@ -70,6 +70,11 @@ const sidebarNavItems = [
     href: "/dashboard/notifications",
     icon: Bell,
   },
+  {
+    title: "Regulations",
+    href: "/dashboard/regulations",
+    icon: Bell,
+  },
 ];
 
 export function Sidebar() {

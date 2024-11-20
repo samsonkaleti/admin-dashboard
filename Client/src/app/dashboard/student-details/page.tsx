@@ -94,7 +94,7 @@ export default function StudentDetailsPage() {
                 <SelectValue placeholder="Choose a College" />
               </SelectTrigger>
               <SelectContent>
-                {collegeList.map((college: any, index: Key | null | undefined) => (
+                {collegeList?.map((college: any, index: Key | null | undefined) => (
                   <SelectItem key={index} value={college}>
                     {college.collegeName}
                   </SelectItem>

@@ -29,7 +29,10 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card"
-import { UserForm } from "@/app/components/Forms/userForm"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 
 interface User {
@@ -40,8 +43,13 @@ interface User {
   active: boolean
 }
 
-interface UserFormData extends Omit<User, 'id'> {
-  password: string
+interface UserFormData {
+  id?: string
+  username: string
+  email: string
+  password: any
+  role: "Admin" | "Uploader"
+  active: boolean
 }
 
 const defaultUser: UserFormData = {
@@ -52,7 +60,102 @@ const defaultUser: UserFormData = {
   active: true,
 }
 
-export default function UserManagementPage() {
+function UserForm({ 
+  user, 
+  isEditMode, 
+  isLoading, 
+  onSubmit, 
+  onCancel 
+}: {
+  user: UserFormData
+  isEditMode: boolean
+  isLoading: boolean
+  onSubmit: (userData: UserFormData) => void
+  onCancel: () => void
+}) {
+  const [formData, setFormData] = useState<UserFormData>(user)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSubmit(formData)
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+      <div className="space-y-1.5">
+        <Label htmlFor="username">Username</Label>
+        <Input
+          id="username"
+          value={formData.username}
+          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+          required
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+        />
+      </div>
+
+      {!isEditMode && (
+        <div className="space-y-1.5">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={formData.password || ""}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            required={!isEditMode}
+          />
+        </div>
+      )}
+
+      <div className="space-y-1.5">
+        <Label htmlFor="role">Role</Label>
+        <Select
+          value={formData.role}
+          onValueChange={(value: "Admin" | "Uploader") =>
+            setFormData({ ...formData, role: value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Admin">Admin</SelectItem>
+            <SelectItem value="Uploader">Uploader</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="status">Status</Label>
+        <Switch
+          id="status"
+          checked={formData.active}
+          onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+        />
+      </div>
+
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isLoading}>
+          {isEditMode ? "Update User" : "Create User"}
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+export default function Component() {
   const { data: fetchedUsers, isLoading: isLoadingUsers } = useGetUsers()
   const updateUserMutation = useUpdateUser()
   const createUserMutation = useCreateUser()
@@ -66,7 +169,7 @@ export default function UserManagementPage() {
   const handleEdit = (userId: string) => {
     const userToEdit = users.find((user) => user.id === userId)
     if (userToEdit) {
-      setSelectedUser({ ...userToEdit, password: '' })
+      setSelectedUser({ ...userToEdit, password: undefined })
       setIsEditMode(true)
       setIsDialogOpen(true)
     }
@@ -74,9 +177,9 @@ export default function UserManagementPage() {
 
   const handleUpdate = async (userData: UserFormData) => {
     try {
-      if (!isEditMode) throw new Error("Not in edit mode")
+      if (!isEditMode || !userData.id) throw new Error("Invalid edit operation")
       await updateUserMutation.mutateAsync({
-        userId: users.find(u => u.username === userData.username)?.id || '',
+        userId: userData.id,
         userData: {
           email: userData.email,
           role: userData.role,

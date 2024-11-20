@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import "./globals.css";
 import { AppLayout } from "@/components/layout/app-layout";
 import { AuthLayout } from "@/components/layout/auth-layout";
+import { NotificationProvider } from "./context/notifcation";
 
 const authPages = ["/login", "/signup", "/privacy", "/"];
 const validRoutesPrefixes = [
@@ -78,13 +79,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryClientProvider client={queryClient}>
-            <ProtectedRoute>
-              {isAuthPage || !isValidRoute(pathname) ? (
-                <AuthLayout>{children}</AuthLayout>
-              ) : (
-                <AppLayout>{children}</AppLayout>
-              )}
-            </ProtectedRoute>
+            <NotificationProvider>
+              <ProtectedRoute>
+                {isAuthPage || !isValidRoute(pathname) ? (
+                  <AuthLayout>{children}</AuthLayout>
+                ) : (
+                  <AppLayout>{children}</AppLayout>
+                )}
+              </ProtectedRoute>
+            </NotificationProvider>
           </QueryClientProvider>
         </ThemeProvider>
       </body>

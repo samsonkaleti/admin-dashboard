@@ -1,69 +1,32 @@
 "use client"
-import { useState } from "react";
-import { Bell, Trash2, CheckCircle, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+import { Bell, Trash2, Upload, UserPlus, AlertCircle } from 'lucide-react'
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-
-type Notification = {
-  id: number;
-  message: string;
-  date: string;
-  type: "info" | "success" | "warning";
-};
+} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { useNotifications } from '@/app/context/notifcation'
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      message: "New user registered",
-      date: "2024-03-15 10:30 AM",
-      type: "info",
-    },
-    {
-      id: 2,
-      message: "PDF upload completed",
-      date: "2024-03-14 2:45 PM",
-      type: "success",
-    },
-    {
-      id: 3,
-      message: "Print request approved",
-      date: "2024-03-13 11:20 AM",
-      type: "success",
-    },
-    {
-      id: 4,
-      message: "Low paper supply in Printer 2",
-      date: "2024-03-12 9:15 AM",
-      type: "warning",
-    },
-  ]);
+  const { notifications, deleteNotification } = useNotifications()
 
-  const handleDelete = (id: number) => {
-    setNotifications(
-      notifications.filter((notification) => notification.id !== id)
-    );
-  };
-
-  const getNotificationIcon = (type: Notification["type"]) => {
+  const getNotificationIcon = (type: "info" | "success" | "warning") => {
     switch (type) {
       case "success":
-        return <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />;
+        return <Upload className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
       case "warning":
-        return (
-          <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
-        );
+        return <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+      case "info":
+        return <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
       default:
-        return <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />;
+        return <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
     }
-  };
+  }
 
   return (
     <Card className="w-full">
@@ -115,7 +78,7 @@ export default function NotificationsPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleDelete(notification.id)}
+                  onClick={() => deleteNotification(notification.id)}
                   className="h-8 w-8"
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />
@@ -126,5 +89,5 @@ export default function NotificationsPage() {
         )}
       </CardContent>
     </Card>
-  );
+  )
 }

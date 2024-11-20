@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 
 interface User {
-  id: string;
+  id: any;
   username: string;
   email: string;
   password?: string;
