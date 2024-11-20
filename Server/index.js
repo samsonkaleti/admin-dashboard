@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173"], // Add your frontend URL(s)
+    origin: ["http://localhost:3000","https://campusify-admin.vercel.app/", "http://localhost:5173"], // Add your frontend URL(s)
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
