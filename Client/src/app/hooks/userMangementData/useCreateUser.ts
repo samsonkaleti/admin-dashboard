@@ -1,6 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-async function createUser(user: User): Promise<User> {
+interface User {
+    id: string
+    username: string
+    email: string
+    role: "Admin" | "Uploader"
+    active: boolean
+  }
+  
+  interface UserFormData extends Omit<User, 'id'> {
+    password: string
+  }
+async function createUser(user: UserFormData): Promise<UserFormData> {
     const localUrl = "http://localhost:5001";
     const response = await fetch(`${localUrl}/api/auth/signup`, {
         method: 'POST',

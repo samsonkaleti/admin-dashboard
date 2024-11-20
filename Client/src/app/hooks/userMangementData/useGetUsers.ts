@@ -9,6 +9,7 @@ interface FetchUsersResponse {
   }
 // Define the expected data type for TypeScript
 interface User {
+  active: any;
   id: any | null | undefined;
   username: any | null ;
   name: string;

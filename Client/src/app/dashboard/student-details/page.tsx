@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Key, useState } from "react"
 import { Search, FileText, Briefcase } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select"
 import { useGetStudents, useRegisterStudentForEvent, Student } from "@/app/hooks/students/useGetStudents"
 import { useEvents } from "@/app/hooks/events/EvenetManagement"
+import { useGetColleges } from "@/app/hooks/colleges/useGetColleges"
 
 export default function StudentDetailsPage() {
   const { data: students = [], isLoading, error } = useGetStudents()
@@ -46,13 +47,14 @@ export default function StudentDetailsPage() {
   const { data: events } = useEvents();
 
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
+  const { data: collegeList } = useGetColleges();
 
-  const collegeList = [
-    "College of Engineering",
-    "Business School",
-    "Arts and Sciences",
-    "Medical School",
-  ]
+  // const collegeList = [
+  //   "College of Engineering",
+  //   "Business School",
+  //   "Arts and Sciences",
+  //   "Medical School",
+  // ]
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -92,9 +94,9 @@ export default function StudentDetailsPage() {
                 <SelectValue placeholder="Choose a College" />
               </SelectTrigger>
               <SelectContent>
-                {collegeList.map((college, index) => (
+                {collegeList.map((college: any, index: Key | null | undefined) => (
                   <SelectItem key={index} value={college}>
-                    {college}
+                    {college.collegeName}
                   </SelectItem>
                 ))}
               </SelectContent>

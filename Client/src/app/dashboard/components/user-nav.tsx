@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -120,7 +120,8 @@ export function Navbar() {
   const [windowWidth, setWindowWidth] = React.useState(isMobile);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
-
+  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   React.useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth < 1024);
@@ -130,16 +131,34 @@ export function Navbar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    // Retrieve user details from session storage
+    const storedUsername = sessionStorage.getItem("username")
+    const storedEmail = sessionStorage.getItem("email")
+    
+    if (storedUsername) setUsername(storedUsername)
+    if (storedEmail) setEmail(storedEmail)
+  }, [])
   const handleLogout = () => {
     // Add any logout logic here (e.g., clearing tokens, etc.)
     router.push("/");
     sessionStorage.removeItem("auth_token");
+    sessionStorage.removeItem("username")
+    sessionStorage.removeItem("email")
   };
   const getLogoutText = () => {
     // Check if the auth_token is present in session storage
-    var authToken = sessionStorage.getItem("auth_token");
+    const authToken = sessionStorage.getItem("auth_token");
     return authToken ? "Logout" : "Login";
   };
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
 
   return (
     <>
@@ -185,18 +204,18 @@ export function Navbar() {
                       className="relative h-8 w-8 rounded-full"
                     >
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback>JD</AvatarFallback>
+                        <AvatarFallback>{getInitials(username)}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end">
                     <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
+                    <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">
-                          John Doe
+                          {username}
                         </p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          john.doe@example.com
+                          {email}
                         </p>
                       </div>
                     </DropdownMenuLabel>

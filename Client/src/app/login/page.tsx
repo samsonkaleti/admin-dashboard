@@ -69,6 +69,8 @@ function LoginPageContent() {
       console.log("Login successful:", response)
       // Store the token in localStorage or a secure cookie
       sessionStorage.setItem("auth_token", response.token)
+      sessionStorage.setItem("username", response.user.username)
+      sessionStorage.setItem("email", response.user.email)
       // Redirect to dashboard or home page
       router.push("/dashboard")
     } catch (error) {
