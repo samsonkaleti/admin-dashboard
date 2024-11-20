@@ -1,3 +1,4 @@
+import { BASE_URL } from "@/app/utils/constants";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 interface User {
     id: string
@@ -11,8 +12,7 @@ interface User {
     password: string
   }
 async function createUser(user: UserFormData): Promise<UserFormData> {
-    const localUrl = "http://localhost:5001";
-    const response = await fetch(`${localUrl}/api/auth/signup`, {
+    const response = await fetch(`${BASE_URL}/api/auth/signup`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

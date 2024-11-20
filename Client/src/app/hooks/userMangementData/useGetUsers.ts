@@ -18,8 +18,7 @@ interface User {
 }
 
 async function fetchUsers(): Promise<FetchUsersResponse> { 
-    const localUrl = "http://localhost:5001"
-  const response = await fetch(`${localUrl}/api/users`, {
+  const response = await fetch(`${BASE_URL}/api/users`, {
     headers: {
       Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
     },

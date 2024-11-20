@@ -1,9 +1,10 @@
+import { BASE_URL } from '@/app/utils/constants';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Function to delete user by ID
 async function deleteUser(userId: string): Promise<void> {
-  const localUrl = "http://localhost:5001";
-  const response = await fetch(`${localUrl}/api/users/${userId}`, {
+ 
+  const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,

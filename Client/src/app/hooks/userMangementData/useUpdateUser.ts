@@ -1,10 +1,10 @@
+import { BASE_URL } from '@/app/utils/constants';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Function to update user details
 async function updateUser(variables: { userId: string; userData: Partial<User> }): Promise<User> {
   const { userId, userData } = variables;
-  const localUrl = "http://localhost:5001";
-  const response = await fetch(`${localUrl}/api/users/${userId}`, {
+  const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

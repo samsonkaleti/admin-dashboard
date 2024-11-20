@@ -2,7 +2,7 @@ import { BASE_URL } from '@/app/utils/constants';
 import { useQuery } from '@tanstack/react-query';
 
 async function fetchAllRegulations() {
-  const response = await fetch('http://localhost:5001/api/regulations', {
+  const response = await fetch(`${BASE_URL}/api/regulations`, {
     headers: {
       Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
     },

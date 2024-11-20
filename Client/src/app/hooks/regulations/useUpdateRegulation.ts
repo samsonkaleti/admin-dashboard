@@ -1,3 +1,4 @@
+import { BASE_URL } from '@/app/utils/constants'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as z from 'zod'
 
@@ -8,7 +9,7 @@ const formSchema = z.object({
 })
 
 const updateRegulation = async ({ id, data }: { id: string, data: z.infer<typeof formSchema> }) => {
-  const response = await fetch(`http://localhost:5001/api/regulations/${id}`, {
+  const response = await fetch(`${BASE_URL}/api/regulations/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
