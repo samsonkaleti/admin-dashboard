@@ -29,8 +29,6 @@ export type Event = {
 
 export type EventInput = Omit<Event, "_id">;
 
-const API_BASE_URL = `${BASE_URL}/api`;
-
 // API Functions
 async function fetchEvents() {
   const response = await fetch(`${BASE_URL}/api/events`, {
@@ -59,7 +57,7 @@ async function fetchEventById(id: string) {
 }
 
 async function createEvent(eventData: FormData) {
-  const response = await fetch(`${API_BASE_URL}/events`, {
+  const response = await fetch(`${BASE_URL}/api/events`, {
     method: "POST",
     body: eventData, // Using FormData for file upload
     headers: {
@@ -74,7 +72,7 @@ async function createEvent(eventData: FormData) {
 }
 
 async function updateEvent(id: string, eventData: FormData) {
-  const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+  const response = await fetch(`${BASE_URL}/api/events/${id}`, {
     method: "PUT",
     body: eventData, // Using FormData for file upload
     headers: {
@@ -89,7 +87,7 @@ async function updateEvent(id: string, eventData: FormData) {
 }
 
 async function deleteEvent(id: string) {
-  const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+  const response = await fetch(`${BASE_URL}/api/events/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
