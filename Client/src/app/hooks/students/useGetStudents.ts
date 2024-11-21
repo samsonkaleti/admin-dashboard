@@ -1,10 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { BASE_URL } from '@/app/utils/constants';
 
+
+interface RegistrationPayload {
+  userId: string;
+  eventId: string;
+}
+
+interface RegistrationResponse {
+  message: string;
+  eventId: string;
+  userId: string;
+  registeredStudentsCount: number;
+}
+
 const API_BASE_URL = `${BASE_URL}/api`;
 
 export type Student = {
-  _id: string
+  id: string
   username: string
   course: string
   printDocuments: string[]
@@ -27,11 +40,10 @@ export function useGetStudents() {
     },
   })
 }
-
 export function useRegisterStudentForEvent() {
   const queryClient = useQueryClient()
 
-  return useMutation<{ message: string }, Error, { userId: string; eventId: string }>({
+  return useMutation<RegistrationResponse, Error, RegistrationPayload>({
     mutationFn: async ({ userId, eventId }) => {
       const response = await fetch(`${API_BASE_URL}/events/register`, {
         method: 'POST',
@@ -40,16 +52,24 @@ export function useRegisterStudentForEvent() {
           'Authorization': `Bearer ${sessionStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify({ userId, eventId }),
-      })
+      });
+
       if (!response.ok) {
-        throw new Error('Network response was not ok')
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to register for event');
       }
-      return response.json()
+
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidate and refetch relevant queries
-      queryClient.invalidateQueries({ queryKey: ['students'] })
-      queryClient.invalidateQueries({ queryKey: ['events'] })
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['students'] });
+      queryClient.invalidateQueries({ queryKey: ['event', data.eventId] });
+      queryClient.invalidateQueries({ queryKey: ['student', data.userId] });
     },
-  })
+    onError: (error) => {
+      console.error('Registration error:', error);
+    }
+  });
 }

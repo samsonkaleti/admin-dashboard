@@ -1,6 +1,6 @@
 "use client"
 
-import { Key, useState } from "react"
+import { useState } from "react"
 import { Search, FileText, Briefcase } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,7 +36,6 @@ import {
 } from "@/components/ui/select"
 import { useGetStudents, useRegisterStudentForEvent, Student } from "@/app/hooks/students/useGetStudents"
 import { useEvents } from "@/app/hooks/events/EvenetManagement"
-import { useGetColleges } from "@/app/hooks/colleges/useGetColleges"
 
 export default function StudentDetailsPage() {
   const { data: students = [], isLoading, error } = useGetStudents()
@@ -47,26 +46,25 @@ export default function StudentDetailsPage() {
   const { data: events } = useEvents();
 
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
-  const { data: collegeList } = useGetColleges();
 
-  // const collegeList = [
-  //   "College of Engineering",
-  //   "Business School",
-  //   "Arts and Sciences",
-  //   "Medical School",
-  // ]
+  const collegeList = [
+    "College of Engineering",
+    "Business School",
+    "Arts and Sciences",
+    "Medical School",
+  ]
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
       student.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student._id.toString().includes(searchTerm) ||
+      student.id.toString().includes(searchTerm) ||
       student.course.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCollege = !selectedCollege || student.course.includes(selectedCollege)
     return matchesSearch && matchesCollege
   })
 
   const handleRegisterForEvent = (userId: string) => {
-    setSelectedStudent(students.find(s => s._id === userId) || null)
+    setSelectedStudent(students.find(s => s.id === userId) || null)
     setSelectedEvent(null)
   }
 
@@ -94,9 +92,9 @@ export default function StudentDetailsPage() {
                 <SelectValue placeholder="Choose a College" />
               </SelectTrigger>
               <SelectContent>
-                {collegeList?.map((college: any, index: Key | null | undefined) => (
+                {collegeList.map((college, index) => (
                   <SelectItem key={index} value={college}>
-                    {college.collegeName}
+                    {college}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -132,12 +130,12 @@ export default function StudentDetailsPage() {
             </TableHeader>
             <TableBody>
               {filteredStudents.map((student) => (
-                <TableRow key={student._id}>
+                <TableRow key={student.id}>
                   <TableCell className="font-medium">
                     <div>{student.username}</div>
-                    <div className="text-sm text-muted-foreground sm:hidden">{student._id}</div>
+                    <div className="text-sm text-muted-foreground sm:hidden">{student.id}</div>
                   </TableCell>
-                  <TableCell className="hidden sm:table-cell">{student._id}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{student.id}</TableCell>
                   <TableCell className="hidden md:table-cell">{student.course}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -206,7 +204,7 @@ export default function StudentDetailsPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleRegisterForEvent(student._id)}
+                            onClick={() => handleRegisterForEvent(student.id)}
                           >
                             Register for Event
                           </Button>
@@ -236,7 +234,7 @@ export default function StudentDetailsPage() {
                               onClick={() => {
                                 if (selectedStudent && selectedEvent) {
                                   registerStudentMutation.mutate({
-                                    userId: selectedStudent._id,
+                                    userId: selectedStudent.id,
                                     eventId: selectedEvent,
                                   })
                                 }

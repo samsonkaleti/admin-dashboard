@@ -36,10 +36,13 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: function () {
-        return this.role === "Student";
-      },
-      match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"],
+      required: true,
+      validate: {
+        validator: function(v) {
+          return /^\d{10}$/.test(v);
+        },
+        message: 'Please enter a valid 10-digit phone number'
+      }
     },
     yearOfJoining: {
       type: Number,
@@ -63,13 +66,18 @@ const userSchema = new mongoose.Schema(
         expiration: { type: Date, select: false },
       },
     ],
+
+    eventsRegistered: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Event'
+    }],
     regulations: [String],
     resetPasswordToken: String,
     resetPasswordExpires: Date,
-    events: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Event",
-    },
+    // events: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Event",
+    // },
   },
   {
     timestamps: true,

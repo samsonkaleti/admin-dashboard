@@ -73,12 +73,26 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  
   registeredStudents: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to the Student model
+      ref: "User",
     },
   ],
+}, {
+  timestamps: true // Optional, but recommended to track creation and update times
+
+
+
+}); 
+
+
+eventSchema.pre('save', function(next) {
+  if (!Array.isArray(this.registeredStudents)) {
+    this.registeredStudents = [];
+  }
+  next();
 });
 
 module.exports = mongoose.model("Event", eventSchema);
