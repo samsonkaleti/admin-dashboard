@@ -27,6 +27,7 @@ import logo2 from "@/utils/logo2.png"
 import logo from "@/utils/logo.png"
 import { useLogin } from "../hooks/auth/useAuth"
 import { useRouter } from "next/navigation"
+import { Eye, EyeOff } from 'lucide-react'
 
 type LoginRequest = {
   email: string
@@ -47,6 +48,7 @@ const signInSchema = z.object({
 function LoginPageContent() {
   const [isClient, setIsClient] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter()
 
   const signInForm = useForm({
@@ -163,16 +165,35 @@ function LoginPageContent() {
                           </Link>
                         </div>
                         <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Enter your password"
-                            type="password"
-                            autoCapitalize="none"
-                            autoComplete="current-password"
-                            autoCorrect="off"
-                            className="shadow-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                          />
-                        </FormControl>
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        placeholder="Enter your password"
+                        type={showPassword ? 'text' : 'password'}
+                        autoCapitalize="none"
+                        autoComplete="current-password"
+                        autoCorrect="off"
+                        className="shadow-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-6 w-6 text-gray-800" aria-hidden="true" />
+                        ) : (
+                          <Eye className="h-6 w-6 text-gray-800" aria-hidden="true" />
+                        )}
+                        <span className="sr-only">
+                          {showPassword ? 'Hide password' : 'Show password'}
+                        </span>
+                      </Button>
+                    </div>
+                  </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
