@@ -53,14 +53,14 @@ export default function StudentDetailsPage() {
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
       student.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.id.toString().includes(searchTerm) ||
+      student._id.toString().includes(searchTerm) ||
       student.course.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCollege = !selectedCollege || student.course.includes(selectedCollege)
     return matchesSearch && matchesCollege
   })
 
   const handleRegisterForEvent = (userId: string) => {
-    setSelectedStudent(students.find(s => s.id === userId) || null)
+    setSelectedStudent(students.find(s => s._id === userId) || null)
     setSelectedEvent(null)
   }
 
@@ -68,7 +68,7 @@ export default function StudentDetailsPage() {
     if (selectedStudent && selectedEvent) {
       try {
         await registerStudentMutation.mutateAsync({
-          userId: selectedStudent.id,
+          userId: selectedStudent._id,
           eventId: selectedEvent,
         })
         setToast({ message: "Student has been registered for the event.", type: 'success' })
@@ -134,7 +134,7 @@ export default function StudentDetailsPage() {
                   <SelectValue placeholder="Choose a College" />
                 </SelectTrigger>
                 <SelectContent>
-                  {collegeList.map((college: any, index:any) => (
+                  {collegeList?.map((college: any, index:any) => (
                     <SelectItem key={index} value={college}>
                       {college.collegeName}
                     </SelectItem>
@@ -172,12 +172,12 @@ export default function StudentDetailsPage() {
               </TableHeader>
               <TableBody>
                 {filteredStudents.map((student) => (
-                  <TableRow key={student.id}>
+                  <TableRow key={student._id}>
                     <TableCell className="font-medium">
                       <div>{student.username}</div>
-                      <div className="text-sm text-muted-foreground sm:hidden">{student.id}</div>
+                      <div className="text-sm text-muted-foreground sm:hidden">{student._id}</div>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell">{student.id}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{student._id}</TableCell>
                     <TableCell className="hidden md:table-cell">{student.course}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
@@ -246,7 +246,7 @@ export default function StudentDetailsPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleRegisterForEvent(student.id)}
+                              onClick={() => handleRegisterForEvent(student._id)}
                             >
                               Register for Event
                             </Button>

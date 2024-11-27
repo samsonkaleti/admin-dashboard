@@ -17,7 +17,7 @@ interface RegistrationResponse {
 const API_BASE_URL = `${BASE_URL}/api`;
 
 export type Student = {
-  id: string
+  _id: string
   username: string
   course: string
   printDocuments: string[]
