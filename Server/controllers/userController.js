@@ -26,7 +26,36 @@ exports.getUsers = async (req, res) => {
       error: error.message,
     });
   }
-};
+}; 
+
+
+exports.getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Validate if id exists
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is missing in the request parameters",
+      });
+    }
+    // Find user by ID
+    const user = await User.findById(id);
+    // Check if user exists
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // Return the user
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    // Detailed error response
+    res.status(500).json({
+      success: false,
+      message: "Error fetching user by ID",
+      error: error.message,
+    });
+  }
+}
 
 
 exports.updateUser = async (req, res) => {
