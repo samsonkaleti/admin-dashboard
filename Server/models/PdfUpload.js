@@ -24,7 +24,7 @@ const PdfUploadSchema = mongoose.Schema({
       enum: ["1st Year", "2nd Year", "3rd Year", "4th Year"],
     },
     semester: {
-      type: String,
+      type: [String],
       required: true,
       enum: ["1st Semester", "2nd Semester"],
     },
@@ -47,8 +47,13 @@ const PdfUploadSchema = mongoose.Schema({
   units: {
     type: String,
     required: true,
-    enum: ["1st Unit", "2nd Unit", "3rd Unit", "4th Unit", "5th Unit"],
-  },
+    enum: [
+      "1st unit", 
+      "2nd unit",   
+      "3rd unit", 
+      "4th unit", 
+      "5th unit", 
+    ],  },
   files: [FileSchema], // Array of files
   uploadDate: {
     type: Date,

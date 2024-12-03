@@ -53,6 +53,7 @@ type PDFUpload = {
   subject: string;
   files: File[];
   uploadDate: string;
+  units?: string; // Add this
 };
 
 export default function PDFUploadPage() {
@@ -63,6 +64,7 @@ export default function PDFUploadPage() {
     regulation: "",
     course: "",
     subject: "",
+    units: "",
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -79,7 +81,7 @@ export default function PDFUploadPage() {
   const updatePdfMutation = useUpdatePdf();
   const deletePdfMutation = useDeletePdf();
   const { downloadPdf, isDownloading } = useDownloadPdf();
-  const { data: regulations } = useGetRegulations()
+  const { data: regulations } = useGetRegulations();
 
   const handleNew = () => {
     setNewUpload({
@@ -123,6 +125,7 @@ export default function PDFUploadPage() {
           regulation: newUpload.regulation,
           course: newUpload.course,
           subject: newUpload.subject,
+          units: newUpload.units, // Add this line
         })
       );
 
@@ -143,6 +146,7 @@ export default function PDFUploadPage() {
         regulation: "",
         course: "",
         subject: "",
+        units: "", // Add this line
       });
       setSelectedFiles([]);
     } catch (error: any) {
@@ -159,6 +163,7 @@ export default function PDFUploadPage() {
         regulation: pdfToEdit.regulation,
         course: pdfToEdit.course,
         subject: pdfToEdit.subject,
+        units: pdfToEdit.unit, 
       });
       setEditingId(id);
       setIsDialogOpen(true);
@@ -186,6 +191,7 @@ export default function PDFUploadPage() {
         regulation: "",
         course: "",
         subject: "",
+        units: "",
       });
       setSelectedFiles([]);
     } catch (error: any) {
@@ -344,7 +350,10 @@ export default function PDFUploadPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {regulations?.map((regulation: any) => (
-                      <SelectItem key={regulation._id} value={regulation.regulation_type}>
+                      <SelectItem
+                        key={regulation._id}
+                        value={regulation.regulation_type}
+                      >
                         {regulation.regulation_type}
                       </SelectItem>
                     ))}
@@ -423,6 +432,33 @@ export default function PDFUploadPage() {
                     }}
                     className="col-span-3"
                   />
+
+                  {/* units */}
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label
+                      htmlFor="units"
+                      className="text-right text-sm font-medium"
+                    >
+                      units
+                    </Label>
+                    <Select
+                      value={newUpload.units || ""}
+                      onValueChange={(value) =>
+                        setNewUpload({ ...newUpload, units: value })
+                      }
+                    >
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Select units" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1st unit">units 1</SelectItem>
+                        <SelectItem value="2nd unit">units 2</SelectItem>
+                        <SelectItem value="3rd unit">units 3</SelectItem>
+                        <SelectItem value="4th unit">units 4</SelectItem>
+                        <SelectItem value="5th unit">units 5</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
                   {/* Display selected files with remove option */}
                   {selectedFiles.length > 0 && (

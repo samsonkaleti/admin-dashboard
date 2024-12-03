@@ -19,5 +19,6 @@ export interface PdfUpload {
     subject: string;
     files: File[];
     uploadDate: Date;
-    year: string; // Virtual field combining year and semester
+    year: string; // Virtual field combining year and semester 
+    units: string, // Initialize as empty
 }
