@@ -159,11 +159,14 @@ export default function PDFUploadPage() {
     const pdfToEdit = pdfUploads?.find((pdf) => pdf.id === id);
     if (pdfToEdit) {
       setNewUpload({
-        academicYear: pdfToEdit.academicYear,
+        academicYear: {
+          year: pdfToEdit.academicYear.year,
+          semester: pdfToEdit.academicYear.semester,
+        },
         regulation: pdfToEdit.regulation,
         course: pdfToEdit.course,
         subject: pdfToEdit.subject,
-        units: pdfToEdit.unit, 
+        units: pdfToEdit.unit,
       });
       setEditingId(id);
       setIsDialogOpen(true);
