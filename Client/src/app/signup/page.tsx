@@ -25,42 +25,53 @@ import Link from "next/link";
 
 const signUpSchema = z
   .object({
-    username: z
-      .string()
-      .min(3, { message: "Username must be at least 3 characters" }),
+    username: z.string().min(3, { message: "Username must be at least 3 characters" }),
     email: z.string().email({ message: "Invalid email address" }),
-    password: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters" }),
+    password: z.string().min(8, { message: "Password must be at least 8 characters" }),
     role: z.enum(["Student", "Admin", "Uploader"]),
-    firstName: z
-      .string()
-      .min(1, { message: "First name is required" })
-      .optional(),
-    lastName: z
-      .string()
-      .min(1, { message: "Last name is required" })
-      .optional(),
-    phone: z
-      .string()
-      .regex(/^\d{10}$/, {
-        message: "Please enter a valid 10-digit phone number",
-      })
-      .optional(),
-    yearOfJoining: z
-      .number()
-      .int()
-      .min(1900)
-      .max(new Date().getFullYear())
-      .optional(),
+    collegeName: z.string().min(1, { message: "College name is required" }).optional(),
+    program: z.string().min(1, { message: "Program is required" }).optional(),
+    specialization: z.string().min(1, { message: "Specialization is required" }).optional(),
+    regulation: z.string().min(1, { message: "Regulation is required" }).optional(),
+    yearOfJoining: z.number().int().min(1900).max(new Date().getFullYear()).optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.role === "Student" && data.yearOfJoining === undefined) {
-      ctx.addIssue({
-        path: ["yearOfJoining"],
-        message: "Year of Joining is required for Students",
-        code: z.ZodIssueCode.custom,
-      });
+    if (data.role === "Student") {
+      if (!data.yearOfJoining) {
+        ctx.addIssue({
+          path: ["yearOfJoining"],
+          message: "Year of Joining is required for Students",
+          code: z.ZodIssueCode.custom,
+        });
+      }
+      if (!data.collegeName) {
+        ctx.addIssue({
+          path: ["collegeName"],
+          message: "College Name is required for Students",
+          code: z.ZodIssueCode.custom,
+        });
+      }
+      if (!data.program) {
+        ctx.addIssue({
+          path: ["program"],
+          message: "Program is required for Students",
+          code: z.ZodIssueCode.custom,
+        });
+      }
+      if (!data.specialization) {
+        ctx.addIssue({
+          path: ["specialization"],
+          message: "Specialization is required for Students",
+          code: z.ZodIssueCode.custom,
+        });
+      }
+      if (!data.regulation) {
+        ctx.addIssue({
+          path: ["regulation"],
+          message: "Regulation is required for Students",
+          code: z.ZodIssueCode.custom,
+        });
+      }
     }
   });
 
@@ -69,15 +80,16 @@ type SignupRequest = {
   email: string;
   password: string;
   role: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
+  collegeName: string;
+  program: string;
+  specialization: string;
+  regulation: string;
   yearOfJoining: number;
 };
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false); // Added client-side flag
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
 
   const signUpForm = useForm({
@@ -87,9 +99,10 @@ export default function SignupPage() {
       email: "",
       password: "",
       role: "Student",
-      firstName: "",
-      lastName: "",
-      phone: "",
+      collegeName: "",
+      program: "",
+      specialization: "",
+      regulation: "",
       yearOfJoining: new Date().getFullYear(),
     },
   });
@@ -106,7 +119,6 @@ export default function SignupPage() {
   };
 
   useEffect(() => {
-    // Set the flag to true when the component is mounted
     setIsClient(true);
   }, []);
 
@@ -118,7 +130,7 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <Form {...signUpForm}>
-            <form onSubmit={signUpForm.handleSubmit(onSignUpSubmit)}>
+            <form onSubmit={signUpForm.handleSubmit(onSignUpSubmit)} className="space-y-4">
               <FormField
                 control={signUpForm.control}
                 name="username"
@@ -166,17 +178,38 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              {/* Conditionally render only on the client side */}
+              
+              <FormField
+                control={signUpForm.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="w-full p-2 border rounded-md"
+                      >
+                        <option value="Student">Student</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Uploader">Uploader</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {isClient && signUpForm.watch("role") === "Student" && (
                 <>
                   <FormField
                     control={signUpForm.control}
-                    name="firstName"
+                    name="collegeName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>First Name</FormLabel>
+                        <FormLabel>College Name</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Your first name" />
+                          <Input {...field} placeholder="Enter your college name" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -184,12 +217,12 @@ export default function SignupPage() {
                   />
                   <FormField
                     control={signUpForm.control}
-                    name="lastName"
+                    name="program"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Last Name</FormLabel>
+                        <FormLabel>Program</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Your last name" />
+                          <Input {...field} placeholder="Enter your program (e.g., Computer Science)" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -197,16 +230,25 @@ export default function SignupPage() {
                   />
                   <FormField
                     control={signUpForm.control}
-                    name="phone"
+                    name="specialization"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone</FormLabel>
+                        <FormLabel>Specialization</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="tel"
-                            placeholder="Your phone number"
-                          />
+                          <Input {...field} placeholder="Enter your specialization" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signUpForm.control}
+                    name="regulation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Regulation</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter regulation year (e.g., 2021)" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -223,9 +265,7 @@ export default function SignupPage() {
                             {...field}
                             type="number"
                             placeholder="Year of joining"
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
+                            onChange={(e) => field.onChange(Number(e.target.value))}
                           />
                         </FormControl>
                         <FormMessage />
@@ -234,15 +274,23 @@ export default function SignupPage() {
                   />
                 </>
               )}
-              <Button type="submit" className="w-full mt-4">
+              
+              {error && (
+                <div className="text-red-500 text-sm mt-2">{error}</div>
+              )}
+              
+              <Button type="submit" className="w-full">
                 Sign Up
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter>
-          <p className="text-center">
-            Already have an account? <Link href="/login">Login</Link>
+          <p className="text-center w-full">
+            Already have an account?{" "}
+            <Link href="/login" className="text-blue-500 hover:text-blue-700">
+              Login
+            </Link>
           </p>
         </CardFooter>
       </Card>

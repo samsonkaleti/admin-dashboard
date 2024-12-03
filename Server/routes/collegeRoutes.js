@@ -88,7 +88,7 @@ router.post("/colleges", authMiddleware, collegeController.createCollege);
  *       500:
  *         description: Error fetching colleges
  */
-router.get("/colleges", authMiddleware, collegeController.getAllColleges);
+router.get("/colleges",collegeController.getAllColleges);
 
 /**
  * @swagger
@@ -109,7 +109,7 @@ router.get("/colleges", authMiddleware, collegeController.getAllColleges);
  *       404:
  *         description: College not found
  */
-router.get("/colleges/:id", authMiddleware, collegeController.getCollegeById);
+router.get("/colleges/:id", collegeController.getCollegeById);
 
 /**
  * @swagger
@@ -132,7 +132,7 @@ router.get("/colleges/:id", authMiddleware, collegeController.getCollegeById);
  */
 router.get(
   "/colleges/name/:collegeName",
-  authMiddleware,
+ 
   collegeController.getCollegeByCollegeName
 );
 
@@ -328,7 +328,6 @@ router.delete(
  */
 router.get(
   "/colleges/:id/programs",
-  authMiddleware,
   collegeController.getCollegePrograms
 );
 
@@ -403,7 +402,6 @@ router.post(
  */
 router.get(
   "/colleges/search",
-  authMiddleware,
   collegeController.searchColleges
 );
 

@@ -16,34 +16,45 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       select: false,
-    },
+    }, 
+    collegeName: {
+      type: String,
+      required: function(){
+        return this.role === "Student";
+      }
+    }, 
+
+    program:{
+      type: String,
+      required: function () {
+        return this.role === "Student";
+      },
+    }, 
+
+    specialization:{
+      type: String,
+      required: function () {
+        return this.role === "Student";
+      },
+    }, 
+
+    regulation:{
+      type: String,
+      required: function () {
+        return this.role === "Student";
+      },
+    }, 
+
+
+
+
+
     role: {
       type: String,
       enum: ["Student", "Admin", "Uploader", "SuperAdmin"],
       required: true,
     },
-    firstName: {
-      type: String,
-      required: function () {
-        return this.role === "Student";
-      },
-    },
-    lastName: {
-      type: String,
-      required: function () {
-        return this.role === "Student";
-      },
-    },
-    phone: {
-      type: String,
-      required: true,
-      validate: {
-        validator: function(v) {
-          return /^\d{10}$/.test(v);
-        },
-        message: 'Please enter a valid 10-digit phone number'
-      }
-    },
+   
     yearOfJoining: {
       type: Number,
       required: function () {

@@ -4,7 +4,7 @@ const { ObjectId } = require("mongoose").Types;
 exports.getUsers = async (req, res) => {
   try {
     // Fetch users whose role is 'Admin' or 'Uploader'
-    const users = await User.find({ role: { $in: ["Admin", "Uploader"] } });
+    const users = await User.find({ role: { $in: ["Admin", "Uploader","Student"] } });
     // Check if any users are found
     if (!users || users.length === 0) {
       return res
@@ -29,33 +29,43 @@ exports.getUsers = async (req, res) => {
 }; 
 
 
-exports.getUserById = async (req, res) => {
+exports.getCurrentUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    // Validate if id exists
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "User ID is missing in the request parameters",
-      });
-    }
+    // Get user ID from the decoded token (set by auth middleware)
+    const userId = req.user.id;
+    console.log(userId)
+
     // Find user by ID
-    const user = await User.findById(id);
+    const user = await User.findById(userId);
+
     // Check if user exists
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
     }
+
     // Return the user
-    res.status(200).json({ success: true, user });
+    res.status(200).json({
+      success: true,
+      user: {
+        ...user._doc,
+        isSuperAdmin: req.user.isSuperAdmin,
+        isAdmin: req.user.isAdmin,
+        isStudent: req.user.isStudent
+      }
+    });
+
   } catch (error) {
-    // Detailed error response
+    console.error("Error fetching current user:", error);
     res.status(500).json({
       success: false,
-      message: "Error fetching user by ID",
-      error: error.message,
+      message: "Error fetching user details",
+      error: error.message
     });
   }
-}
+};
 
 
 exports.updateUser = async (req, res) => {
