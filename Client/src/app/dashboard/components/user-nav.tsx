@@ -31,6 +31,7 @@ import {
 import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { Bell, LogOut, Settings, User, Sun, Moon, Menu } from "lucide-react";
 import logo from "../../../utils/logo.png";
+import logo3 from "../../../utils/logo3.jpeg";
 import { useNotifications } from "@/app/context/notifcation";
 import { Badge } from "@/components/ui/badge"
 const sidebarNavItems = [
@@ -184,7 +185,7 @@ export function Navbar() {
 
           <div className="absolute left-1/2 transform -translate-x-1/2 lg:relative lg:left-0 lg:transform-none lg:flex-1">
             <Image
-              src={logo}
+              src={theme === "dark" ? logo3 : logo}
               alt="Logo"
               width={150}
               height={40}
