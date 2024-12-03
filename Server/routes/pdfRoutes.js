@@ -48,10 +48,51 @@ router.get(
 
 /**
  * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   schemas:
+ *     PDF:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         academicYear:
+ *           type: object
+ *           properties:
+ *             year:
+ *               type: string
+ *             semester:
+ *               type: string
+ *         regulation:
+ *           type: string
+ *         course:
+ *           type: string
+ *         subject:
+ *           type: string
+ *         units:
+ *           type: string
+ *         files:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               fileName:
+ *                 type: string
+ *               filePath:
+ *                 type: string
+ *         uploadDate:
+ *           type: string
+ *           format: date-time
  * /api/pdfs:
  *   post:
  *     summary: Upload multiple PDFs
  *     tags: [PDFs]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -85,6 +126,9 @@ router.get(
  *                 type: string
  *               subject:
  *                 type: string
+ *               units:
+ *                 type: string
+ *                 enum: ["1st Unit", "2nd Unit", "3rd Unit", "4th Unit", "5th Unit"]
  *     responses:
  *       201:
  *         description: PDFs uploaded successfully
@@ -97,7 +141,12 @@ router.get(
  *                   type: string
  *                 pdf:
  *                   $ref: '#/components/schemas/PDF'
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: Bad request
  */
+
 router.post(
   "/",
   authMiddleware,

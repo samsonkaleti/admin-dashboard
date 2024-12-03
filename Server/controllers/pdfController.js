@@ -1,8 +1,11 @@
 const PdfUpload = require("../models/PdfUpload");
 const multer = require("multer");
+const fs = require("fs/promises");
+const path = require("path");
 
 const pdfController = {
   // Create multiple PDFs
+
   createPdfs: async (req, res) => {
     try {
       // Check if files exist
@@ -11,23 +14,25 @@ const pdfController = {
           .status(400)
           .json({ error: "Please upload at least one PDF file" });
       }
-
+  
       const metadata = JSON.parse(req.body.metadata);
-
+  
       const {
         academicYear: { year, semester },
         regulation,
         course,
         subject,
+        units,
       } = metadata;
+  
       // Validate required fields
-      if (!year || !semester || !regulation || !course || !subject) {
+      if (!year || !semester || !regulation || !course || !subject || !units) {
         return res.status(400).json({
           error:
-            "Academic year, semester, regulation, course, and subject are required",
+            "Academic year, semester, regulation, course, subject and units are required",
         });
       }
-
+  
       // Validate all files are PDFs
       const invalidFiles = req.files.filter(
         (file) => file.mimetype !== "application/pdf"
@@ -38,17 +43,23 @@ const pdfController = {
           invalidFiles: invalidFiles.map((f) => f.originalname),
         });
       }
-
+  
+      // Create the uploads directory if it doesn't exist
+      const uploadDir = path.join(__dirname, "../uploads");
+      await fs.mkdir(uploadDir, { recursive: true });
+  
       // Generate unique ID
       const id = Date.now();
-
-      // Prepare files array
-      const files = req.files.map((file) => ({
-        fileName: file.originalname,
-        fileData: file.buffer,
-      }));
-
-      // Create new PDF document with multiple files
+  
+      // Prepare files array and save files to the uploads folder
+      const files = [];
+      for (const file of req.files) {
+        const filePath = path.join(uploadDir, `${id}_${file.originalname}`);
+        await fs.writeFile(filePath, file.buffer);
+        files.push({ fileName: file.originalname, filePath });
+      }
+  
+      // Create new PDF document with file paths
       const newPdf = new PdfUpload({
         id,
         academicYear: {
@@ -58,11 +69,12 @@ const pdfController = {
         regulation,
         course,
         subject,
+        units,
         files,
       });
-
+  
       await newPdf.save();
-
+  
       res.status(201).json({
         message: "PDFs uploaded successfully",
         pdf: {
@@ -71,6 +83,7 @@ const pdfController = {
           regulation: newPdf.regulation,
           course: newPdf.course,
           subject: newPdf.subject,
+          units: newPdf.units,
           fileNames: newPdf.files.map((f) => f.fileName),
           uploadDate: newPdf.uploadDate,
         },
@@ -80,6 +93,7 @@ const pdfController = {
       res.status(500).json({ error: "Failed to upload PDFs" });
     }
   },
+  
 
   // Get all PDFs
   getAllPdfs: async (req, res) => {
