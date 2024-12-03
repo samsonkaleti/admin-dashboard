@@ -123,23 +123,44 @@ const pdfController = {
   // Get all PDFs
   getAllPdfs: async (req, res) => {
     try {
-      const { year, semester } = req.query;
+      const { year, semester, subject, units } = req.query;
       let query = {};
 
       if (year) {
         query["academicYear.year"] = year;
       }
       if (semester) {
-        query["academicYear.semester"] = semester;
+        query["academicYear.semester"] = { $in: [semester] };
+      }
+      if (subject) {
+        query.subject = subject;
+      }
+      if (units) {
+        query.units = units;
       }
 
+      console.log("Query:", query);
+
       const pdfs = await PdfUpload.find(query).select("-files.fileData");
-      res.status(200).json(pdfs);
+      
+      console.log("Found PDFs:", pdfs.length);
+
+      // Map the results to include the file path instead of the file data
+      const pdfResults = pdfs.map(pdf => ({
+        ...pdf.toObject(),
+        files: pdf.files.map(file => ({
+          ...file,
+          filePath: `/uploaders/${file.filename}` // Adjust this path as needed
+        }))
+      }));
+
+      res.status(200).json(pdfResults);
     } catch (err) {
       console.error("Error fetching PDFs:", err);
       res.status(500).json({ error: "Failed to fetch PDFs" });
     }
   },
+
 
   // Update PDF document and its files
   updatePdfById: async (req, res) => {

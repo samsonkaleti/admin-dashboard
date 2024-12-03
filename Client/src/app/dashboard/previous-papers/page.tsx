@@ -56,7 +56,7 @@ type PDFUpload = {
   units?: string; // Add this
 };
 
-export default function PDFUploadPage() {
+export default function PreviousPapers() {
   const [newUpload, setNewUpload] = useState<
     Omit<PDFUpload, "id" | "files" | "uploadDate">
   >({
@@ -169,7 +169,6 @@ export default function PDFUploadPage() {
         units: pdfToEdit.unit,
       });
       setEditingId(id);
-      setSelectedFiles([]);
       setIsDialogOpen(true);
     }
   };
@@ -178,10 +177,11 @@ export default function PDFUploadPage() {
     if (editingId === null) return;
 
     try {
-      const updatedPdf = {
+      const updatedPdf: PDFUpload = {
         id: editingId,
         ...newUpload,
         files: selectedFiles,
+        uploadDate: new Date().toISOString(),
       };
 
       await updatePdfMutation.mutateAsync(updatedPdf);
@@ -461,30 +461,13 @@ export default function PDFUploadPage() {
                   />
 
                   {/* Display Selected Files */}
-                  {(selectedFiles.length > 0 
-                    ) && (
+                  {selectedFiles.length > 0 && (
                     <div className="text-sm text-muted-foreground">
-                      <p>Selected files:</p>
+                      <p>Selected files ({selectedFiles.length}):</p>
                       <ul className="list-disc pl-5 mt-2 space-y-2">
-                        {editingId &&
-                          pdfUploads
-                            ?.find((pdf) => pdf.id === editingId)
-                            ?.files.map((file, index) => (
-                              <li
-                                key={`existing-${index}`}
-                                className="flex items-center justify-between"
-                              >
-                                <span>
-                                  {file.fileName || `Existing File ${index + 1}`}
-                                </span>
-                                <span className="text-muted-foreground">
-                                  (Existing)
-                                </span>
-                              </li>
-                            ))}
                         {selectedFiles.map((file, index) => (
                           <li
-                            key={`new-${index}`}
+                            key={index}
                             className="flex items-center justify-between"
                           >
                             <span>{file.name}</span>
@@ -504,17 +487,15 @@ export default function PDFUploadPage() {
                           </li>
                         ))}
                       </ul>
-                      {selectedFiles.length > 0 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedFiles([])}
-                          className="mt-2 text-red-500"
-                        >
-                          Clear New Files
-                        </Button>
-                      )}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedFiles([])}
+                        className="mt-2 text-red-500"
+                      >
+                        Clear All
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -538,9 +519,11 @@ export default function PDFUploadPage() {
                       Processing...
                     </div>
                   ) : editingId ? (
-                    `Update PDF${selectedFiles.length > 0 ? ` and Upload ${selectedFiles.length} New File${selectedFiles.length !== 1 ? 's' : ''}` : ''}`
+                    "Update PDF"
                   ) : (
-                    `Upload ${selectedFiles.length} PDF${selectedFiles.length !== 1 ? "s" : ""}`
+                    `Upload ${selectedFiles.length} PDF${
+                      selectedFiles.length !== 1 ? "s" : ""
+                    }`
                   )}
                 </Button>
               </DialogFooter>

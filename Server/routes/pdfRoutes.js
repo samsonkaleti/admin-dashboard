@@ -9,17 +9,29 @@ const { authMiddleware } = require("../middleware/authMiddleware");
  * @swagger
  * /api/pdfs:
  *   get:
- *     summary: Get all PDF documents
+ *     summary: Get PDF documents based on academic criteria
  *     tags: [PDFs]
  *     parameters:
  *       - in: query
  *         name: year
  *         schema:
  *           type: string
+ *         description: Academic year of the PDFs
  *       - in: query
  *         name: semester
  *         schema:
  *           type: string
+ *         description: Semester of the PDFs
+ *       - in: query
+ *         name: subject
+ *         schema:
+ *           type: string
+ *         description: Subject of the PDFs
+ *       - in: query
+ *         name: unit
+ *         schema:
+ *           type: string
+ *         description: Unit of the PDFs
  *     responses:
  *       '200':
  *         description: Successful response
