@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Pencil, Trash2, FileUp, Download } from "lucide-react";
+import { Pencil, Trash2, FileUp, Download, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -35,14 +35,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useCreatePdf } from "@/app/hooks/pdfUploads/useCreatePdfUpload";
-import { useGetAllPdfs } from "@/app/hooks/pdfUploads/useGetAllPdfs";
-import { useUpdatePdf } from "@/app/hooks/pdfUploads/useUpdatePdf";
-import { useDeletePdf } from "@/app/hooks/pdfUploads/useDeletePdf";
-import { useDownloadPdf } from "@/app/hooks/pdfUploads/useDownloadPdf";
+import { useGetAllPreviousPapers } from "@/app/hooks/previousPapers/useGetAllPreviousPapers";
+import { useUpdatePreviousPaper } from "@/app/hooks/previousPapers/useUpdatePreviousPaper";
+import { useDeletePreviousPaper } from "@/app/hooks/previousPapers/useDeletePreviousPaper";
 import { useGetRegulations } from "@/app/hooks/regulations/useGetRegulations";
+import { useCreatePreviousPaper } from "@/app/hooks/previousPapers/useCreatePreviousPapers";
+import { useDownloadPreviousPaper } from "@/app/hooks/previousPapers/useDownloadPreviousPapers";
 
-type PDFUpload = {
+type PreviousPaperUpload = {
   id: number;
   academicYear: {
     year: string;
@@ -51,36 +51,39 @@ type PDFUpload = {
   regulation: string;
   course: string;
   subject: string;
+  examDate: {
+    year: number;
+    month: number;
+  };
   files: File[];
   uploadDate: string;
-  units?: string; // Add this
 };
 
-export default function PreviousPapers() {
+export default function PreviousPaperUploadPage() {
   const [newUpload, setNewUpload] = useState<
-    Omit<PDFUpload, "id" | "files" | "uploadDate">
+    Omit<PreviousPaperUpload, "id" | "files" | "uploadDate">
   >({
     academicYear: { year: "", semester: "" },
     regulation: "",
     course: "",
     subject: "",
-    units: "",
+    examDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
   const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
   const semesters = ["1st Semester", "2nd Semester"];
-  // const regulations = ["R24", "R20", "R19", "R16", "R13"];
 
-  const { data: pdfUploads, isLoading, isError, error } = useGetAllPdfs();
-  const createPdfMutation = useCreatePdf();
-  const updatePdfMutation = useUpdatePdf();
-  const deletePdfMutation = useDeletePdf();
-  const { downloadPdf, isDownloading } = useDownloadPdf();
+  const { data: previousPapers, isLoading, isError, error } = useGetAllPreviousPapers();
+  const createPreviousPaperMutation = useCreatePreviousPaper();
+  const updatePreviousPaperMutation = useUpdatePreviousPaper();
+  const deletePreviousPaperMutation = useDeletePreviousPaper();
+  const { downloadPreviousPaper, isDownloading } = useDownloadPreviousPaper();
   const { data: regulations } = useGetRegulations();
 
   const handleNew = () => {
@@ -89,6 +92,7 @@ export default function PreviousPapers() {
       regulation: "",
       course: "",
       subject: "",
+      examDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
     });
     setSelectedFiles([]);
     setEditingId(null);
@@ -97,19 +101,18 @@ export default function PreviousPapers() {
 
   const handleAdd = async () => {
     try {
-      // Validate form fields
       if (
         !newUpload.academicYear.year ||
         !newUpload.academicYear.semester ||
         !newUpload.regulation ||
         !newUpload.course ||
-        !newUpload.subject
+        !newUpload.subject ||
+        !selectedDate
       ) {
         toast.error("All fields are required");
         return;
       }
 
-      // Validate files
       if (selectedFiles.length === 0) {
         toast.error("Please select at least one PDF file");
         return;
@@ -117,7 +120,6 @@ export default function PreviousPapers() {
 
       const formData = new FormData();
 
-      // Append metadata as JSON string
       formData.append(
         "metadata",
         JSON.stringify({
@@ -125,50 +127,53 @@ export default function PreviousPapers() {
           regulation: newUpload.regulation,
           course: newUpload.course,
           subject: newUpload.subject,
-          units: newUpload.units, // Add this line
+          examDate: {
+            year: selectedDate.getFullYear(),
+            month: selectedDate.getMonth() + 1,
+          },
         })
       );
 
-      // Append all files with the same field name 'files'
       selectedFiles.forEach((file) => {
         formData.append("files", file);
       });
 
-      // Submit the form using a mutation or API call
-      await createPdfMutation.mutateAsync(formData);
+      await createPreviousPaperMutation.mutateAsync(formData);
 
-      toast.success("PDFs uploaded successfully");
+      toast.success("Previous papers uploaded successfully");
 
-      // Reset form after successful upload
       setIsDialogOpen(false);
       setNewUpload({
         academicYear: { year: "", semester: "" },
         regulation: "",
         course: "",
         subject: "",
-        units: "", // Add this line
+        examDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
       });
       setSelectedFiles([]);
+      setSelectedDate(new Date());
     } catch (error: any) {
-      console.error("Error uploading PDFs:", error);
-      toast.error(error.message || "Failed to upload PDFs");
+      console.error("Error uploading previous papers:", error);
+      toast.error(error.message || "Failed to upload previous papers");
     }
   };
 
   const handleEdit = (id: number) => {
-    const pdfToEdit = pdfUploads?.find((pdf) => pdf.id === id);
-    if (pdfToEdit) {
+    const paperToEdit = previousPapers?.find((paper:any) => paper.id === id);
+    if (paperToEdit) {
       setNewUpload({
         academicYear: {
-          year: pdfToEdit.academicYear.year,
-          semester: pdfToEdit.academicYear.semester,
+          year: paperToEdit.academicYear.year,
+          semester: paperToEdit.academicYear.semester,
         },
-        regulation: pdfToEdit.regulation,
-        course: pdfToEdit.course,
-        subject: pdfToEdit.subject,
-        units: pdfToEdit.unit,
+        regulation: paperToEdit.regulation,
+        course: paperToEdit.course,
+        subject: paperToEdit.subject,
+        examDate: paperToEdit.examDate,
       });
       setEditingId(id);
+      setSelectedDate(new Date(paperToEdit.examDate.year, paperToEdit.examDate.month - 1));
+      setSelectedFiles([]);
       setIsDialogOpen(true);
     }
   };
@@ -177,15 +182,41 @@ export default function PreviousPapers() {
     if (editingId === null) return;
 
     try {
-      const updatedPdf: PDFUpload = {
-        id: editingId,
-        ...newUpload,
-        files: selectedFiles,
-        uploadDate: new Date().toISOString(),
-      };
+      if (
+        !newUpload.academicYear.year ||
+        !newUpload.academicYear.semester ||
+        !newUpload.regulation ||
+        !newUpload.course ||
+        !newUpload.subject ||
+        !selectedDate
+      ) {
+        toast.error("All fields are required");
+        return;
+      }
 
-      await updatePdfMutation.mutateAsync(updatedPdf);
-      toast.success("PDF updated successfully");
+      const formData = new FormData();
+
+      formData.append(
+        "metadata",
+        JSON.stringify({
+          academicYear: newUpload.academicYear,
+          regulation: newUpload.regulation,
+          course: newUpload.course,
+          subject: newUpload.subject,
+          examDate: {
+            year: selectedDate.getFullYear(),
+            month: selectedDate.getMonth() + 1,
+          },
+        })
+      );
+
+      selectedFiles.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      await updatePreviousPaperMutation.mutateAsync({ id: editingId, formData });
+
+      toast.success("Previous paper updated successfully");
 
       setIsDialogOpen(false);
       setEditingId(null);
@@ -194,12 +225,13 @@ export default function PreviousPapers() {
         regulation: "",
         course: "",
         subject: "",
-        units: "",
+        examDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
       });
       setSelectedFiles([]);
+      setSelectedDate(new Date());
     } catch (error: any) {
-      console.error("Error updating PDF:", error);
-      toast.error(error.message || "Failed to update PDF");
+      console.error("Error updating previous paper:", error);
+      toast.error(error.message || "Failed to update previous paper");
     }
   };
 
@@ -212,23 +244,23 @@ export default function PreviousPapers() {
     if (deletingId === null) return;
 
     try {
-      await deletePdfMutation.mutateAsync(deletingId);
-      toast.success("PDF deleted successfully");
+      await deletePreviousPaperMutation.mutateAsync(deletingId);
+      toast.success("Previous paper deleted successfully");
       setIsDeleteDialogOpen(false);
       setDeletingId(null);
     } catch (error: any) {
-      console.error("Error deleting PDF:", error);
-      toast.error(error.message || "Failed to delete PDF");
+      console.error("Error deleting previous paper:", error);
+      toast.error(error.message || "Failed to delete previous paper");
     }
   };
 
   const handleDownload = async (id: number, fileIndex: number) => {
     try {
-      await downloadPdf(id, fileIndex);
-      toast.success("PDF downloaded successfully");
+      await downloadPreviousPaper(id, fileIndex);
+      toast.success("Previous paper downloaded successfully");
     } catch (error: any) {
-      console.error("Error downloading PDF:", error);
-      toast.error(error.message || "Failed to download PDF");
+      console.error("Error downloading previous paper:", error);
+      toast.error(error.message || "Failed to download previous paper");
     }
   };
 
@@ -239,10 +271,10 @@ export default function PreviousPapers() {
     <Card className="w-full max-w-[95vw] mx-auto">
       <CardHeader className="space-y-2">
         <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
-          PDF Upload Manager
+          Previous Paper Upload Manager
         </CardTitle>
         <CardDescription className="text-sm md:text-base text-muted-foreground">
-          Organize and manage PDF uploads across different academic years,
+          Organize and manage previous paper uploads across different academic years,
           courses, and subjects
         </CardDescription>
       </CardHeader>
@@ -253,7 +285,7 @@ export default function PreviousPapers() {
             onClick={handleNew}
           >
             <FileUp className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Upload New PDF</span>
+            <span className="hidden sm:inline">Upload New Previous Paper</span>
             <span className="sm:hidden">Upload</span>
           </Button>
         </div>
@@ -262,12 +294,12 @@ export default function PreviousPapers() {
           <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold text-primary">
-                {editingId ? "Edit PDF Upload" : "Upload New PDF"}
+                {editingId ? "Edit Previous Paper Upload" : "Upload New Previous Paper"}
               </DialogTitle>
               <DialogDescription className="text-muted-foreground">
                 {editingId
-                  ? "Modify the existing PDF details"
-                  : "Add new PDFs to the collection"}
+                  ? "Modify the existing previous paper details"
+                  : "Add new previous papers to the collection"}
               </DialogDescription>
             </DialogHeader>
 
@@ -401,31 +433,21 @@ export default function PreviousPapers() {
                 />
               </div>
 
-              {/* Units */}
+              {/* Exam Date */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label
-                  htmlFor="units"
+                  htmlFor="examDate"
                   className="text-right text-sm font-medium"
                 >
-                  Units
+                  Exam Date
                 </Label>
-                <Select
-                  value={newUpload.units || ""}
-                  onValueChange={(value) =>
-                    setNewUpload({ ...newUpload, units: value })
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select Unit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1st unit">Unit 1</SelectItem>
-                    <SelectItem value="2nd unit">Unit 2</SelectItem>
-                    <SelectItem value="3rd unit">Unit 3</SelectItem>
-                    <SelectItem value="4th unit">Unit 4</SelectItem>
-                    <SelectItem value="5th unit">Unit 5</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="col-span-3">
+                  <Calendar
+                    value={selectedDate} 
+                    onChange={(date) => setSelectedDate(date)}
+                    className="w-full"
+                  />
+                </div>
               </div>
 
               {/* Multiple PDF Files Upload */}
@@ -463,11 +485,11 @@ export default function PreviousPapers() {
                   {/* Display Selected Files */}
                   {selectedFiles.length > 0 && (
                     <div className="text-sm text-muted-foreground">
-                      <p>Selected files ({selectedFiles.length}):</p>
+                      <p>Selected files:</p>
                       <ul className="list-disc pl-5 mt-2 space-y-2">
                         {selectedFiles.map((file, index) => (
                           <li
-                            key={index}
+                            key={`new-${index}`}
                             className="flex items-center justify-between"
                           >
                             <span>{file.name}</span>
@@ -494,7 +516,7 @@ export default function PreviousPapers() {
                         onClick={() => setSelectedFiles([])}
                         className="mt-2 text-red-500"
                       >
-                        Clear All
+                        Clear Files
                       </Button>
                     </div>
                   )}
@@ -507,23 +529,21 @@ export default function PreviousPapers() {
                   onClick={editingId ? handleUpdate : handleAdd}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                   disabled={
-                    createPdfMutation.isPending ||
-                    updatePdfMutation.isPending ||
+                    createPreviousPaperMutation.isPending ||
+                    updatePreviousPaperMutation.isPending ||
                     selectedFiles.length === 0
                   }
                 >
-                  {createPdfMutation.isPending ||
-                  updatePdfMutation.isPending ? (
+                  {createPreviousPaperMutation.isPending ||
+                  updatePreviousPaperMutation.isPending ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Processing...
                     </div>
                   ) : editingId ? (
-                    "Update PDF"
+                    `Update Previous Paper${selectedFiles.length > 0 ? ` and Upload ${selectedFiles.length} New File${selectedFiles.length !== 1 ? 's' : ''}` : ''}`
                   ) : (
-                    `Upload ${selectedFiles.length} PDF${
-                      selectedFiles.length !== 1 ? "s" : ""
-                    }`
+                    `Upload ${selectedFiles.length} Previous Paper${selectedFiles.length !== 1 ? "s" : ""}`
                   )}
                 </Button>
               </DialogFooter>
@@ -536,7 +556,7 @@ export default function PreviousPapers() {
             <DialogHeader>
               <DialogTitle>Confirm Deletion</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this PDF? This action cannot be
+                Are you sure you want to delete this previous paper? This action cannot be
                 undone.
               </DialogDescription>
             </DialogHeader>
@@ -550,9 +570,9 @@ export default function PreviousPapers() {
               <Button
                 variant="destructive"
                 onClick={handleDelete}
-                disabled={deletePdfMutation.isPending}
+                disabled={deletePreviousPaperMutation.isPending}
               >
-                {deletePdfMutation.isPending ? "Deleting..." : "Delete"}
+                {deletePreviousPaperMutation.isPending ? "Deleting..." : "Delete"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -572,6 +592,7 @@ export default function PreviousPapers() {
                     Course
                   </TableHead>
                   <TableHead className="font-semibold">Subject</TableHead>
+                  <TableHead className="font-semibold">Exam Date</TableHead>
                   <TableHead className="font-semibold hidden lg:table-cell">
                     Files
                   </TableHead>
@@ -581,7 +602,7 @@ export default function PreviousPapers() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pdfUploads?.map((upload) => (
+                {previousPapers?.map((upload: any) => (
                   <TableRow key={upload.id}>
                     <TableCell>{upload.academicYear.year}</TableCell>
                     <TableCell>{upload.academicYear.semester}</TableCell>
@@ -592,6 +613,7 @@ export default function PreviousPapers() {
                       {upload.course}
                     </TableCell>
                     <TableCell>{upload.subject}</TableCell>
+                    <TableCell>{`${upload.examDate.month}/${upload.examDate.year}`}</TableCell>
                     <TableCell className="hidden lg:table-cell">
                       {upload.files.length} file(s)
                     </TableCell>
@@ -610,7 +632,7 @@ export default function PreviousPapers() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                      {upload.files?.map((file, index) => (
+                      {upload.files?.map((file: any, index: number) => (
                         <Button
                           key={index}
                           variant="ghost"
@@ -632,3 +654,4 @@ export default function PreviousPapers() {
     </Card>
   );
 }
+
