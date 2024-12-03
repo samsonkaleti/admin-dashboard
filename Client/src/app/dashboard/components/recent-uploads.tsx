@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export default function RecentUploads() {
   return (
     <div className="space-y-8">
-      {recentUploads.map((upload, index) => (
+      {recentUploads?.map((upload, index) => (
         <div key={index} className="flex items-center">
           <Avatar className="h-9 w-9">
             <AvatarImage src={upload.avatar} alt="Avatar" />

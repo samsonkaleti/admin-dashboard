@@ -294,7 +294,7 @@ export default function TechUniversityTable() {
           ...updatedCard,
         });
         queryClient.setQueryData(['cards'], (oldData: Card[] | undefined) => 
-          oldData ? oldData.map(card => card._id === editingCard._id ? result : card) : []
+          oldData ? oldData?.map(card => card._id === editingCard._id ? result : card) : []
         );
         setEditingCard(null);
         setIsEditDialogOpen(false);

@@ -81,7 +81,7 @@ export default function InternshipPage() {
 
   const handleUpdate = () => {
     setInternships(
-      internships.map((internship) =>
+      internships?.map((internship) =>
         internship.id === editingId
           ? { ...internship, ...newInternship }
           : internship
@@ -100,7 +100,7 @@ export default function InternshipPage() {
       "data:text/csv;charset=utf-8," +
       "ID,Company,Position,Description,Applicants\n" +
       internships
-        .map(
+        ?.map(
           (internship) =>
             `${internship.id},${internship.company},${internship.position},${
               internship.description
@@ -152,7 +152,7 @@ export default function InternshipPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {internships.map((internship) => (
+              {internships?.map((internship) => (
                 <TableRow key={internship.id}>
                   <TableCell className="font-medium">
                     <div>{internship.company}</div>
@@ -207,7 +207,7 @@ export default function InternshipPage() {
                               Current Applicants
                             </h3>
                             <ul className="space-y-2">
-                              {selectedInternship?.applicants.map((applicant, index) => (
+                              {selectedInternship?.applicants?.map((applicant, index) => (
                                 <li
                                   key={index}
                                   className="flex items-center gap-2"

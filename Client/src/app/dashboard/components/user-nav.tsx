@@ -163,7 +163,7 @@ export function Navbar() {
   const getInitials = (name: string) => {
     return name
       .split(' ')
-      .map(word => word[0])
+      ?.map(word => word[0])
       .join('')
       .toUpperCase()
       .slice(0, 2)
@@ -340,7 +340,7 @@ export function Navbar() {
           `}
         >
           <nav className="flex flex-col p-4">
-            {sidebarNavItems.map((item) => (
+            {sidebarNavItems?.map((item) => (
               <Button
                 key={item.href}
                 variant={pathname === item.href ? "secondary" : "ghost"}

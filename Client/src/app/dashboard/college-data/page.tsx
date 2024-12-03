@@ -182,7 +182,7 @@ export default function CollegeDataPage() {
                       <TableCell>{college.regulatoryBody}</TableCell>
                       <TableCell>{college.domain}</TableCell>
                       <TableCell>
-                        {college.programs.map((p) => p.name).join(", ")}
+                        {college.programs?.map((p) => p.name).join(", ")}
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">

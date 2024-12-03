@@ -283,7 +283,7 @@ export default function PDFUploadPage() {
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
-                    {years.map((year) => (
+                    {years?.map((year) => (
                       <SelectItem key={year} value={year}>
                         {year}
                       </SelectItem>
@@ -316,7 +316,7 @@ export default function PDFUploadPage() {
                     <SelectValue placeholder="Select semester" />
                   </SelectTrigger>
                   <SelectContent>
-                    {semesters.map((semester) => (
+                    {semesters?.map((semester) => (
                       <SelectItem key={semester} value={semester}>
                         {semester}
                       </SelectItem>
@@ -343,7 +343,7 @@ export default function PDFUploadPage() {
                     <SelectValue placeholder="Select regulation" />
                   </SelectTrigger>
                   <SelectContent>
-                    {regulations.map((regulation: any) => (
+                    {regulations?.map((regulation: any) => (
                       <SelectItem key={regulation._id} value={regulation.regulation_type}>
                         {regulation.regulation_type}
                       </SelectItem>
@@ -429,7 +429,7 @@ export default function PDFUploadPage() {
                     <div className="text-sm text-muted-foreground">
                       <p>Selected files ({selectedFiles.length}):</p>
                       <ul className="list-disc pl-5 mt-2 space-y-2">
-                        {selectedFiles.map((file, index) => (
+                        {selectedFiles?.map((file, index) => (
                           <li
                             key={index}
                             className="flex items-center justify-between"
@@ -576,7 +576,7 @@ export default function PDFUploadPage() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                      {upload.files.map((file, index) => (
+                      {upload.files?.map((file, index) => (
                         <Button
                           key={index}
                           variant="ghost"

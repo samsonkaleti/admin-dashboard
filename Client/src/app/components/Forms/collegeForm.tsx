@@ -354,7 +354,7 @@ export default function CollegeDataForm({
                     className="w-full p-2 border rounded-md bg-background text-foreground"
                   >
                     <option value="">Select Program</option>
-                    {programOptions.map((program) => (
+                    {programOptions?.map((program) => (
                       <option key={program.name} value={program.name}>
                         {program.name}
                       </option>
@@ -368,7 +368,7 @@ export default function CollegeDataForm({
                     <div className="space-y-2">
                       <Label>Specializations</Label>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {getAllSpecializations().map((spec) => (
+                        {getAllSpecializations()?.map((spec) => (
                           <label
                             key={spec}
                             className="flex items-center space-x-2 text-sm"
@@ -420,7 +420,7 @@ export default function CollegeDataForm({
                             </Button>
                           </div>
                           <div className="flex flex-wrap gap-2">
-                            {customSpecializations.map((spec) => (
+                            {customSpecializations?.map((spec) => (
                               <Badge
                                 key={spec}
                                 variant="secondary"
@@ -448,7 +448,7 @@ export default function CollegeDataForm({
                     <div className="space-y-2">
                       <Label>Regulations</Label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {getAllRegulations().map((reg) => (
+                        {getAllRegulations()?.map((reg) => (
                           <label
                             key={reg.type}
                             className="flex items-center space-x-2 text-sm"
@@ -501,7 +501,7 @@ export default function CollegeDataForm({
                           >
                             <option value="">Select Category</option>
                             {groupedRegulations &&
-                              Object.keys(groupedRegulations).map(
+                              Object.keys(groupedRegulations)?.map(
                                 (category) => (
                                   <option key={category} value={category}>
                                     {category}
@@ -517,7 +517,7 @@ export default function CollegeDataForm({
                         groupedRegulations[selectedCategory] && (
                           <div className="mt-4 space-y-2">
                             <Label>Regulation Types</Label>
-                            {groupedRegulations[selectedCategory].map(
+                            {groupedRegulations[selectedCategory]?.map(
                               (regulation: any) => (
                                 <div key={regulation._id}>
                                   <input
@@ -551,7 +551,7 @@ export default function CollegeDataForm({
                       <div className="flex flex-wrap gap-2">
                         {programOptions
                           .find((program) => program.name === selectedProgram)
-                          ?.years.map((year) => (
+                          ?.years?.map((year) => (
                             <label
                               key={year}
                               className="flex items-center space-x-2 text-sm"

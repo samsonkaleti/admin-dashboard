@@ -71,7 +71,7 @@ export default function Home() {
       <CardContent className="space-y-6">
         {/* Stats Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {dynamicStatsData.map((stat, index) => (
+          {dynamicStatsData?.map((stat, index) => (
             <Card key={index} className="overflow-hidden">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between space-x-2">

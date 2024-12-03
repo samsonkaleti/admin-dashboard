@@ -171,7 +171,7 @@ export default function StudentDetailsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredStudents.map((student) => (
+                {filteredStudents?.map((student) => (
                   <TableRow key={student._id}>
                     <TableCell className="font-medium">
                       <div>{student.username}</div>

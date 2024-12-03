@@ -33,7 +33,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   useEffect(() => {
     if (pdfData) {
-      const newPdfNotifications = pdfData.map((pdf) => ({
+      const newPdfNotifications = pdfData?.map((pdf) => ({
         id: `pdf-${pdf.id}`,
         message: `New PDF uploaded: ${pdf.files[0]?.fileName || 'Unnamed PDF'}`,
         date: new Date(pdf.uploadDate).toLocaleString(),
@@ -48,7 +48,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   useEffect(() => {
     if (userData?.users) {
-      const newUserNotifications = userData.users.map((user) => ({
+      const newUserNotifications = userData.users?.map((user) => ({
         id: `user-${user.id}`,
         message: `New user registered: ${user.username}`,
         date: new Date().toLocaleString(),

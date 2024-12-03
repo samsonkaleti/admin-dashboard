@@ -100,7 +100,7 @@ const EventDetails = () => {
     queryKey: ["students", event?.registeredStudents],
     queryFn: async () => {
       if (!event?.registeredStudents?.length) return [];
-      const studentPromises = event.registeredStudents.map((studentId) =>
+      const studentPromises = event.registeredStudents?.map((studentId) =>
         fetchStudentDetails(studentId)
       );
       return Promise.all(studentPromises);

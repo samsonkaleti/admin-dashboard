@@ -58,7 +58,7 @@ export default function PrintStationPage() {
 
   const handleApprove = (id: number) => {
     setPrintOrders(
-      printOrders.map((order) =>
+      printOrders?.map((order) =>
         order.id === id ? { ...order, status: "approved" } : order
       )
     );
@@ -66,7 +66,7 @@ export default function PrintStationPage() {
 
   const handleReject = (id: number) => {
     setPrintOrders(
-      printOrders.map((order) =>
+      printOrders?.map((order) =>
         order.id === id ? { ...order, status: "rejected" } : order
       )
     );
@@ -75,7 +75,7 @@ export default function PrintStationPage() {
   const handleSetDeliveryDate = () => {
     if (selectedOrder) {
       setPrintOrders(
-        printOrders.map((order) =>
+        printOrders?.map((order) =>
           order.id === selectedOrder.id
             ? { ...order, deliveryDate: selectedOrder.deliveryDate }
             : order
@@ -110,7 +110,7 @@ export default function PrintStationPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {printOrders.map((order) => (
+              {printOrders?.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">
                     {order.studentName}

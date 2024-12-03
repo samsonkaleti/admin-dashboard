@@ -59,7 +59,7 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <div className="space-y-3 sm:space-y-4">
-            {notifications.map((notification) => (
+            {notifications?.map((notification) => (
               <div
                 key={notification.id}
                 className="flex items-start justify-between p-3 sm:p-4 rounded-lg border hover:bg-gray-50/50 transition-colors"

@@ -87,7 +87,7 @@ export function Sidebar() {
       <div className="space-y-4 py-8">
         <div className="px-3 py-2">
           <div className="space-y-1">
-            {sidebarNavItems.map((item) => {
+            {sidebarNavItems?.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Button

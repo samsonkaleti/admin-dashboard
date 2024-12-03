@@ -649,7 +649,7 @@ const EventManagement = () => {
           </DialogHeader>
           <div className="py-4">
             <ScrollArea className="h-[300px] w-full rounded-md border p-4">
-              {students.map((student) => (
+              {students?.map((student) => (
                 <Button
                   key={student._id}
                   variant="ghost"
