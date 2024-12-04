@@ -7,6 +7,8 @@ const studentRoutes = require("./routes/studentRoutes");
 const regulationRoutes = require("./routes/regulationRoutes");
 const userRoutes = require("./routes/usersRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const previousPaperRoutes = require("./routes/previousPaperRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
@@ -61,9 +63,11 @@ app.use("/api", cardRoutes);
 app.use("/api", studentRoutes);
 app.use("/api/regulations", regulationRoutes);
 app.use("/api/pdfs", pdfRoutes);
+app.use("/api/previouspapers", previousPaperRoutes);
 app.use("/api/events", eventsRoutes);
 app.use("/api", userRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api", notificationRoutes);
 
 // Socket.IO Integration
 io.on("connection", (socket) => {

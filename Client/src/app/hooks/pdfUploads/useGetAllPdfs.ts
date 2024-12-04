@@ -34,5 +34,11 @@ export function useGetAllPdfs(year?: string, semester?: string) {
   return useQuery<PDFUpload[], Error>({
     queryKey: ['pdfs', year, semester],
     queryFn: () => fetchPdfs(year, semester),
+    staleTime: 50000,
+    refetchOnWindowFocus: false,
+    refetchInterval: 30000,
+    refetchOnMount: true,
+    retry: 3,
+    retryDelay: 1000,
   })
 }

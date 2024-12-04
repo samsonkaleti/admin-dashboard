@@ -8,7 +8,7 @@ async function fetchPreviousPapers() {
     throw new Error("Authentication required");
   }
 
-  const response = await fetch(`${BASE_URL}/api/previous-papers`, {
+  const response = await fetch(`${BASE_URL}/api/previouspapers`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -25,6 +25,12 @@ export function useGetAllPreviousPapers() {
   return useQuery({
     queryKey: ['previousPapers'],
     queryFn: fetchPreviousPapers,
+    staleTime: 50000,
+    refetchOnWindowFocus: false,
+    refetchInterval: 30000,
+    refetchOnMount: true,
+    retry: 3,
+    retryDelay: 1000
   });
 }
 

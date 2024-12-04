@@ -1,4 +1,4 @@
-const PreviousPaperUpload = require("../models/PreviousPaperUpload");
+const PreviousPaperUpload = require("../models/PreviousPapers");
 const fs = require("fs/promises");
 const path = require("path");
 
@@ -106,7 +106,6 @@ const previousPaperController = {
     }
   },
 
-  // Implement other methods (updatePreviousPaperById, deletePreviousPaperById, downloadPreviousPaper) similarly to pdfController
 };
 
 module.exports = previousPaperController;

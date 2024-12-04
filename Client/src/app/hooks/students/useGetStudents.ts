@@ -38,6 +38,12 @@ export function useGetStudents() {
       }
       return response.json()
     },
+    staleTime: 50000,
+    refetchOnWindowFocus: false,
+    refetchInterval: 30000,
+    refetchOnMount: true,
+    retry: 3,
+    retryDelay: 1000,
   })
 }
 export function useRegisterStudentForEvent() {

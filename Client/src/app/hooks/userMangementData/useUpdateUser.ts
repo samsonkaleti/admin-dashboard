@@ -1,3 +1,4 @@
+import { User } from '@/app/@types/user';
 import { BASE_URL } from '@/app/utils/constants';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 

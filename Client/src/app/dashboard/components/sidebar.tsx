@@ -41,6 +41,11 @@ const sidebarNavItems = [
     icon: FileUp,
   },
   {
+    title: "Previous Papers",
+    href: "/dashboard/previous-papers",
+    icon: FileUp,
+  },
+  {
     title: "Print Station",
     href: "/dashboard/print-station",
     icon: Printer,
@@ -74,7 +79,7 @@ const sidebarNavItems = [
     title: "Regulations",
     href: "/dashboard/regulations",
     icon: Bell,
-  },
+  }
 ];
 
 export function Sidebar() {

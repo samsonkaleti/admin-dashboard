@@ -36,12 +36,10 @@ export function useGetUsers(options?: UseQueryOptions<FetchUsersResponse, Error>
   return useQuery<FetchUsersResponse,  Error>({
     queryKey: ['users'],
     queryFn: fetchUsers,
-    // staleTime: 10 * 60 * 1000,   // Data is considered fresh for 10 minutes
-    // // cacheTime: 30 * 60 * 1000,   // Cache data for 30 minutes
-    // retry: 2,                    // Retry fetching twice on failure
-    // refetchOnWindowFocus: false, // Disable refetch on window focus
-    // refetchOnMount: false,       // Disable refetch on component mount
-    // keepPreviousData: true,      // Keep displaying previous data during fetching
+    staleTime: 10 * 60 * 1000,   // Data is considered fresh for 10 minutes
+    retry: 2,                    // Retry fetching twice on failure
+    refetchOnWindowFocus: false, // Disable refetch on window focus
+    refetchOnMount: false,       // Disable refetch on component mount
     select: (data) => data,      // Optionally transform data if needed
     ...options,                  // Spread options to allow external overrides
   });

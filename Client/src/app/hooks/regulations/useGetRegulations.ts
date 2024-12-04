@@ -17,5 +17,11 @@ export function useGetRegulations() {
   return useQuery({
     queryKey: ['regulations'],
     queryFn: fetchAllRegulations,
+    staleTime: 50000,
+    refetchOnWindowFocus: false,
+    refetchInterval: 30000,
+    refetchOnMount: true,
+    retry: 3,
+    retryDelay: 1000,
   });
 }

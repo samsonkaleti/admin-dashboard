@@ -56,6 +56,11 @@ const sidebarNavItems = [
     icon: FileUp,
   },
   {
+    title: "Previous Papers",
+    href: "/dashboard/previous-papers",
+    icon: FileUp,
+  },
+  {
     title: "Print Station",
     href: "/dashboard/print-station",
     icon: Printer,
@@ -84,7 +89,7 @@ const sidebarNavItems = [
     title: "Notifications",
     href: "/dashboard/notifications",
     icon: Bell,
-  },
+  }
 ];
 
 const ThemeToggle = () => {

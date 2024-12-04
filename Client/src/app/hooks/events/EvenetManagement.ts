@@ -105,6 +105,12 @@ export function useEvents() {
   return useQuery({
     queryKey: ["events"],
     queryFn: fetchEvents,
+    staleTime: 50000,
+    refetchOnWindowFocus: false,
+    refetchInterval: 30000,
+    refetchOnMount: true,
+    retry: 3,
+    retryDelay: 1000,
   });
 }
 

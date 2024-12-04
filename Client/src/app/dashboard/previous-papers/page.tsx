@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Pencil, Trash2, FileUp, Download, Calendar } from 'lucide-react';
+import { Pencil, Trash2, FileUp, Download, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -41,7 +41,8 @@ import { useDeletePreviousPaper } from "@/app/hooks/previousPapers/useDeletePrev
 import { useGetRegulations } from "@/app/hooks/regulations/useGetRegulations";
 import { useCreatePreviousPaper } from "@/app/hooks/previousPapers/useCreatePreviousPapers";
 import { useDownloadPreviousPaper } from "@/app/hooks/previousPapers/useDownloadPreviousPapers";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 type PreviousPaperUpload = {
   id: number;
   academicYear: {
@@ -67,19 +68,27 @@ export default function PreviousPaperUploadPage() {
     regulation: "",
     course: "",
     subject: "",
-    examDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
+    examDate: {
+      year: new Date().getFullYear(),
+      month: new Date().getMonth() + 1,
+    },
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
   const semesters = ["1st Semester", "2nd Semester"];
 
-  const { data: previousPapers, isLoading, isError, error } = useGetAllPreviousPapers();
+  const {
+    data: previousPapers,
+    isLoading,
+    isError,
+    error,
+  } = useGetAllPreviousPapers();
   const createPreviousPaperMutation = useCreatePreviousPaper();
   const updatePreviousPaperMutation = useUpdatePreviousPaper();
   const deletePreviousPaperMutation = useDeletePreviousPaper();
@@ -92,7 +101,10 @@ export default function PreviousPaperUploadPage() {
       regulation: "",
       course: "",
       subject: "",
-      examDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
+      examDate: {
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+      },
     });
     setSelectedFiles([]);
     setEditingId(null);
@@ -148,7 +160,10 @@ export default function PreviousPaperUploadPage() {
         regulation: "",
         course: "",
         subject: "",
-        examDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
+        examDate: {
+          year: new Date().getFullYear(),
+          month: new Date().getMonth() + 1,
+        },
       });
       setSelectedFiles([]);
       setSelectedDate(new Date());
@@ -159,7 +174,7 @@ export default function PreviousPaperUploadPage() {
   };
 
   const handleEdit = (id: number) => {
-    const paperToEdit = previousPapers?.find((paper:any) => paper.id === id);
+    const paperToEdit = previousPapers?.find((paper: any) => paper.id === id);
     if (paperToEdit) {
       setNewUpload({
         academicYear: {
@@ -172,7 +187,9 @@ export default function PreviousPaperUploadPage() {
         examDate: paperToEdit.examDate,
       });
       setEditingId(id);
-      setSelectedDate(new Date(paperToEdit.examDate.year, paperToEdit.examDate.month - 1));
+      setSelectedDate(
+        new Date(paperToEdit.examDate.year, paperToEdit.examDate.month - 1)
+      );
       setSelectedFiles([]);
       setIsDialogOpen(true);
     }
@@ -214,7 +231,10 @@ export default function PreviousPaperUploadPage() {
         formData.append("files", file);
       });
 
-      await updatePreviousPaperMutation.mutateAsync({ id: editingId, formData });
+      await updatePreviousPaperMutation.mutateAsync({
+        id: editingId,
+        formData,
+      });
 
       toast.success("Previous paper updated successfully");
 
@@ -225,7 +245,10 @@ export default function PreviousPaperUploadPage() {
         regulation: "",
         course: "",
         subject: "",
-        examDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
+        examDate: {
+          year: new Date().getFullYear(),
+          month: new Date().getMonth() + 1,
+        },
       });
       setSelectedFiles([]);
       setSelectedDate(new Date());
@@ -264,9 +287,6 @@ export default function PreviousPaperUploadPage() {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error: {error.message}</div>;
-
   return (
     <Card className="w-full max-w-[95vw] mx-auto">
       <CardHeader className="space-y-2">
@@ -274,8 +294,8 @@ export default function PreviousPaperUploadPage() {
           Previous Paper Upload Manager
         </CardTitle>
         <CardDescription className="text-sm md:text-base text-muted-foreground">
-          Organize and manage previous paper uploads across different academic years,
-          courses, and subjects
+          Organize and manage previous paper uploads across different academic
+          years, courses, and subjects
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -294,7 +314,9 @@ export default function PreviousPaperUploadPage() {
           <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold text-primary">
-                {editingId ? "Edit Previous Paper Upload" : "Upload New Previous Paper"}
+                {editingId
+                  ? "Edit Previous Paper Upload"
+                  : "Upload New Previous Paper"}
               </DialogTitle>
               <DialogDescription className="text-muted-foreground">
                 {editingId
@@ -442,10 +464,12 @@ export default function PreviousPaperUploadPage() {
                   Exam Date
                 </Label>
                 <div className="col-span-3">
-                  <Calendar
-                    value={selectedDate} 
-                    onChange={(date) => setSelectedDate(date)}
-                    className="w-full"
+                  <DatePicker
+                    selected={selectedDate}
+                    onChange={(date: any) => setSelectedDate(date)}
+                    dateFormat="MM/yyyy"
+                    showMonthYearPicker
+                    className="w-full p-2 border rounded"
                   />
                 </div>
               </div>
@@ -541,9 +565,17 @@ export default function PreviousPaperUploadPage() {
                       Processing...
                     </div>
                   ) : editingId ? (
-                    `Update Previous Paper${selectedFiles.length > 0 ? ` and Upload ${selectedFiles.length} New File${selectedFiles.length !== 1 ? 's' : ''}` : ''}`
+                    `Update Previous Paper${
+                      selectedFiles.length > 0
+                        ? ` and Upload ${selectedFiles.length} New File${
+                            selectedFiles.length !== 1 ? "s" : ""
+                          }`
+                        : ""
+                    }`
                   ) : (
-                    `Upload ${selectedFiles.length} Previous Paper${selectedFiles.length !== 1 ? "s" : ""}`
+                    `Upload ${selectedFiles.length} Previous Paper${
+                      selectedFiles.length !== 1 ? "s" : ""
+                    }`
                   )}
                 </Button>
               </DialogFooter>
@@ -556,8 +588,8 @@ export default function PreviousPaperUploadPage() {
             <DialogHeader>
               <DialogTitle>Confirm Deletion</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this previous paper? This action cannot be
-                undone.
+                Are you sure you want to delete this previous paper? This action
+                cannot be undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -572,7 +604,9 @@ export default function PreviousPaperUploadPage() {
                 onClick={handleDelete}
                 disabled={deletePreviousPaperMutation.isPending}
               >
-                {deletePreviousPaperMutation.isPending ? "Deleting..." : "Delete"}
+                {deletePreviousPaperMutation.isPending
+                  ? "Deleting..."
+                  : "Delete"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -654,4 +688,3 @@ export default function PreviousPaperUploadPage() {
     </Card>
   );
 }
-

@@ -14,7 +14,7 @@ async function createPreviousPaper(formData: FormData) {
     throw new Error("Authentication required");
   }
 
-  const response = await fetch(`${BASE_URL}/api/previous-papers`, {
+  const response = await fetch(`${BASE_URL}/api/previouspapers`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
