@@ -34,7 +34,7 @@ import logo from "../../../utils/logo.png";
 import logo3 from "../../../utils/logo3.jpeg";
 import { useNotifications } from "@/app/context/notifcation";
 import { Badge } from "@/components/ui/badge"
-const sidebarNavItems = [
+const NavbarItems = [
   {
     title: "Dashboard",
     href: "/dashboard",
@@ -89,6 +89,11 @@ const sidebarNavItems = [
     title: "Notifications",
     href: "/dashboard/notifications",
     icon: Bell,
+  },
+  {
+    title: "Regulations",
+    href: "/dashboard/regulations",
+    icon: Bell,
   }
 ];
 
@@ -110,13 +115,7 @@ const ThemeToggle = () => {
   );
 };
 
-const NotificationBell = () => (
-  <Button variant="ghost" size="icon" className="relative">
-    <Bell className="h-5 w-5" />
-    <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500 ring-2 ring-background" />
-    <span className="sr-only">Notifications</span>
-  </Button>
-);
+ 
 
 export function Navbar() {
   const pathname = usePathname();
@@ -257,17 +256,6 @@ export function Navbar() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-<Button variant="ghost" size="icon" className="relative">
-      <Bell className={`h-5 w-5 ${isAnimating ? 'animate-ring' : ''}`} />
-      {notifications.length > 0 && (
-        <Badge
-          variant="destructive"
-          className="absolute -top-1 -right-1 px-1 min-w-[1.25rem] h-5 flex items-center justify-center text-xs"
-        >
-          {notifications.length}
-        </Badge>
-      )}
-    </Button>
               </>
             )}
 
@@ -346,7 +334,7 @@ export function Navbar() {
           `}
         >
           <nav className="flex flex-col p-4">
-            {sidebarNavItems?.map((item) => (
+            {NavbarItems?.map((item) => (
               <Button
                 key={item.href}
                 variant={pathname === item.href ? "secondary" : "ghost"}

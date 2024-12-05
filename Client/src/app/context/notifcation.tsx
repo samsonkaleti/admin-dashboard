@@ -31,36 +31,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const { data: pdfData } = useGetAllPdfs()
   const { data: userData } = useGetUsers()
 
-  useEffect(() => {
-    if (pdfData) {
-      const newPdfNotifications = pdfData?.map((pdf) => ({
-        id: `pdf-${pdf.id}`,
-        message: `New PDF uploaded: ${pdf.files[0]?.fileName || 'Unnamed PDF'}`,
-        date: new Date(pdf.uploadDate).toLocaleString(),
-        type: "success" as const,
-      }))
-      setNotifications((prev) => [
-        ...newPdfNotifications.filter((newNotif) => !prev.some((prevNotif) => prevNotif.id === newNotif.id)),
-        ...prev,
-      ])
-    }
-  }, [pdfData])
-
-  useEffect(() => {
-    if (userData?.users) {
-      const newUserNotifications = userData.users?.map((user) => ({
-        id: `user-${user.id}`,
-        message: `New user registered: ${user.username}`,
-        date: new Date().toLocaleString(),
-        type: "info" as const,
-      }))
-      setNotifications((prev) => [
-        ...newUserNotifications.filter((newNotif) => !prev.some((prevNotif) => prevNotif.id === newNotif.id)),
-        ...prev,
-      ])
-    }
-  }, [userData])
-
   const deleteNotification = (id: string) => {
     setNotifications((prev) => prev.filter((notification) => notification.id !== id))
   }

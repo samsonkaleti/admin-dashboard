@@ -88,7 +88,7 @@ export default function NotificationsPage() {
             <CardTitle className="text-2xl font-semibold text-gray-800">
               Notifications
               <Badge variant="secondary" className="ml-2 bg-primary/10 text-primary">
-                {notifications.length} New
+                {notifications?.length} New
               </Badge>
             </CardTitle>
             <Dialog open={open} onOpenChange={setOpen}>
@@ -155,7 +155,7 @@ export default function NotificationsPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {notifications.map((notification: any) => (
+              {notifications?.map((notification: any) => (
                 <div
                   key={notification._id}
                   className="flex items-center justify-between bg-gray-50 p-4 rounded-md shadow-sm hover:bg-gray-100 transition"
