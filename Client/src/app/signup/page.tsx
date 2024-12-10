@@ -1,4 +1,5 @@
 "use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,10 +19,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useSignUp } from "../hooks/auth/useAuth";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useGetColleges } from "../hooks/colleges/useGetColleges";
+import { CollegeData, Program, Regulation } from "../@types/college";
 
 const signUpSchema = z
   .object({
@@ -29,11 +39,11 @@ const signUpSchema = z
     email: z.string().email({ message: "Invalid email address" }),
     password: z.string().min(8, { message: "Password must be at least 8 characters" }),
     role: z.enum(["Student", "Admin", "Uploader"]),
-    collegeName: z.string().min(1, { message: "College name is required" }).optional(),
-    program: z.string().min(1, { message: "Program is required" }).optional(),
-    specialization: z.string().min(1, { message: "Specialization is required" }).optional(),
-    regulation: z.string().min(1, { message: "Regulation is required" }).optional(),
-    yearOfJoining: z.number().int().min(1900).max(new Date().getFullYear()).optional(),
+    collegeName: z.string().min(1, { message: "College name is required" }),
+    program: z.string().min(1, { message: "Program is required" }),
+    specialization: z.string().min(1, { message: "Specialization is required" }),
+    regulation: z.string().min(1, { message: "Regulation is required" }),
+    yearOfJoining: z.number().int().min(1900).max(new Date().getFullYear()),
   })
   .superRefine((data, ctx) => {
     if (data.role === "Student") {
@@ -44,55 +54,18 @@ const signUpSchema = z
           code: z.ZodIssueCode.custom,
         });
       }
-      if (!data.collegeName) {
-        ctx.addIssue({
-          path: ["collegeName"],
-          message: "College Name is required for Students",
-          code: z.ZodIssueCode.custom,
-        });
-      }
-      if (!data.program) {
-        ctx.addIssue({
-          path: ["program"],
-          message: "Program is required for Students",
-          code: z.ZodIssueCode.custom,
-        });
-      }
-      if (!data.specialization) {
-        ctx.addIssue({
-          path: ["specialization"],
-          message: "Specialization is required for Students",
-          code: z.ZodIssueCode.custom,
-        });
-      }
-      if (!data.regulation) {
-        ctx.addIssue({
-          path: ["regulation"],
-          message: "Regulation is required for Students",
-          code: z.ZodIssueCode.custom,
-        });
-      }
     }
   });
 
-type SignupRequest = {
-  username: string;
-  email: string;
-  password: string;
-  role: string;
-  collegeName: string;
-  program: string;
-  specialization: string;
-  regulation: string;
-  yearOfJoining: number;
-};
+type SignupRequest = z.infer<typeof signUpSchema>;
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
+  const { data: colleges, isLoading: isLoadingColleges } = useGetColleges();
 
-  const signUpForm = useForm({
+  const signUpForm = useForm<SignupRequest>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       username: "",
@@ -123,11 +96,20 @@ export default function SignupPage() {
     setIsClient(true);
   }, []);
 
+  const watchCollege = signUpForm.watch("collegeName");
+  const watchProgram = signUpForm.watch("program");
+
+  const selectedCollege = colleges?.find((college: { _id: string; }) => college._id === watchCollege);
+  const programs = selectedCollege?.programs || [];
+  const selectedProgram = programs.find((program: { name: string; }) => program.name === watchProgram);
+  const specializations = selectedProgram?.specializations || [];
+  const regulations = selectedProgram?.regulations || [];
+
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card className="w-full max-w-[400px] shadow-lg">
         <CardHeader>
-          <h2 className="text-center text-3xl font-bold">Sign Up</h2>
+          <h2 className="text-center text-3xl font-bold">Student Sign Up</h2>
         </CardHeader>
         <CardContent>
           <Form {...signUpForm}>
@@ -180,28 +162,7 @@ export default function SignupPage() {
                 )}
               />
               
-              <FormField
-                control={signUpForm.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <FormControl>
-                      <select
-                        {...field}
-                        className="w-full p-2 border rounded-md"
-                      >
-                        <option value="Student">Student</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Uploader">Uploader</option>
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {isClient && signUpForm.watch("role") === "Student" && (
+              {isClient && (
                 <>
                   <FormField
                     control={signUpForm.control}
@@ -209,9 +170,20 @@ export default function SignupPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>College Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Enter your college name" />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your college" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {colleges?.map((college: any) => (
+                              <SelectItem key={college._id} value={college._id}>
+                                {college.collegeName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -222,9 +194,20 @@ export default function SignupPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Program</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Enter your program (e.g., Computer Science)" />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your program" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {programs.map((program: Program) => (
+                              <SelectItem key={program.name} value={program.name}>
+                                {program.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -235,9 +218,20 @@ export default function SignupPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Specialization</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Enter your specialization" />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your specialization" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {specializations.map((specialization: any) => (
+                              <SelectItem key={specialization} value={specialization}>
+                                {specialization}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -248,9 +242,20 @@ export default function SignupPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Regulation</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Enter regulation year (e.g., 2021)" />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your regulation" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {regulations.map((regulation: Regulation) => (
+                              <SelectItem key={regulation.regulation} value={regulation.regulation}>
+                                {regulation.regulation}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -298,3 +303,4 @@ export default function SignupPage() {
     </div>
   );
 }
+

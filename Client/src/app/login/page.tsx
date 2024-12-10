@@ -23,12 +23,12 @@ import {
 } from "@/components/ui/form"
 import { useEffect, useState } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import logo2 from "@/utils/logo2.png"
-import logo from "@/utils/logo.png"
 import { useLogin } from "../hooks/auth/useAuth"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from 'lucide-react'
-
+import logo from "../../../utils/logo.png";
+import logo3 from "../../../utils/logo3.jpeg";
+import { useTheme } from "next-themes";
 type LoginRequest = {
   email: string
   password: string
@@ -50,7 +50,7 @@ function LoginPageContent() {
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter()
-
+  const { theme, setTheme } = useTheme();
   const signInForm = useForm({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -88,7 +88,7 @@ function LoginPageContent() {
           <div className="relative h-64 w-full">
             {isClient && (
               <ClientSideImage
-                src={logo2}
+                src={theme === "dark" ? logo3 : logo}
                 alt="Campusify Logo"
                 layout="fill"
                 objectFit="contain"
@@ -107,7 +107,7 @@ function LoginPageContent() {
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative h-16 w-32">
                   <ClientSideImage
-                    src={logo}
+                    src={theme === "dark" ? logo3 : logo}
                     alt="Campusify"
                     layout="fill"
                     objectFit="contain"

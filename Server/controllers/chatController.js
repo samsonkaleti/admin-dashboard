@@ -1,24 +1,44 @@
-const OpenAIApi = require('openai');
-const similarity = require("similarity"); // Node.js friendly similarity library
+const OpenAIApi = require("openai");
+const similarity = require("similarity");
 const pdfController = require("./pdfController");
 const { extractPdfText } = require("../utils/pdfUtils");
 const Chat = require("../models/Chat");
 
-const openai = new OpenAIApi.OpenAI(
-  {
-    key: process.env.OPENAI_API_KEY
-  }
-);
+const openai = new OpenAIApi.OpenAI({
+  key: process.env.OPENAI_API_KEY,
+});
 
 const chatController = {
-  // Start a new chat session
+  // Start a new chat session or retrieve an existing one
   startChat: async ({ body }) => {
-    const { year, semester, subject, units } = body;
-    if (!year || !semester || !subject || !units) {
-      throw new Error("Year, semester, subject, and units are required to start a chat.");
+    const regulation = "R20";
+    const units = "1st unit";
+    const { year, semester, subject, userId } = body;
+
+    if (!year || !semester || !subject || !units || !userId) {
+      throw new Error(
+        "Year, semester, subject, units, and user ID are required to start a chat."
+      );
     }
 
     try {
+      const existingChat = await Chat.findOne({
+        "subjectDetails.year": year,
+        "subjectDetails.semester": semester,
+        "subjectDetails.subject": subject,
+        "subjectDetails.units": { $all: [units] },
+        participants: userId,
+      });
+
+      if (existingChat) {
+        return {
+          chatId: existingChat._id,
+          subject,
+          units,
+          existingChat: true,
+        };
+      }
+
       const mockReq = { query: { year, semester, subject, units } };
       const mockRes = {
         status: function (statusCode) {
@@ -33,17 +53,38 @@ const chatController = {
 
       // Fetch PDFs using pdfController
       await pdfController.getAllPdfs(mockReq, mockRes);
-      if (mockRes.statusCode !== 200) throw new Error("Failed to fetch PDFs");
+
+      if (mockRes.statusCode !== 200 || !mockRes.data) {
+        throw new Error("Failed to fetch PDFs");
+      }
 
       const pdfs = mockRes.data;
-      if (pdfs.length === 0) throw new Error("No relevant PDFs found.");
 
-      const chat = new Chat({ year, semester, subject, units, messages: [], relevantPdfs: pdfs });
+      // Extract relevantPdfs
+      const relevantPdfs = pdfs
+        .flatMap((pdf) => pdf.files)
+        .filter((file) => file.fileName && file.filePath)
+        .map((file) => ({
+          name: file.fileName,
+          fileData: file.filePath, // Use filePath as a reference to fetch the actual file
+        }));
+
+      if (relevantPdfs.length === 0) {
+        throw new Error("No valid PDFs available for the chat.");
+      }
+
+      const chat = new Chat({
+        participants: [userId],
+        subjectDetails: { year, semester, subject, units, regulation },
+        messages: [],
+        relevantPdfs,
+      });
+
       await chat.save();
 
-      return { chatId: chat._id, subject, units };
+      return { chatId: chat._id, subject, units, existingChat: false };
     } catch (error) {
-      console.error("Error starting chat:", error);
+      console.error("Error starting chat:", error.message);
       throw new Error("Failed to start chat.");
     }
   },
@@ -61,10 +102,17 @@ const chatController = {
     const pdfs = chat.relevantPdfs;
     const pdfTextChunks = [];
 
-    // Extract text from PDFs
+    // Fetch text from each PDF using its file path
     for (const pdf of pdfs) {
-      const buffer = Buffer.from(pdf.fileData, "base64");
-      const text = await extractPdfText(buffer);
+      const filePath = pdf.fileData; // fileData stores filePath in this case
+      const fileBuffer = await pdfController.fetchPdfBuffer(filePath); // Fetch file buffer from the server
+
+      if (!fileBuffer) {
+        console.warn(`Failed to fetch PDF at path: ${filePath}`);
+        continue;
+      }
+
+      const text = await extractPdfText(fileBuffer);
       pdfTextChunks.push(...text.split("\n\n")); // Chunk text
     }
 
@@ -100,20 +148,36 @@ const chatController = {
 
     const relevantContext = topChunks.join("\n\n");
 
+    // Include chat history for continuity
+    const chatHistory = chat.messages
+      .filter((message) => message.isBot === false) // Include only user questions
+      .map((message) => `User: ${message.content}`)
+      .join("\n");
+
+    // Prepare full context for the AI model
+    const context = `${chatHistory}\n\nRelevant Context:\n${relevantContext}`;
+
     // Send context and question to ChatGPT
     const chatGptResponse = await openai.createChatCompletion({
       model: "gpt-4",
       messages: [
         { role: "system", content: "You are a helpful assistant." },
-        { role: "user", content: `Context:\n${relevantContext}\n\nQuestion: ${question}` },
+        {
+          role: "user",
+          content: `Context:\n${context}\n\nQuestion: ${question}`,
+        },
       ],
     });
 
     const answer = chatGptResponse.data.choices[0].message.content;
 
-    // Save chat history
-    chat.messages.push({ role: "user", message: question });
-    chat.messages.push({ role: "system", message: answer });
+    // Save chat history with user question and bot response
+    chat.messages.push({
+      sender: chat.participants[0],
+      content: question,
+      isBot: false,
+    });
+    chat.messages.push({ sender: null, content: answer, isBot: true });
     await chat.save();
 
     return { response: answer };

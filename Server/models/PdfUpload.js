@@ -6,7 +6,7 @@ const FileSchema = new mongoose.Schema({
     required: true,
   },
   fileData: {
-    type: Buffer,
+    type: String, // Base64 encoded
     required: true,
   },
 });
@@ -32,7 +32,6 @@ const PdfUploadSchema = mongoose.Schema({
   regulation: {
     type: String,
     required: true,
-    //enum: ["R20", "R19", "R21", "R18", "R17"], // Add more as needed
   },
   course: {
     type: String,
@@ -45,15 +44,10 @@ const PdfUploadSchema = mongoose.Schema({
     trim: true,
   },
   units: {
-    type: String,
+    type: [String],
     required: true,
-    enum: [
-      "1st unit", 
-      "2nd unit",   
-      "3rd unit", 
-      "4th unit", 
-      "5th unit", 
-    ],  },
+    enum: ["1st unit", "2nd unit", "3rd unit", "4th unit", "5th unit"],
+  },
   files: [FileSchema], // Array of files
   uploadDate: {
     type: Date,

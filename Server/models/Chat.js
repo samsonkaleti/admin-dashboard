@@ -1,47 +1,28 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const chatSchema = new mongoose.Schema({
-  participants: [{
-    type: mongoose.Schema.Types.ObjectId, // References to the User model
-    ref: 'User',
-    required: true,
-  }],
-  messages: [{
-    sender: {
-      type: mongoose.Schema.Types.ObjectId, // Reference to the User model
-      ref: 'User',
-      required: true,
-    },
-    content: {
-      type: String,
-      required: true,
-    },
-    timestamp: {
-      type: Date,
-      default: Date.now,
-    },
-    subjectDetails: {
-      year: {
-        type: Number, // Year of study
-        required: true,
-      },
-      semester: {
-        type: Number, // Semester number
-        required: true,
-      },
-      subject: {
-        type: String, // Subject name
-        required: true,
-      },
-    },
-  }],
-  createdAt: {
-    type: Date,
-    default: Date.now,
+const ChatSchema = new mongoose.Schema({
+  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  subjectDetails: {
+    year: String,
+    semester: String,
+    subject: String,
+    units: [String],
+    regulation: String,
   },
+  messages: [
+    {
+      sender: mongoose.Schema.Types.ObjectId,
+      content: String,
+      isBot: Boolean,
+    },
+  ],
+  relevantPdfs: [
+    {
+      name: { type: String, required: true },
+      fileData: { type: String, required: true }, // Base64 encoded data
+    },
+  ],
 });
 
-// Create the ChatHistory model
-const Chat = mongoose.model('Chat', chatSchema);
-
+const Chat = mongoose.model("Chat", ChatSchema);
 module.exports = Chat;

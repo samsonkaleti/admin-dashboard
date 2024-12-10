@@ -99,7 +99,6 @@ const NavbarItems = [
 
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
-
   return (
     <Button
       variant="ghost"

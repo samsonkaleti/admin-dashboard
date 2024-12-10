@@ -75,7 +75,7 @@ const pdfController = {
       const files = [];
 
       for (const file of req.files) {
-        const filePath = path.join(uploadDir, `${id}_${file.originalname}`);
+        const filePath = path.join(uploadDir, `${file.originalname}`);
         await fs.writeFile(filePath, file.buffer);
 
         // Save the file with its name, path, and fileData as a buffer
@@ -141,18 +141,20 @@ const pdfController = {
 
       console.log("Query:", query);
 
-      const pdfs = await PdfUpload.find(query).select("-files.fileData");
-      
+      const pdfs = await PdfUpload.find(query);
       console.log("Found PDFs:", pdfs.length);
 
-      // Map the results to include the file path instead of the file data
-      const pdfResults = pdfs.map(pdf => ({
+      // Map results and create download links
+      const pdfResults = pdfs.map((pdf) => ({
         ...pdf.toObject(),
-        files: pdf.files.map(file => ({
+        files: pdf.files.map((file) => ({
           ...file,
-          filePath: `/uploaders/${file.filename}` // Adjust this path as needed
-        }))
+          filePath: `/uploaders/${file.fileName}`, // Adjust as needed
+          downloadUrl: `/api/pdfs/download/${pdf.id}/${file.fileName}`, // Dynamic download endpoint
+        })),
       }));
+
+      console.log("PDF Results:", pdfResults);
 
       res.status(200).json(pdfResults);
     } catch (err) {
@@ -161,6 +163,40 @@ const pdfController = {
     }
   },
 
+  // Download PDF file by ID and file name
+  downloadPdf: async (req, res) => {
+    try {
+      const { id, fileName } = req.params;
+
+      // Find the corresponding PDF
+      const pdf = await PdfUpload.findOne({ id: parseInt(id) });
+
+      if (!pdf) {
+        return res.status(404).json({ error: "PDF document not found" });
+      }
+
+      // Verify the file exists in the PDF document
+      const file = pdf.files.find((file) => file.fileName === fileName);
+
+      if (!file) {
+        return res.status(404).json({ error: "File not found in PDF document" });
+      }
+
+      // Build the file path
+      const filePath = path.join(__dirname, "../uploaders", fileName);
+
+      // Serve the file
+      res.download(filePath, fileName, (err) => {
+        if (err) {
+          console.error("Error downloading file:", err);
+          res.status(500).json({ error: "Failed to download file" });
+        }
+      });
+    } catch (err) {
+      console.error("Error downloading PDF:", err);
+      res.status(500).json({ error: "Failed to download PDF" });
+    }
+  },
 
   // Update PDF document and its files
   updatePdfById: async (req, res) => {
@@ -389,6 +425,17 @@ const pdfController = {
         .json({ message: "File upload failed", error: error.message });
     }
   },
+  fetchPdfBuffer: async (filePath) => {
+    try {
+      const absolutePath = path.join(__dirname, "..", filePath);
+      const buffer = await fs.readFile(absolutePath);
+      return buffer;
+    } catch (err) {
+      console.error("Error fetching PDF buffer:", err.message);
+      return null;
+    }
+  },
+  
 };
 
 module.exports = pdfController;

@@ -354,7 +354,7 @@ router.get(
  *               format: binary
  */
 router.get(
-  "/download-all/:id",
+  "/download-all/:id/:fileName",
   authMiddleware,
   // authorizeRoles("Admin", "Uploader"),
   pdfController.downloadAllPdfs
