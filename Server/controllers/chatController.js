@@ -1,97 +1,83 @@
 const OpenAIApi = require("openai");
-const similarity = require("similarity");
-const pdfController = require("./pdfController");
 const { extractPdfText } = require("../utils/pdfUtils");
+const pdfController = require("./pdfController");
 const Chat = require("../models/Chat");
+require("dotenv").config();
 
 const openai = new OpenAIApi.OpenAI({
-  key: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Utility function to calculate cosine similarity
+const cosineSimilarity = (vec1, vec2) => {
+  const dotProduct = vec1.reduce((sum, v, i) => sum + v * vec2[i], 0);
+  const magnitudeA = Math.sqrt(vec1.reduce((sum, v) => sum + v * v, 0));
+  const magnitudeB = Math.sqrt(vec2.reduce((sum, v) => sum + v * v, 0));
+  return dotProduct / (magnitudeA * magnitudeB);
+};
+
 const chatController = {
-  // Start a new chat session or retrieve an existing one
+  // Start a chat session with filters
   startChat: async ({ body }) => {
-    const regulation = "R20";
-    const units = "1st unit";
-    const { year, semester, subject, userId } = body;
-
-    if (!year || !semester || !subject || !units || !userId) {
-      throw new Error(
-        "Year, semester, subject, units, and user ID are required to start a chat."
-      );
+    const { year, semester, subject, units, userId, regulation } = body;
+  
+    if (!year || !semester || !subject || !regulation || !userId) {
+      throw new Error("Year, semester, subject, regulation, units, and userId are required.");
     }
-
-    try {
-      const existingChat = await Chat.findOne({
-        "subjectDetails.year": year,
-        "subjectDetails.semester": semester,
-        "subjectDetails.subject": subject,
-        "subjectDetails.units": { $all: [units] },
-        participants: userId,
-      });
-
-      if (existingChat) {
-        return {
-          chatId: existingChat._id,
-          subject,
-          units,
-          existingChat: true,
-        };
-      }
-
-      const mockReq = { query: { year, semester, subject, units } };
-      const mockRes = {
-        status: function (statusCode) {
-          this.statusCode = statusCode;
-          return this;
-        },
-        json: function (data) {
-          this.data = data;
-          return this;
-        },
-      };
-
-      // Fetch PDFs using pdfController
-      await pdfController.getAllPdfs(mockReq, mockRes);
-
-      if (mockRes.statusCode !== 200 || !mockRes.data) {
-        throw new Error("Failed to fetch PDFs");
-      }
-
-      const pdfs = mockRes.data;
-
-      // Extract relevantPdfs
-      const relevantPdfs = pdfs
-        .flatMap((pdf) => pdf.files)
-        .filter((file) => file.fileName && file.filePath)
-        .map((file) => ({
-          name: file.fileName,
-          fileData: file.filePath, // Use filePath as a reference to fetch the actual file
-        }));
-
-      if (relevantPdfs.length === 0) {
-        throw new Error("No valid PDFs available for the chat.");
-      }
-
-      const chat = new Chat({
-        participants: [userId],
-        subjectDetails: { year, semester, subject, units, regulation },
-        messages: [],
-        relevantPdfs,
-      });
-
-      await chat.save();
-
-      return { chatId: chat._id, subject, units, existingChat: false };
-    } catch (error) {
-      console.error("Error starting chat:", error.message);
-      throw new Error("Failed to start chat.");
+  
+    const mockReq = { query: { year, semester, subject, units } };
+    const mockRes = {
+      status: function (statusCode) {
+        this.statusCode = statusCode;
+        return this;
+      },
+      json: function (data) {
+        this.data = data;
+        return this;
+      },
+    };
+  
+    // Fetch PDFs using pdfController
+    await pdfController.getAllPdfs(mockReq, mockRes);
+  
+    if (mockRes.statusCode !== 200 || !mockRes.data) {
+      throw new Error("Failed to fetch PDFs");
     }
+  
+    const pdfs = mockRes.data;
+  
+    if (pdfs.length === 0) {
+      throw new Error("No PDFs found for the selected criteria.");
+    }
+  
+    // Extract file URLs directly
+    const RelevantPdfs = pdfs.flatMap((pdf) => pdf.files.map((file) => file.fileUrl));
+  
+    const result = RelevantPdfs[0] // Logs each URL as a raw string
+    console.log("Relevant PDFs (URLs):", result);
+
+    // Create a new chat session
+    const chat = new Chat({
+      year,
+      semester,
+      subject,
+      regulation,
+      messages: [],
+      relevantPdfs: result
+    });
+  
+    await chat.save();
+  
+    return { chatId: chat._id, subject, regulation };
   },
+  
+  
+  
 
-  // Handle user questions
+  // Process a user question
   askQuestion: async ({ body }) => {
     const { chatId, question } = body;
+
     if (!chatId || !question) {
       throw new Error("Chat ID and question are required.");
     }
@@ -100,84 +86,79 @@ const chatController = {
     if (!chat) throw new Error("Chat session not found.");
 
     const pdfs = chat.relevantPdfs;
-    const pdfTextChunks = [];
 
-    // Fetch text from each PDF using its file path
-    for (const pdf of pdfs) {
-      const filePath = pdf.fileData; // fileData stores filePath in this case
-      const fileBuffer = await pdfController.fetchPdfBuffer(filePath); // Fetch file buffer from the server
-
-      if (!fileBuffer) {
-        console.warn(`Failed to fetch PDF at path: ${filePath}`);
-        continue;
-      }
-
-      const text = await extractPdfText(fileBuffer);
-      pdfTextChunks.push(...text.split("\n\n")); // Chunk text
+    if (!pdfs || pdfs.length === 0) {
+      throw new Error("No relevant PDFs found for this chat session.");
     }
 
-    // Vectorize text chunks using OpenAI embeddings
+    const pdfTextChunks = [];
+
+    // Extract text from static PDF links (for demonstration)
+    for (const pdf of pdfs) {
+      const text = await extractPdfText(pdf); // Assuming `extractPdfText` can handle URLs
+      pdfTextChunks.push(...text.split("\n\n"));
+    }
+
+    // Generate embeddings for PDF chunks
     const embeddings = await Promise.all(
       pdfTextChunks.map(async (chunk) => {
-        const response = await openai.createEmbedding({
-          input: chunk,
+        const response = await openai.embeddings.create({
           model: "text-embedding-ada-002",
+          input: chunk,
         });
-        return { embedding: response.data.data[0].embedding, chunk };
+        return { embedding: response.data[0].embedding, chunk };
       })
     );
 
-    // Vectorize the question
-    const questionEmbeddingResponse = await openai.createEmbedding({
-      input: question,
+    // Generate embedding for the question
+    const questionEmbeddingResponse = await openai.embeddings.create({
       model: "text-embedding-ada-002",
+      input: question,
     });
-    const questionVector = questionEmbeddingResponse.data.data[0].embedding;
+    const questionVector = questionEmbeddingResponse.data[0].embedding;
 
-    // Compute similarity scores
+    // Calculate similarity scores
     const scores = embeddings.map(({ embedding, chunk }) => ({
       chunk,
-      score: similarity(embedding, questionVector),
+      score: cosineSimilarity(embedding, questionVector),
     }));
 
-    // Sort chunks by relevance and get the top 3
-    const topChunks = scores
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3)
-      .map((item) => item.chunk);
-
+    // Get top relevant chunks
+    const topChunks = scores.sort((a, b) => b.score - a.score).slice(0, 3).map((item) => item.chunk);
     const relevantContext = topChunks.join("\n\n");
 
-    // Include chat history for continuity
-    const chatHistory = chat.messages
-      .filter((message) => message.isBot === false) // Include only user questions
-      .map((message) => `User: ${message.content}`)
-      .join("\n");
-
-    // Prepare full context for the AI model
-    const context = `${chatHistory}\n\nRelevant Context:\n${relevantContext}`;
-
-    // Send context and question to ChatGPT
-    const chatGptResponse = await openai.createChatCompletion({
+    // Generate response using GPT-4
+    const chatGptResponse = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         { role: "system", content: "You are a helpful assistant." },
-        {
-          role: "user",
-          content: `Context:\n${context}\n\nQuestion: ${question}`,
-        },
+        { role: "user", content: `Context:\n${relevantContext}\n\nQuestion: ${question}` },
       ],
     });
 
-    const answer = chatGptResponse.data.choices[0].message.content;
+    const answer = chatGptResponse.choices[0].message.content;
 
-    // Save chat history with user question and bot response
+    // Add messages with the required fields
     chat.messages.push({
-      sender: chat.participants[0],
+      role: "user", // Assuming role is 'user' for the question
       content: question,
-      isBot: false,
+      subjectDetails: {
+        year: chat.year,
+        semester: chat.semester,
+        subject: chat.subject,
+      },
     });
-    chat.messages.push({ sender: null, content: answer, isBot: true });
+
+    chat.messages.push({
+      role: "system", // The system (AI) is sending the answer
+      content: answer,
+      subjectDetails: {
+        year: chat.year,
+        semester: chat.semester,
+        subject: chat.subject,
+      },
+    });
+
     await chat.save();
 
     return { response: answer };
@@ -186,7 +167,6 @@ const chatController = {
   // Fetch chat history
   getChatHistory: async ({ params }) => {
     const { chatId } = params;
-    if (!chatId) throw new Error("Chat ID is required.");
 
     const chat = await Chat.findById(chatId);
     if (!chat) throw new Error("Chat session not found.");

@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { Pencil, Trash2, FileUp, Download } from "lucide-react";
+import { Key, useState } from "react";
+import { Pencil, Trash2, FileUp, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -232,8 +232,13 @@ export default function PDFUploadPage() {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error: {error.message}</div>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <Card className="w-full max-w-[95vw] mx-auto">
@@ -461,8 +466,7 @@ export default function PDFUploadPage() {
                   />
 
                   {/* Display Selected Files */}
-                  {(selectedFiles.length > 0 
-                    ) && (
+                  {selectedFiles.length > 0 && (
                     <div className="text-sm text-muted-foreground">
                       <p>Selected files:</p>
                       <ul className="list-disc pl-5 mt-2 space-y-2">
@@ -475,7 +479,8 @@ export default function PDFUploadPage() {
                                 className="flex items-center justify-between"
                               >
                                 <span>
-                                  {file.fileName || `Existing File ${index + 1}`}
+                                  {file.fileName ||
+                                    `Existing File ${index + 1}`}
                                 </span>
                                 <span className="text-muted-foreground">
                                   (Existing)
@@ -538,9 +543,17 @@ export default function PDFUploadPage() {
                       Processing...
                     </div>
                   ) : editingId ? (
-                    `Update PDF${selectedFiles.length > 0 ? ` and Upload ${selectedFiles.length} New File${selectedFiles.length !== 1 ? 's' : ''}` : ''}`
+                    `Update PDF${
+                      selectedFiles.length > 0
+                        ? ` and Upload ${selectedFiles.length} New File${
+                            selectedFiles.length !== 1 ? "s" : ""
+                          }`
+                        : ""
+                    }`
                   ) : (
-                    `Upload ${selectedFiles.length} PDF${selectedFiles.length !== 1 ? "s" : ""}`
+                    `Upload ${selectedFiles.length} PDF${
+                      selectedFiles.length !== 1 ? "s" : ""
+                    }`
                   )}
                 </Button>
               </DialogFooter>
@@ -598,10 +611,12 @@ export default function PDFUploadPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pdfUploads?.map((upload) => (
+                {pdfUploads?.map((upload: any) => (
                   <TableRow key={upload.id}>
                     <TableCell>{upload.academicYear.year}</TableCell>
-                    <TableCell>{upload.academicYear.semester}</TableCell>
+                    <TableCell>
+                      {upload.academicYear.semester.join(", ")}
+                    </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       {upload.regulation}
                     </TableCell>
@@ -627,7 +642,7 @@ export default function PDFUploadPage() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                      {upload.files?.map((file, index) => (
+                      {upload.files.map((file: any, index: any) => (
                         <Button
                           key={index}
                           variant="ghost"

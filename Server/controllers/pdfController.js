@@ -68,7 +68,7 @@ const pdfController = {
       }
 
       // Create the uploaders directory if it doesn't exist
-      const uploadDir = path.join(__dirname, "../uploaders");
+      const uploadDir = path.join(__dirname, "../uploads");
       await fs.mkdir(uploadDir, { recursive: true });
 
       const id = Date.now();
@@ -126,35 +126,38 @@ const pdfController = {
       const { year, semester, subject, units } = req.query;
       let query = {};
 
-      if (year) {
-        query["academicYear.year"] = year;
-      }
-      if (semester) {
-        query["academicYear.semester"] = { $in: [semester] };
-      }
-      if (subject) {
-        query.subject = subject;
-      }
-      if (units) {
-        query.units = units;
-      }
+      // Build the query based on request parameters
+      if (year) query["academicYear.year"] = year;
+      if (semester) query["academicYear.semester"] = { $in: [semester] };
+      if (subject) query.subject = subject;
+      if (units) query.units = units;
 
       console.log("Query:", query);
 
+      // Fetch PDFs from the database
       const pdfs = await PdfUpload.find(query);
-      console.log("Found PDFs:", pdfs.length);
+      if (!pdfs || pdfs.length === 0) {
+        return res
+          .status(404)
+          .json({ error: "No PDFs found matching the criteria" });
+      }
 
-      // Map results and create download links
+      // Base URL for file access (adjust to match your server URL and port)
+      const baseUrl = "http://localhost:5001/uploads";
+
+      // Map results and add file URLs
       const pdfResults = pdfs.map((pdf) => ({
-        ...pdf.toObject(),
+        id: pdf.id,
+        academicYear: pdf.academicYear,
+        regulation: pdf.regulation,
+        course: pdf.course,
+        subject: pdf.subject,
+        units: pdf.units,
         files: pdf.files.map((file) => ({
-          ...file,
-          filePath: `/uploaders/${file.fileName}`, // Adjust as needed
-          downloadUrl: `/api/pdfs/download/${pdf.id}/${file.fileName}`, // Dynamic download endpoint
+          fileName: file.fileName,
+          fileUrl: `${baseUrl}/${file.fileName}`, // URL to access the file
         })),
       }));
-
-      console.log("PDF Results:", pdfResults);
 
       res.status(200).json(pdfResults);
     } catch (err) {
@@ -179,7 +182,9 @@ const pdfController = {
       const file = pdf.files.find((file) => file.fileName === fileName);
 
       if (!file) {
-        return res.status(404).json({ error: "File not found in PDF document" });
+        return res
+          .status(404)
+          .json({ error: "File not found in PDF document" });
       }
 
       // Build the file path
@@ -308,7 +313,7 @@ const pdfController = {
       }
 
       // Delete each file from the file system
-      const uploadDir = path.join(__dirname, "../uploaders");
+      const uploadDir = path.join(__dirname, "../uploads");
 
       for (const file of deletedPdf.files) {
         const filePath = path.join(
@@ -324,11 +329,9 @@ const pdfController = {
         }
       }
 
-      res
-        .status(200)
-        .json({
-          message: "PDF document and associated files deleted successfully",
-        });
+      res.status(200).json({
+        message: "PDF document and associated files deleted successfully",
+      });
     } catch (err) {
       console.error("Error deleting PDF document:", err);
       res.status(500).json({ error: "Failed to delete PDF document" });
@@ -435,7 +438,6 @@ const pdfController = {
       return null;
     }
   },
-  
 };
 
 module.exports = pdfController;

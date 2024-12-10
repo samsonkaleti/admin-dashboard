@@ -33,7 +33,6 @@ import { Bell, LogOut, Settings, User, Sun, Moon, Menu } from "lucide-react";
 import logo from "../../../utils/logo.png";
 import logo3 from "../../../utils/logo3.jpeg";
 import { useNotifications } from "@/app/context/notifcation";
-import { Badge } from "@/components/ui/badge"
 const NavbarItems = [
   {
     title: "Dashboard",

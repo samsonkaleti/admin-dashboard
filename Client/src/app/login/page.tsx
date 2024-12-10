@@ -26,8 +26,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useLogin } from "../hooks/auth/useAuth"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from 'lucide-react'
-import logo from "../../../utils/logo.png";
-import logo3 from "../../../utils/logo3.jpeg";
+import logo from "../../utils/logo.png"
+import logo3 from "../../utils/logo3.jpeg";
 import { useTheme } from "next-themes";
 type LoginRequest = {
   email: string
