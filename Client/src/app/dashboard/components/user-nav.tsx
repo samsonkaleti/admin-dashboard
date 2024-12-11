@@ -29,10 +29,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import * as NavigationMenu from "@radix-ui/react-navigation-menu";
-import { Bell, LogOut, Settings, User, Sun, Moon, Menu } from "lucide-react";
+import { Bell, LogOut, Settings, User, Sun, Moon, Menu, Bot } from "lucide-react";
 import logo from "../../../utils/logo.png";
 import logo3 from "../../../utils/logo3.jpeg";
 import { useNotifications } from "@/app/context/notifcation";
+
 const NavbarItems = [
   {
     title: "Dashboard",
@@ -93,7 +94,12 @@ const NavbarItems = [
     title: "Regulations",
     href: "/dashboard/regulations",
     icon: Bell,
-  }
+  },
+  {
+    title: "ChatBot",
+    href: "/dashboard/chat",
+    icon: Bot,
+  },
 ];
 
 const ThemeToggle = () => {
@@ -113,8 +119,6 @@ const ThemeToggle = () => {
   );
 };
 
- 
-
 export function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -124,10 +128,12 @@ export function Navbar() {
   const [windowWidth, setWindowWidth] = React.useState(isMobile);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
-  const [username, setUsername] = useState("")
-  const [email, setEmail] = useState("")
-  const [isAnimating, setIsAnimating] = useState(false)
-  const { notifications } = useNotifications()
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState(""); // Role state
+  const [isAnimating, setIsAnimating] = useState(false);
+  const { notifications } = useNotifications();
+
   React.useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth < 1024);
@@ -138,39 +144,55 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    setIsAnimating(true)
-    const timer = setTimeout(() => setIsAnimating(false), 1000)
-    return () => clearTimeout(timer)
-  }, [notifications.length])
+    setIsAnimating(true);
+    const timer = setTimeout(() => setIsAnimating(false), 1000);
+    return () => clearTimeout(timer);
+  }, [notifications.length]);
 
   useEffect(() => {
     // Retrieve user details from session storage
-    const storedUsername = sessionStorage.getItem("username")
-    const storedEmail = sessionStorage.getItem("email")
-    
-    if (storedUsername) setUsername(storedUsername)
-    if (storedEmail) setEmail(storedEmail)
-  }, [])
+    const storedUsername = sessionStorage.getItem("username");
+    const storedEmail = sessionStorage.getItem("email");
+    const storedRole = sessionStorage.getItem("role"); // Retrieve role
+    if (storedUsername) setUsername(storedUsername);
+    if (storedEmail) setEmail(storedEmail);
+    if (storedRole) setRole(storedRole); // Set role
+  }, []);
+
   const handleLogout = () => {
-    // Add any logout logic here (e.g., clearing tokens, etc.)
     router.push("/");
     sessionStorage.removeItem("auth_token");
-    sessionStorage.removeItem("username")
-    sessionStorage.removeItem("email")
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("email");
+    sessionStorage.removeItem("role");
+    sessionStorage.removeItem("user_id");
+    sessionStorage.removeItem("signup_email");
   };
+
   const getLogoutText = () => {
-    // Check if the auth_token is present in session storage
     const authToken = sessionStorage.getItem("auth_token");
     return authToken ? "Logout" : "Login";
   };
+
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      ?.map(word => word[0])
-      .join('')
+      .split(" ")
+      ?.map((word) => word[0])
+      .join("")
       .toUpperCase()
-      .slice(0, 2)
-  }
+      .slice(0, 2);
+  };
+
+  // Filter NavbarItems based on role
+  const filteredNavbarItems = NavbarItems.filter((item) => {
+    if (role === "Student") {
+      return item.title === "ChatBot"; // Show only ChatBot for Student
+    }
+    if (role === "Admin") {
+      return item.title !== "ChatBot"; // Show all except ChatBot for Admin
+    }
+    return false; // Show nothing for other roles
+  });
 
   return (
     <>
@@ -198,17 +220,7 @@ export function Navbar() {
           <div className="flex items-center gap-2 md:gap-4 ml-auto">
             {!windowWidth && (
               <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                >
-                  {theme === "dark" ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
-                </Button>
+                <ThemeToggle />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -222,7 +234,7 @@ export function Navbar() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end">
                     <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
+                      <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">
                           {username}
                         </p>
@@ -237,17 +249,11 @@ export function Navbar() {
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
-                      </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className={`${
-                        authToken ? "text-red-600 dark:text-red-400" : ""
-                      }`}
+                      className="text-red-600 dark:text-red-400"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>{getLogoutText()}</span>
@@ -256,8 +262,7 @@ export function Navbar() {
                 </DropdownMenu>
               </>
             )}
-
-            {windowWidth && (
+             {windowWidth && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -266,7 +271,7 @@ export function Navbar() {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/avatars/01.png" alt="@johndoe" />
-                      <AvatarFallback>JD</AvatarFallback>
+                      <AvatarFallback>{getInitials(username)}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
@@ -274,10 +279,10 @@ export function Navbar() {
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        John Doe
+                        {username}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        john.doe@example.com
+                        {email}
                       </p>
                     </div>
                   </DropdownMenuLabel>
@@ -286,15 +291,6 @@ export function Navbar() {
                     <DropdownMenuItem>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Bell className="mr-2 h-4 w-4" />
-                      <span>Notifications</span>
-                      <span className="ml-auto h-2 w-2 rounded-full bg-red-500" />
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
@@ -319,20 +315,19 @@ export function Navbar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
+            )}  
           </div>
         </div>
       </header>
 
       <NavigationMenu.Root className="lg:hidden">
         <NavigationMenu.List
-          className={`
-            fixed w-full bg-background border-b z-40 shadow-lg transition-transform duration-300 ease-in-out
-            ${isOpen ? "translate-y-0" : "-translate-y-full"}
-          `}
+          className={`fixed w-full bg-background border-b z-40 shadow-lg transition-transform ${
+            isOpen ? "translate-y-0" : "-translate-y-full"
+          }`}
         >
           <nav className="flex flex-col p-4">
-            {NavbarItems?.map((item) => (
+            {filteredNavbarItems.map((item) => (
               <Button
                 key={item.href}
                 variant={pathname === item.href ? "secondary" : "ghost"}

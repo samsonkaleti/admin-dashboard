@@ -44,7 +44,7 @@ const OtpVerification = () => {
 
   const onSubmit = async (data: OtpVerificationRequest) => {
     try {
-      const email = sessionStorage.getItem("signupEmail");
+      const email = sessionStorage.getItem("signup_email");
       if (!email) {
         setError("Email is missing. Please sign up again.");
         return;

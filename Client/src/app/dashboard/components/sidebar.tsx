@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ import {
   UserCog,
   Bell,
   CalendarRange,
+  Bot,
 } from "lucide-react";
 
 const sidebarNavItems = [
@@ -79,20 +80,41 @@ const sidebarNavItems = [
     title: "Regulations",
     href: "/dashboard/regulations",
     icon: Bell,
-  }
+  },
+  {
+    title: "ChatBot",
+    href: "/dashboard/chat",
+    icon: Bot,
+  },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [role, setRole] = useState("");
+
+  useEffect(() => {
+    // Retrieve user role from session storage
+    const storedRole = sessionStorage.getItem("role");
+    if (storedRole) setRole(storedRole);
+  }, []);
+
+  // Filter sidebarNavItems based on user role
+  const filteredSidebarNavItems = sidebarNavItems.filter((item) => {
+    if (role === "Student") {
+      return item.title === "ChatBot"; // Only show ChatBot for Student role
+    }
+    if (role === "Admin") {
+      return item.title !== "ChatBot"; // Show all routes except ChatBot for Admin
+    }
+    return false; // No items displayed for other roles
+  });
 
   return (
     <ScrollArea className="h-screen">
-      {" "}
-      {/* Full height scroll area */}
       <div className="space-y-4 py-8">
         <div className="px-3 py-2">
           <div className="space-y-1">
-            {sidebarNavItems?.map((item) => {
+            {filteredSidebarNavItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Button
