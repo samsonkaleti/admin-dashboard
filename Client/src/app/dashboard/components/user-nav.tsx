@@ -94,12 +94,7 @@ const NavbarItems = [
     title: "Regulations",
     href: "/dashboard/regulations",
     icon: Bell,
-  },
-  {
-    title: "ChatBot",
-    href: "/dashboard/chat",
-    icon: Bot,
-  },
+  }
 ];
 
 const ThemeToggle = () => {

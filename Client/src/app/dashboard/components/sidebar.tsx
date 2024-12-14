@@ -80,12 +80,7 @@ const sidebarNavItems = [
     title: "Regulations",
     href: "/dashboard/regulations",
     icon: Bell,
-  },
-  {
-    title: "ChatBot",
-    href: "/dashboard/chat",
-    icon: Bot,
-  },
+  }
 ];
 
 export function Sidebar() {
